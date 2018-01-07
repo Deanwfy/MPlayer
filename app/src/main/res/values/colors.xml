@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorBarText">#ffffff</color>
+    <color name="colorSongTitleText">#000000</color>
+    <color name="colorMusicList">#f3f4f6</color>
+    <color name="colorControlPanel">#ffffff</color>
+    <color name="transparent">#00000000</color>
+
+    <color name="colorPrimary">#005b52</color>
+    <color name="colorPrimaryDark">#00443d</color>
+    <color name="colorAccent">#FF4081</color>
+</resources>

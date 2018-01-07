@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">MPlayer</string>
+    <string name="action_settings">Settings</string>
+    <string name="music_title">Title</string>
+    <string name="music_artist">Artist</string>
+    <string name="music_duration">duration</string>
+</resources>
