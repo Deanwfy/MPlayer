@@ -3,15 +3,16 @@ package com.dean.mplayer;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -49,18 +50,15 @@ public class ListActivity extends AppCompatActivity {
     // 防误触确认退出
     private long exitTime = 0;
 
-    private ImageButton btnTemp;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
         Toolbar toolbar =(Toolbar)findViewById(R.id.toolbar);   // 标题栏实现
+        toolbar.setTitle("MPlayer");
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);   // ToolBar替换ActionBar
-
-        btnTemp = findViewById(R.id.btnTemp);//临时
-        btnTemp.setOnClickListener(new TempListener());
 
         mMusicList = (ListView) findViewById(R.id.music_list);
         mMusicList.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
@@ -72,13 +70,14 @@ public class ListActivity extends AppCompatActivity {
 
     }
 
-    //临时
-    class TempListener implements View.OnClickListener{
-        @Override
-        public void onClick(View v) {
-            Toast.makeText(getApplicationContext(),"我是来自计科三班的：王飞宇\n爱好电影音乐科技\n擅长前端及安卓\n请多指教",Toast.LENGTH_LONG).show();
-        }
+    //菜单
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        getMenuInflater().inflate(R.menu.menu, menu);
+        return true;
     }
+
 
     // 歌曲列表显示适配器
     public void setListAdpter(List<HashMap<String, String>> musiclist) {
