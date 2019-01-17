@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        tools:context="com.dean.mplayer.ListActivity">
-
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".ListActivity">
+        <item android:id="@+id/menu_settings"
+            android:title="设置"
+            android:orderInCategory="90"
+            app:showAsAction="never"/>
+        <item android:id="@+id/menu_exit"
+            android:title="退出"
+            android:orderInCategory="100"
+            app:showAsAction="never"/>
 </menu>

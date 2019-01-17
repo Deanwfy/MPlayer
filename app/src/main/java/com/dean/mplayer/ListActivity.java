@@ -1,9 +1,10 @@
 package com.dean.mplayer;
 
-import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,7 +30,6 @@ public class ListActivity extends AppCompatActivity {
     // 列表显示
     private ListView mMusicList;
     private List<MusicInfo> mp3Infos = null;
-    private SimpleAdapter mAdapter;
 
     // 播放控制显示
     private TextView PlayingTitle;
@@ -50,17 +50,19 @@ public class ListActivity extends AppCompatActivity {
     // 防误触确认退出
     private long exitTime = 0;
 
+    //服务回传广播接收器
+    private ActionReceiver actionReceiver;
+    public static final String MUSIC_UPDATE = "musicUpdate";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list);
 
-        Toolbar toolbar =(Toolbar)findViewById(R.id.toolbar);   // 标题栏实现
-        toolbar.setTitle("MPlayer");
-        toolbar.setTitleTextColor(Color.WHITE);
+        Toolbar toolbar = findViewById(R.id.toolbar);   // 标题栏实现
         setSupportActionBar(toolbar);   // ToolBar替换ActionBar
 
-        mMusicList = (ListView) findViewById(R.id.music_list);
+        mMusicList = findViewById(R.id.music_list);
         mMusicList.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
         mp3Infos = MediaUtil.getMusicInfos(getApplicationContext());    // 获取歌曲信息
         setListAdpter(getMusicMaps(mp3Infos));  // 显示歌曲列表
@@ -68,6 +70,10 @@ public class ListActivity extends AppCompatActivity {
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
 
+        actionReceiver = new ActionReceiver();
+        IntentFilter intentFilter = new IntentFilter(); //Intent过滤器
+        intentFilter.addAction(MUSIC_UPDATE);   //添加过滤规则
+        registerReceiver(actionReceiver, intentFilter); //注册Intent广播接收器
     }
 
     //菜单
@@ -79,8 +85,10 @@ public class ListActivity extends AppCompatActivity {
     }
 
 
+
     // 歌曲列表显示适配器
     public void setListAdpter(List<HashMap<String, String>> musiclist) {
+        SimpleAdapter mAdapter;
         mAdapter = new SimpleAdapter(this, musiclist,
                 R.layout.music_list_item_layout, new String[] { "title", "artist","duration" },
                 new int[] { R.id.music_title, R.id.music_artist , R.id.music_duration });
@@ -90,8 +98,7 @@ public class ListActivity extends AppCompatActivity {
     // 歌曲列表监听器
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position,
-                                long id) {
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             listPosition = position;
             playMusic(listPosition);
         }
@@ -116,12 +123,12 @@ public class ListActivity extends AppCompatActivity {
 
     // 统一获取播放控制面板控件id
     private void findControlBtnById(){
-        PrevBtn = (Button)findViewById(R.id.prev);
-        PlayBtn = (Button)findViewById(R.id.play);
-        NextBtn = (Button)findViewById(R.id.next);
-        PlayingTitle = (TextView)findViewById(R.id.playing_title);
-        PlayingArtist = (TextView)findViewById(R.id.playing_artist);
-        PlayingCover = (ImageView)findViewById(R.id.music_cover);
+        PrevBtn = findViewById(R.id.prev);
+        PlayBtn = findViewById(R.id.play);
+        NextBtn = findViewById(R.id.next);
+        PlayingTitle = findViewById(R.id.playing_title);
+        PlayingArtist = findViewById(R.id.playing_artist);
+        PlayingCover = findViewById(R.id.music_cover);
     }
 
     // 将监听器设置到播放控制面板控件
@@ -141,10 +148,10 @@ public class ListActivity extends AppCompatActivity {
             switch (v.getId()){
                 case R.id.prev:
                     PlayBtn.setBackgroundResource(R.drawable.play);
+                    prevSong();
                     isFirstTime = false;
                     isPlaying = true;
                     isPaused = false;
-                    prevSong();
                     break;
                 case R.id.play:
                     if(isFirstTime) {
@@ -172,10 +179,10 @@ public class ListActivity extends AppCompatActivity {
                     break;
                 case R.id.next:
                     PlayBtn.setBackgroundResource(R.drawable.play);
+                    nextSong();
                     isFirstTime = false;
                     isPlaying = true;
                     isPaused = false;
-                    nextSong();
                     break;
             }
         }
@@ -189,7 +196,7 @@ public class ListActivity extends AppCompatActivity {
         Bitmap bitmap = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
         PlayingCover.setImageBitmap(bitmap);
         Intent intent = new Intent(ListActivity.this, PlayService.class);
-        intent.putExtra("listPosition", 0);
+        intent.putExtra("listPosition", listPosition);
         intent.putExtra("url", mp3Info.getUrl());
         intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
         startService(intent);
@@ -211,6 +218,8 @@ public class ListActivity extends AppCompatActivity {
             startService(intent);
         }else {
             Toast.makeText(ListActivity.this, "已经是第一首了", Toast.LENGTH_SHORT).show();
+            listPosition++;
+            if(isPaused)    playSong();
         }
     }
 
@@ -230,9 +239,12 @@ public class ListActivity extends AppCompatActivity {
             startService(intent);
         } else {
             Toast.makeText(ListActivity.this, "已经是最后一首", Toast.LENGTH_SHORT).show();
+            listPosition--;
+            if(isPaused)    playSong();
         }
     }
 
+    //退出同时结束后台服务
     @Override
     protected void onDestroy() {
         Intent intent = new Intent(ListActivity.this, PlayService.class);
@@ -257,6 +269,27 @@ public class ListActivity extends AppCompatActivity {
             exitTime = System.currentTimeMillis();
         } else {
             finish();
+        }
+    }
+
+    //服务回传广播接收器
+    public class ActionReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if(action.equals(MUSIC_UPDATE)) {
+                listPosition = intent.getIntExtra("current", -1);
+                if(listPosition <= mp3Infos.size() - 1) {
+                    MusicInfo mp3Info = mp3Infos.get(listPosition);
+                    PlayingTitle.setText(mp3Info.getTitle());
+                    PlayingArtist.setText(mp3Info.getArtist());
+                    Bitmap bitmap = MediaUtil.getArtwork(context, mp3Info.getId(), mp3Info.getAlbumId(), true);
+                    PlayingCover.setImageBitmap(bitmap);
+                } else {
+                    listPosition--;
+                    PlayBtn.setBackgroundResource(R.drawable.pause);
+                }
+            }
         }
     }
 

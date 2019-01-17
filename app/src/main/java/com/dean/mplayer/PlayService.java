@@ -42,10 +42,16 @@ public class PlayService extends Service {
 					current++;		// 下一首位置
 					if (current <= mp3Infos.size() - 1) {
 						path = mp3Infos.get(current).getUrl();
+						Intent musicUpdate = new Intent("musicUpdate");	//播放完毕，将服务自动进行的切歌操作回传到前台
+						musicUpdate.putExtra("current", current);
+						sendBroadcast(musicUpdate);
 						play(0);
 					}else {
 						mediaPlayer.seekTo(0);
-						current = 0;
+						Intent musicUpdate = new Intent("musicUpdate");	//播放完毕，将服务自动进行的切歌操作回传到前台
+						musicUpdate.putExtra("current", current);
+						sendBroadcast(musicUpdate);
+						current--;
 					}
 				} else if(status == 4) {    //随机播放
 					current = getRandomIndex(mp3Infos.size() - 1);
@@ -111,6 +117,8 @@ public class PlayService extends Service {
 			mediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			//TODO
 		}
 	}
 
@@ -146,7 +154,7 @@ public class PlayService extends Service {
 		if (mediaPlayer != null) {
 			mediaPlayer.stop();
 			try {
-				mediaPlayer.prepare(); // 在调用stop后如果需要再次通过start进行播放,需要之前调用prepare函数
+				mediaPlayer.prepare(); // stop后再次start前需要先prepare
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
