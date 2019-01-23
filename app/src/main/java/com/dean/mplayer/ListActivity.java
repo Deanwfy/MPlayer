@@ -287,7 +287,9 @@ public class ListActivity extends AppCompatActivity {
                     PlayingCover.setImageBitmap(bitmap);
                 } else {
                     listPosition--;
-                    PlayBtn.setBackgroundResource(R.drawable.pause);
+                    PlayBtn.setBackgroundResource(R.drawable.pause);    //最后一首播放完毕，改变播放状态
+                    isPlaying = false;
+                    isPaused = true;
                 }
             }
         }

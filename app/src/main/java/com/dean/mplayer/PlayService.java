@@ -30,13 +30,16 @@ public class PlayService extends Service {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 				if (status == 1) {		// 单曲循环
-					mediaPlayer.start();
+					play(0);
 				} else if (status == 2) { // 全部循环
 					current++;
 					if(current > mp3Infos.size() - 1) {		// 变为第一首的位置继续播放
 						current = 0;
 					}
 					path = mp3Infos.get(current).getUrl();
+					Intent musicUpdate = new Intent("musicUpdate");	//播放完毕，将服务自动进行的切歌操作回传到前台
+					musicUpdate.putExtra("current", current);
+					sendBroadcast(musicUpdate);
 					play(0);
 				} else if (status == 3) {		// 顺序播放
 					current++;		// 下一首位置
@@ -47,16 +50,18 @@ public class PlayService extends Service {
 						sendBroadcast(musicUpdate);
 						play(0);
 					}else {
-						mediaPlayer.seekTo(0);
-						Intent musicUpdate = new Intent("musicUpdate");	//播放完毕，将服务自动进行的切歌操作回传到前台
+						stop();
+						Intent musicUpdate = new Intent("musicUpdate");	//最后一首播放完毕，将服务自动进行的停止操作回传到前台
 						musicUpdate.putExtra("current", current);
 						sendBroadcast(musicUpdate);
 						current--;
 					}
 				} else if(status == 4) {    //随机播放
 					current = getRandomIndex(mp3Infos.size() - 1);
-					System.out.println("currentIndex ->" + current);
 					path = mp3Infos.get(current).getUrl();
+					Intent musicUpdate = new Intent("musicUpdate");	//播放完毕，将服务自动进行的切歌操作回传到前台
+					musicUpdate.putExtra("current", current);
+					sendBroadcast(musicUpdate);
 					play(0);
 				}
 			}
@@ -104,8 +109,7 @@ public class PlayService extends Service {
 
 	//获取随机位置
 	protected int getRandomIndex(int end) {
-		int index = (int) (Math.random() * end);
-		return index;
+		return (int)(Math.random() * end);
 	}
 
 	 //播放
@@ -117,8 +121,6 @@ public class PlayService extends Service {
 			mediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			//TODO
 		}
 	}
 
@@ -153,11 +155,6 @@ public class PlayService extends Service {
 	private void stop() {
 		if (mediaPlayer != null) {
 			mediaPlayer.stop();
-			try {
-				mediaPlayer.prepare(); // stop后再次start前需要先prepare
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		}
 	}
 

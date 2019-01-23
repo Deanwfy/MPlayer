@@ -59,9 +59,10 @@
 
         <TextView
             android:id="@+id/playing_title"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
@@ -70,16 +71,18 @@
             android:textColor="@color/colorSongTitleText"
             android:textSize="18sp"
             toolbar:layout_constraintBottom_toTopOf="@+id/guideline"
+            toolbar:layout_constraintEnd_toStartOf="@+id/prev"
             toolbar:layout_constraintStart_toEndOf="@+id/music_cover" />
 
         <TextView
             android:id="@+id/playing_artist"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/music_artist"
             android:textSize="14sp"
+            toolbar:layout_constraintEnd_toEndOf="@+id/playing_title"
             toolbar:layout_constraintStart_toStartOf="@+id/playing_title"
             toolbar:layout_constraintTop_toTopOf="@+id/guideline" />
 
