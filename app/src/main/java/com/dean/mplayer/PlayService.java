@@ -2,7 +2,13 @@ package com.dean.mplayer;
 
 import java.util.List;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.app.TaskStackBuilder;
+import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
@@ -66,6 +72,34 @@ public class PlayService extends Service {
 				}
 			}
 		});
+
+		//启动音乐播放后开启通知栏
+		//建立通知渠道
+		String id = "channel_1";
+		CharSequence name = "Music_title";
+		int importance = NotificationManager.IMPORTANCE_DEFAULT;
+		NotificationChannel mNotificationChannel = new NotificationChannel(id, name, importance);
+		//创建通知
+		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+		//将通知绑定至通知渠道
+		mNotificationManager.createNotificationChannel(mNotificationChannel);
+		//通知内容
+        Notification.Builder mNotification =  new Notification.Builder(this, id)
+				.setSmallIcon(R.drawable.music_cover)
+				.setContentTitle("This is Title")
+				.setContentText("This is ContentText");
+		//通知常驻
+		Notification notification = mNotification.build();
+		notification.flags = Notification.FLAG_ONGOING_EVENT;
+		//通知点击事件
+		Intent resultIntent = new Intent(this, ListActivity.class);
+//        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+//        stackBuilder.addParentStack(ListActivity.class);
+//        stackBuilder.addNextIntent(resultIntent);
+		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
+		mNotification.setContentIntent(resultPendingIntent);
+		//发布通知
+        mNotificationManager.notify((int)System.currentTimeMillis(), mNotification.build());
 
 	}
 
