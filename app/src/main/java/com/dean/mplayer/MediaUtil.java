@@ -16,11 +16,24 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 
 public class MediaUtil {
 
+	//版本判断
+	public static boolean isOreo() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.O;
+	}
+	public static boolean isMarshmallow() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
+	}
+	public static boolean isLollipop() {
+		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
+	}
+
+	//歌曲信息获取
 	public static List<MusicInfo> getMusicInfos(Context context) {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
@@ -106,11 +119,7 @@ public class MediaUtil {
 
 	//获取专辑封面的Uri
 	private static final Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
-	/**
-	 * 获取默认专辑图片
-	 * @param context
-	 * @return
-	 */
+	//获取默认专辑图片
 	@SuppressWarnings("ResourceType")
 	public static Bitmap getDefaultArtwork(Context context) {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
@@ -119,13 +128,7 @@ public class MediaUtil {
 	}
 
 
-	/**
-	 * 从文件当中获取专辑封面位图
-	 * @param context
-	 * @param songid
-	 * @param albumid
-	 * @return
-	 */
+	//从文件中获取专辑封面位图
 	private static Bitmap getArtworkFromFile(Context context, long songid, long albumid){
 		Bitmap bm = null;
 		if(albumid < 0 && songid < 0) {
@@ -168,14 +171,7 @@ public class MediaUtil {
 		return bm;
 	}
 
-	/**
-	 * 获取专辑封面位图对象
-	 * @param context
-	 * @param song_id
-	 * @param album_id
-	 * @param allowdefalut
-	 * @return
-	 */
+	//获取专辑封面位图对象
 	public static Bitmap getArtwork(Context context, long song_id, long album_id, boolean allowdefalut){
 		if(album_id < 0) {
 			if(song_id < 0) {
@@ -202,10 +198,9 @@ public class MediaUtil {
 				options.inJustDecodeBounds = true;
 				//调用此方法得到options得到图片的大小
 				BitmapFactory.decodeStream(in, null, options);
-				/** 我们的目标是在你N pixel的画面上显示。 所以需要调用computeSampleSize得到图片缩放的比例 **/
-				/** 这里的target为800是根据默认专辑图片大小决定的，800只是测试数字但是试验后发现完美的结合 **/
-				options.inSampleSize = computeSampleSize(options, 100);
-				// 我们得到了缩放比例，现在开始正式读入Bitmap数据
+				//调用computeSampleSize得到图片缩放比例, target:800
+				options.inSampleSize = computeSampleSize(options, 800);
+				//得到缩放比例，读入Bitmap数据
 				options.inJustDecodeBounds = false;
 				options.inDither = false;
 				options.inPreferredConfig = Bitmap.Config.ARGB_8888;
@@ -237,12 +232,7 @@ public class MediaUtil {
 		return null;
 	}
 
-	/**
-	 * 对图片进行合适的缩放
-	 * @param options
-	 * @param target
-	 * @return
-	 */
+	//图片缩放
 	public static int computeSampleSize(BitmapFactory.Options options, int target) {
 		int w = options.outWidth;
 		int h = options.outHeight;

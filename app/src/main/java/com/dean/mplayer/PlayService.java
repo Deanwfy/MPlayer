@@ -7,15 +7,17 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.IBinder;
-import android.widget.RemoteViews;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v7.graphics.Palette;
 
 public class PlayService extends Service {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
@@ -27,11 +29,18 @@ public class PlayService extends Service {
 	private int status = 3;         //播放状态，默认为顺序播放
 	private int currentTime;        //当前播放进度
 
+
+	String channelId = "MPlayer_channel_1";	//通知渠道Id
+	private MediaSessionCompat mediaSessionCompat;
+
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		mediaPlayer = new MediaPlayer();
 		mp3Infos = MediaUtil.getMusicInfos(PlayService.this);
+
+		if (MediaUtil.isLollipop())
+			setUpMediaSessionCompat();
 
 		// 设置音乐播放完成时的监听器
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
@@ -123,12 +132,13 @@ public class PlayService extends Service {
 	 //播放
 	private void play(int currentTime) {
 		try {
+			mediaSessionCompat.setActive(true);
 			mediaPlayer.reset();// 把各项参数恢复到初始状态
 			mediaPlayer.setDataSource(path);
 			mediaPlayer.prepare(); // 进行缓冲
 			mediaPlayer.setOnPreparedListener(new PreparedListener(currentTime));// 注册一个监听器
 			//启动音乐播放后开启通知栏
-			sendNotification(true);
+			sendNotification();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -139,7 +149,6 @@ public class PlayService extends Service {
 		if (mediaPlayer != null && mediaPlayer.isPlaying()) {
 			mediaPlayer.pause();
 			isPause = true;
-			sendNotification(false);
 		}
 	}
 
@@ -185,41 +194,83 @@ public class PlayService extends Service {
 		}
 	}
 
-	private void sendNotification(boolean notificationFlag){
-		//建立通知渠道
-		String channelId = "MPlayer_channel_1";
-		CharSequence channelName = "MPlayer";
-		int importance = NotificationManager.IMPORTANCE_LOW;
-		NotificationChannel mNotificationChannel = new NotificationChannel(channelId, channelName, importance);
-		//创建通知
-		NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-		//将通知绑定至通知渠道
-		mNotificationManager.createNotificationChannel(mNotificationChannel);
+	private void sendNotification(){
+		//通知点击事件
+		Intent testIntent = new Intent(this, PlayDetail.class);
+		PendingIntent testPendingIntent = PendingIntent.getActivity(this, 0, testIntent, 0);
+		//获取歌曲信息
+		MusicInfo mp3Info = mp3Infos.get(current);
+		String musicTitle = mp3Info.getTitle();
+		String musicArtist = mp3Info.getArtist();
+		Bitmap musicCover = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
 		//通知内容
-		//自定义布局
-		RemoteViews notificationPlayerLayout = new RemoteViews(getPackageName(), R.layout.notification_player_layout);
-		Notification.Builder mNotification =  new Notification.Builder(this, channelId)
-				.setContentTitle("This is Title")
-				.setContentText("This is Artist")
-				.setCustomBigContentView(notificationPlayerLayout)
+		NotificationCompat.Builder mNotificationCompat = new NotificationCompat.Builder(this, channelId)
+				.setContentTitle(musicTitle)
+				.setContentText(musicArtist)
 				.setSmallIcon(R.drawable.music_cover)
-				.setStyle(new Notification.DecoratedMediaCustomViewStyle());
-		//通知常驻
-		Notification notification = mNotification.build();
-		if (notificationFlag) {
-			notification.flags = Notification.FLAG_FOREGROUND_SERVICE;
-		} else {
-			mNotification.setAutoCancel(false);
+				.setLargeIcon(musicCover)
+				.setShowWhen(false)
+				.addAction(R.drawable.ic_notification_prev, "Prev", testPendingIntent)
+				.addAction(R.drawable.ic_notification_play, "play", testPendingIntent)
+				.addAction(R.drawable.ic_notification_next, "next", testPendingIntent);
+		//版本兼容
+		if (MediaUtil.isLollipop()) {
+			mNotificationCompat.setVisibility(Notification.VISIBILITY_PUBLIC);	//锁屏显示
+			android.support.v4.media.app.NotificationCompat.MediaStyle mediaStyle = new android.support.v4.media.app.NotificationCompat.MediaStyle()    //通知类型为"多媒体"
+					.setMediaSession(mediaSessionCompat.getSessionToken())
+					.setShowActionsInCompactView(0, 1, 2);    //通知栏折叠状态下保持按键显示
+			mNotificationCompat.setStyle(mediaStyle);
+			mNotificationCompat.setColor(Palette.from(musicCover).generate().getVibrantColor(Color.parseColor("#005b52")));
+		}
+		if (MediaUtil.isOreo()){
+			mNotificationCompat.setOngoing(true);	//通知常驻
+			mNotificationCompat.setColorized(true);	//通知变色
 		}
 		//通知点击事件
 		Intent resultIntent = new Intent(this, PlayDetail.class);
-/*        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(ListActivity.class);
-        stackBuilder.addNextIntent(resultIntent);*/
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-		mNotification.setContentIntent(resultPendingIntent);
+		mNotificationCompat.setContentIntent(resultPendingIntent);
 		//发布通知
-		mNotificationManager.notify(1, mNotification.build());
+		if (MediaUtil.isOreo()) {
+			//建立通知渠道
+			CharSequence channelName = "MPlayer";
+			int importance = NotificationManager.IMPORTANCE_LOW;
+			NotificationChannel mNotificationChannel = new NotificationChannel(channelId, channelName, importance);
+			//创建通知
+			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			//将通知绑定至通知渠道
+			mNotificationManager.createNotificationChannel(mNotificationChannel);
+			//推送
+			mNotificationManager.notify(1, mNotificationCompat.build());
+		}
+	}
+
+	private void setUpMediaSessionCompat() {
+		mediaSessionCompat = new MediaSessionCompat(this, "MPlayer");
+		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
+			@Override
+			public void onPause() { pause(); }
+
+			@Override
+			public void onPlay() {
+				play(0);
+			}
+
+			@Override
+			public void onSkipToNext() {
+				current++;
+				next();
+			}
+
+			@Override
+			public void onSkipToPrevious() {
+				current--;
+				previous();
+			}
+
+		});
+		mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
+				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS);
 	}
 
 }
