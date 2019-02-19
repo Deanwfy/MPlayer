@@ -4,6 +4,7 @@
     package="com.dean.mplayer">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 
     <application
         android:allowBackup="true"
@@ -30,7 +31,11 @@
             android:parentActivityName=".ListActivity">
         </activity>
 
-        <service android:name=".PlayService"/>
+        <service android:name=".PlayService">
+            <intent-filter>
+                <action android:name="android.media.browse.MediaBrowserService" />
+            </intent-filter>
+        </service>
 
     </application>
 

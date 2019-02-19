@@ -38,7 +38,7 @@ public class MediaUtil {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
 				MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-		
+
 		List<MusicInfo> mp3Infos = new ArrayList<>();
 		for (int i = 0; i < cursor.getCount(); i++) {
 			cursor.moveToNext();
@@ -60,6 +60,7 @@ public class MediaUtil {
 					.getColumnIndex(MediaStore.Audio.Media.SIZE));
 			String url = cursor.getString(cursor
 					.getColumnIndex(MediaStore.Audio.Media.DATA));
+			Uri uri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
 			int isMusic = cursor.getInt(cursor
 					.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
 			if (isMusic != 0) {
@@ -72,6 +73,7 @@ public class MediaUtil {
 				mp3Info.setDuration(duration);
 				mp3Info.setSize(size);
 				mp3Info.setUrl(url);
+				mp3Info.setUri(uri);
 				mp3Infos.add(mp3Info);
 			}
 		}
@@ -92,6 +94,7 @@ public class MediaUtil {
 			map.put("duration", formatTime(mp3Info.getDuration()));
 			map.put("size", String.valueOf(mp3Info.getSize()));
 			map.put("url", mp3Info.getUrl());
+			map.put("uri",String.valueOf(mp3Info.getUri()));
 			musiclist.add(map);
 		}
 		return musiclist;

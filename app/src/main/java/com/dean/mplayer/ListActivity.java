@@ -1,13 +1,26 @@
 package com.dean.mplayer;
 
+import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.v4.media.MediaBrowserCompat;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -29,7 +42,7 @@ public class ListActivity extends AppCompatActivity {
 
     // 列表显示
     private ListView mMusicList;
-    private List<MusicInfo> mp3Infos = null;
+    private List<MusicInfo> musicInfos = null;
 
     // 播放控制显示
     private TextView PlayingTitle;
@@ -41,18 +54,14 @@ public class ListActivity extends AppCompatActivity {
     private Button PlayBtn;
     private Button NextBtn;
 
-    // 播放标志
-    private boolean isFirstTime = true;
-    private boolean isPlaying;
-    private boolean isPaused;
     private int listPosition = 0;
 
     // 防误触确认退出
     private long exitTime = 0;
 
-    //服务回传广播接收器
-    private ActionReceiver actionReceiver;
-    public static final String MUSIC_UPDATE = "musicUpdate";
+    //获取服务
+    private MediaControllerCompat mediaController;
+    private MediaBrowserCompat mediaBrowserCompat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,27 +73,105 @@ public class ListActivity extends AppCompatActivity {
 
         mMusicList = findViewById(R.id.music_list);
         mMusicList.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        mp3Infos = MediaUtil.getMusicInfos(getApplicationContext());    // 获取歌曲信息
-        setListAdpter(getMusicMaps(mp3Infos));  // 显示歌曲列表
+        musicInfos = MediaUtil.getMusicInfos(getApplicationContext());    // 获取歌曲信息
+        setListAdpter(getMusicMaps(musicInfos));  // 显示歌曲列表
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
 
-        actionReceiver = new ActionReceiver();
-        IntentFilter intentFilter = new IntentFilter(); //Intent过滤器
-        intentFilter.addAction(MUSIC_UPDATE);   //添加过滤规则
-        registerReceiver(actionReceiver, intentFilter); //注册Intent广播接收器
+        initMediaBrowser();
+
+        Intent intent = new Intent(this, PlayService.class);
+        startService(intent);
+//        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
-    //菜单
+    private void initMediaBrowser() {
+        if (mediaBrowserCompat == null) {
+            // 创建MediaBrowserCompat
+            mediaBrowserCompat = new MediaBrowserCompat(
+                    this,
+                    // 创建ComponentName 连接 MusicService
+                    new ComponentName(this, PlayService.class),
+                    // 创建callback
+                    mediaBrowserConnectionCallback,
+                    //
+                    null);
+            // 链接service
+            mediaBrowserCompat.connect();
+        }
+    }
+
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
+        // 连接成功
+        @Override
+        public void onConnected() {
+            try {
+                // 获取MediaControllerCompat
+                mediaController = new MediaControllerCompat(
+                        ListActivity.this,
+                        mediaBrowserCompat.getSessionToken());
+                MediaControllerCompat.setMediaController(ListActivity.this, mediaController);
+                mediaController.registerCallback(mediaControllerCompatCallback);
+                //设置当前数据
+                mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());
+                mediaControllerCompatCallback.onPlaybackStateChanged(mediaController.getPlaybackState());
+                String mediaId = AppConstant.MediaIdInfo.MEDIA_ID_NORMAL;
+                mediaBrowserCompat.unsubscribe(mediaId);
+                mediaBrowserCompat.subscribe(mediaId, mediaBrowserSubscriptionCallback);
+                Log.e("ListActivity", "onConnected");
+            } catch (RemoteException e) {
+                Log.d("ListActivity", String.format("onConnected: Problem: %s", e.toString()));
+                throw new RuntimeException(e);
+            }
+        }
+    };
+
+    private final MediaBrowserCompat.SubscriptionCallback mediaBrowserSubscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
+        @Override
+        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
+            super.onChildrenLoaded(parentId, children);
+
+        }
+    };
+
+    private final MediaControllerCompat.Callback mediaControllerCompatCallback =
+            new MediaControllerCompat.Callback(){
+                @Override
+                public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
+                    switch (state.getState()) {
+                        case PlaybackStateCompat.STATE_NONE://默认状态
+                            PlayBtn.setBackgroundResource(R.drawable.pause);
+                            break;
+                        case PlaybackStateCompat.STATE_PLAYING:
+                            PlayBtn.setBackgroundResource(R.drawable.play);
+                            break;
+                        case PlaybackStateCompat.STATE_PAUSED:
+                            PlayBtn.setBackgroundResource(R.drawable.pause);
+                            break;
+                        case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT://下一首
+                            break;
+                        case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS://上一首
+                            break;
+                    }
+                }
+                @Override
+                public void onMetadataChanged(MediaMetadataCompat metadata) {
+                    if (metadata != null) {
+                        PlayingTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
+                        PlayingArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
+                        PlayingCover.setImageBitmap(metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART));
+                    }
+                }
+            };
+
+        //菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
     }
-
-
 
     // 歌曲列表显示适配器
     public void setListAdpter(List<HashMap<String, String>> musiclist) {
@@ -99,25 +186,8 @@ public class ListActivity extends AppCompatActivity {
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            listPosition = position;
-            playMusic(listPosition);
-        }
-    }
-
-    // 通过列表播放音乐
-    public void playMusic(int listPosition) {
-        if (mp3Infos != null) {
-            PlayBtn.setBackgroundResource(R.drawable.play);
-            MusicInfo mp3Info = mp3Infos.get(listPosition);
-            PlayingTitle.setText(mp3Info.getTitle());
-            PlayingArtist.setText(mp3Info.getArtist());
-            Bitmap bitmap = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
-            PlayingCover.setImageBitmap(bitmap);
-            Intent intent = new Intent(ListActivity.this, PlayService.class);
-            intent.putExtra("url", mp3Info.getUrl());
-            intent.putExtra("listPosition", listPosition);
-            intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
-            startService(intent);
+            mediaController.getTransportControls().play();
+            Log.e("ItemClick", musicInfos.get(position).getUri() + "");
         }
     }
 
@@ -141,106 +211,26 @@ public class ListActivity extends AppCompatActivity {
 
     // 命名播放控制面板监听器类，实现监听事件
     private class ControlBtnOnClickListener implements OnClickListener{
-        Intent intent = new Intent(ListActivity.this, PlayService.class);
 
         @Override
         public void onClick(View v){
             switch (v.getId()){
                 case R.id.prev:
-                    PlayBtn.setBackgroundResource(R.drawable.play);
-                    prevSong();
-                    isFirstTime = false;
-                    isPlaying = true;
-                    isPaused = false;
+                    mediaController.getTransportControls().skipToPrevious();
                     break;
                 case R.id.play:
-                    if(isFirstTime) {
-                        PlayBtn.setBackgroundResource(R.drawable.play);
-                        playSong();
-                        isFirstTime = false;
-                        isPlaying = true;
-                        isPaused = false;
+                    if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                        mediaController.getTransportControls().pause();
+                    } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED){
+                        mediaController.getTransportControls().play();
                     } else {
-                        if (isPlaying) {
-                            PlayBtn.setBackgroundResource(R.drawable.pause);
-                            intent.putExtra("MSG", AppConstant.PlayerMsg.PAUSE_MSG);
-                            startService(intent);
-                            isPlaying = false;
-                            isPaused = true;
-
-                        } else if (isPaused) {
-                            PlayBtn.setBackgroundResource(R.drawable.play);
-                            intent.putExtra("MSG", AppConstant.PlayerMsg.CONTINUE_MSG);
-                            startService(intent);
-                            isPaused = false;
-                            isPlaying = true;
-                        }
+                        mediaController.getTransportControls().play();
                     }
                     break;
                 case R.id.next:
-                    PlayBtn.setBackgroundResource(R.drawable.play);
-                    nextSong();
-                    isFirstTime = false;
-                    isPlaying = true;
-                    isPaused = false;
+                    mediaController.getTransportControls().skipToNext();
                     break;
             }
-        }
-    }
-
-    // 播放
-    public void playSong() {
-        MusicInfo mp3Info = mp3Infos.get(listPosition);
-        PlayingTitle.setText(mp3Info.getTitle());
-        PlayingArtist.setText(mp3Info.getArtist());
-        Bitmap bitmap = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
-        PlayingCover.setImageBitmap(bitmap);
-        Intent intent = new Intent(ListActivity.this, PlayService.class);
-        intent.putExtra("listPosition", listPosition);
-        intent.putExtra("url", mp3Info.getUrl());
-        intent.putExtra("MSG", AppConstant.PlayerMsg.PLAY_MSG);
-        startService(intent);
-    }
-
-    // 上一曲
-    public void prevSong() {
-        listPosition = listPosition - 1;
-        if(listPosition >= 0) {
-            MusicInfo mp3Info = mp3Infos.get(listPosition);
-            PlayingTitle.setText(mp3Info.getTitle());
-            PlayingArtist.setText(mp3Info.getArtist());
-            Bitmap bitmap = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
-            PlayingCover.setImageBitmap(bitmap);
-            Intent intent = new Intent(ListActivity.this, PlayService.class);
-            intent.putExtra("listPosition", listPosition);
-            intent.putExtra("url", mp3Info.getUrl());
-            intent.putExtra("MSG", AppConstant.PlayerMsg.PRIVIOUS_MSG);
-            startService(intent);
-        }else {
-            Toast.makeText(ListActivity.this, "已经是第一首了", Toast.LENGTH_SHORT).show();
-            listPosition++;
-            if(isPaused)    playSong();
-        }
-    }
-
-    //下一曲
-    public void nextSong() {
-        listPosition = listPosition + 1;
-        if(listPosition <= mp3Infos.size() - 1) {
-            MusicInfo mp3Info = mp3Infos.get(listPosition);
-            PlayingTitle.setText(mp3Info.getTitle());
-            PlayingArtist.setText(mp3Info.getArtist());
-            Bitmap bitmap = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
-            PlayingCover.setImageBitmap(bitmap);
-            Intent intent = new Intent(ListActivity.this, PlayService.class);
-            intent.putExtra("listPosition", listPosition);
-            intent.putExtra("url", mp3Info.getUrl());
-            intent.putExtra("MSG", AppConstant.PlayerMsg.NEXT_MSG);
-            startService(intent);
-        } else {
-            Toast.makeText(ListActivity.this, "已经是最后一首", Toast.LENGTH_SHORT).show();
-            listPosition--;
-            if(isPaused)    playSong();
         }
     }
 
@@ -272,27 +262,5 @@ public class ListActivity extends AppCompatActivity {
         }
     }
 
-    //服务回传广播接收器
-    public class ActionReceiver extends BroadcastReceiver {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-            if(action.equals(MUSIC_UPDATE)) {
-                listPosition = intent.getIntExtra("current", -1);
-                if(listPosition <= mp3Infos.size() - 1) {
-                    MusicInfo mp3Info = mp3Infos.get(listPosition);
-                    PlayingTitle.setText(mp3Info.getTitle());
-                    PlayingArtist.setText(mp3Info.getArtist());
-                    Bitmap bitmap = MediaUtil.getArtwork(context, mp3Info.getId(), mp3Info.getAlbumId(), true);
-                    PlayingCover.setImageBitmap(bitmap);
-                } else {
-                    listPosition--;
-                    PlayBtn.setBackgroundResource(R.drawable.pause);    //最后一首播放完毕，改变播放状态
-                    isPlaying = false;
-                    isPaused = true;
-                }
-            }
-        }
-    }
 
 }
