@@ -119,9 +119,7 @@ public class ListActivity extends AppCompatActivity {
                 String mediaId = AppConstant.MediaIdInfo.MEDIA_ID_NORMAL;
                 mediaBrowserCompat.unsubscribe(mediaId);
                 mediaBrowserCompat.subscribe(mediaId, mediaBrowserSubscriptionCallback);
-                Log.e("ListActivity", "onConnected");
             } catch (RemoteException e) {
-                Log.d("ListActivity", String.format("onConnected: Problem: %s", e.toString()));
                 throw new RuntimeException(e);
             }
         }
@@ -186,8 +184,9 @@ public class ListActivity extends AppCompatActivity {
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            mediaController.getTransportControls().play();
-            Log.e("ItemClick", musicInfos.get(position).getUri() + "");
+            Bundle listPosition = new Bundle();
+            listPosition.putInt("listPosition", position);
+            mediaController.getTransportControls().playFromUri(musicInfos.get(position).getUri(), listPosition);
         }
     }
 
@@ -224,7 +223,7 @@ public class ListActivity extends AppCompatActivity {
                     } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED){
                         mediaController.getTransportControls().play();
                     } else {
-                        mediaController.getTransportControls().play();
+                        mediaController.getTransportControls().playFromUri(musicInfos.get(0).getUri(), null);
                     }
                     break;
                 case R.id.next:

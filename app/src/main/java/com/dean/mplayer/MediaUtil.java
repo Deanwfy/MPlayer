@@ -60,7 +60,7 @@ public class MediaUtil {
 					.getColumnIndex(MediaStore.Audio.Media.SIZE));
 			String url = cursor.getString(cursor
 					.getColumnIndex(MediaStore.Audio.Media.DATA));
-			Uri uri = MediaStore.Audio.Media.INTERNAL_CONTENT_URI;
+			Uri uri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
 			int isMusic = cursor.getInt(cursor
 					.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
 			if (isMusic != 0) {

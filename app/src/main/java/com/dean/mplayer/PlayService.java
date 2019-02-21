@@ -1,18 +1,14 @@
 package com.dean.mplayer;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.MediaPlayer;
@@ -28,7 +24,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaBrowserServiceCompat;
-import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -39,7 +34,7 @@ import android.util.Log;
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
 	private String action;	//媒体控制动作
-	private int listPosition = 0;        // 记录当前正在播放的音乐
+	private int listPosition = 0;        // 当前正在播放的音乐
 	private List<MusicInfo> musicInfos;   //存放MusicInfo对象的集合
 	private int status = 3;         //播放状态，默认为顺序播放
 	private int currentTime;        //当前播放进度
@@ -54,7 +49,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	@Nullable
 	@Override
 	public BrowserRoot onGetRoot(@NonNull String clientPackageName, int clientUid, @Nullable Bundle rootHints) {
-		Log.e("------","GetRoot");
 		return new BrowserRoot(AppConstant.MediaIdInfo.MEDIA_ID_ROOT, null);
 	}
 	@Override
@@ -90,15 +84,10 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				if (status == 1) {		// 单曲循环
 					mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
 				} else if (status == 2) { // 全部循环
-					listPosition++;
-					if(listPosition > musicInfos.size() - 1) {		// 变为第一首的位置继续播放
-						listPosition = 0;
-					}
-					mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+					mediaControllerCompat.getTransportControls().skipToNext();
 				} else if (status == 3) {		// 顺序播放
 					if (listPosition < musicInfos.size() - 1) {
-						listPosition++;
-						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						mediaControllerCompat.getTransportControls().skipToNext();
 					}else {
 						mediaControllerCompat.getTransportControls().stop();
 					}
@@ -217,7 +206,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private void setUpMediaSessionCompat() {
 		//播放状态初始化
 		playbackStateCompat = new PlaybackStateCompat.Builder()
-				.setState(PlaybackStateCompat.STATE_NONE, 0, 1.0f)
+				.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
 				.build();
 		//MediaSession初始化
 		mediaSessionCompat = new MediaSessionCompat(this, "MPlayer");
@@ -234,20 +223,22 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		//设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
 		sendNotification();
-		Log.e("Service","has start");
 
 		//回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
 			//播放
 			@Override
-			public void onPlayFromUri(Uri uri, Bundle extras) {
+			public void onPlayFromUri(Uri uri, Bundle position) {
+				if (position != null) {
+					listPosition = position.getInt("listPosition");
+				}
 				MusicInfo musicInfo = musicInfos.get(listPosition);
+				Log.e("IsPlayingPosition", listPosition + "");
 				MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
 						.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicInfo.getTitle())
 						.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicInfo.getArtist())
 						.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, musicInfo.getId(), musicInfo.getAlbumId(), true));
 				mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
-				Log.e("IsPlaying", musicInfo.getUri() + "");
 					try {
 						switch (playbackStateCompat.getState()) {
 							case PlaybackStateCompat.STATE_PLAYING:
@@ -255,7 +246,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 							case PlaybackStateCompat.STATE_NONE:
 								mediaPlayer.reset();
 								//设置播放地址
-								mediaPlayer.setDataSource(musicInfo.getUrl());
+								mediaPlayer.setDataSource(PlayService.this, uri);
 								//异步进行播放
 								mediaPlayer.prepareAsync();
 								break;
