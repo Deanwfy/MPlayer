@@ -2,7 +2,7 @@ package com.dean.mplayer;
 
 public class AppConstant {
 	public class PlayAction {
-		public static final String ACTION_PLAY = "play";	// 播放
+		public static final String ACTION_PLAY = "ic_play";	// 播放
 		public static final String ACTION_PAUSE = "pause";	// 暂停
 		public static final String ACTION_STOP = "stop";	// 停止
 		public static final String ACTION_CONTINUE = "continue";	// 继续

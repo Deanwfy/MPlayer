@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="theme">夜间模式</string>
+    <string name="clock">睡眠定时</string>
+    <string name="setting">设置</string>
+    <string name="exit">退出</string>
+</resources>

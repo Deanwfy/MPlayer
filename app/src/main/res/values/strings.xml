@@ -3,4 +3,8 @@
     <string name="music_title">Title</string>
     <string name="music_artist">Artist</string>
     <string name="music_duration">duration</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">MPlayer</string>
+    <string name="nav_header_subtitle">wfy00800@163.com</string>
 </resources>

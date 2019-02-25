@@ -15,9 +15,7 @@ import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -40,6 +38,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private int currentTime;        //当前播放进度
 
 	String channelId = "MPlayer_channel_1";	//通知渠道Id
+	NotificationManager notificationManager;	//通知管理器
 
 	private MediaSessionCompat mediaSessionCompat;	//mediaSession
 	private PlaybackStateCompat playbackStateCompat;	//播放状态
@@ -132,6 +131,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	@Override
 	public void onDestroy() {
 		if (mediaPlayer != null) {
+			notificationManager.cancelAll();
 			mediaPlayer.stop();
 			mediaPlayer.release();
 			mediaPlayer = null;
@@ -161,7 +161,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		//通知内容
 		NotificationCompat.Action playPauseAction = playbackStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING ?
 				createAction(R.drawable.ic_notification_play, "Pause", AppConstant.PlayAction.ACTION_PAUSE) :
-				createAction(R.drawable.ic_notification_pause, "play", AppConstant.PlayAction.ACTION_CONTINUE) ;
+				createAction(R.drawable.ic_notification_pause, "Play", AppConstant.PlayAction.ACTION_CONTINUE) ;
 		NotificationCompat.Builder mNotificationCompat = new NotificationCompat.Builder(this, channelId)
 				.setContentTitle(musicTitle)
 				.setContentText(musicArtist)
@@ -185,7 +185,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			mNotificationCompat.setColorized(true);	//通知变色
 		}
 		//通知点击事件
-		Intent resultIntent = new Intent(this, PlayDetail.class);
+		Intent resultIntent = new Intent(this, PlayNow.class);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
 		mNotificationCompat.setContentIntent(resultPendingIntent);
 		//发布通知
@@ -195,11 +195,11 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			int importance = NotificationManager.IMPORTANCE_LOW;
 			NotificationChannel mNotificationChannel = new NotificationChannel(channelId, channelName, importance);
 			//创建通知
-			NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+			notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			//将通知绑定至通知渠道
-			mNotificationManager.createNotificationChannel(mNotificationChannel);
+			notificationManager.createNotificationChannel(mNotificationChannel);
 			//推送
-			mNotificationManager.notify(1, mNotificationCompat.build());
+			notificationManager.notify(1, mNotificationCompat.build());
 		}
 	}
 
@@ -222,7 +222,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS);
 		//设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
-		sendNotification();
+//		sendNotification();
 
 		//回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
@@ -253,6 +253,16 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						}
 					} catch (IOException e) {
 				}
+			}
+			//停止
+			@Override
+			public void onStop(){
+				mediaPlayer.stop();
+				playbackStateCompat = new PlaybackStateCompat.Builder()
+						.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
+						.build();
+				mediaSessionCompat.setPlaybackState(playbackStateCompat);
+				sendNotification();
 			}
 			//暂停
 			@Override

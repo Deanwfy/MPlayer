@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="navigation_view">
+
+    <group
+        android:id="@+id/drawer_menu_activity">
+        <item
+            android:id="@+id/ic_menu_clock"
+            android:icon="@drawable/ic_menu_clock"
+            android:title="@string/clock" />
+        <item
+            android:id="@+id/ic_menu_theme"
+            android:icon="@drawable/ic_menu_theme"
+            android:title="@string/theme" />
+    </group>
+
+    <group
+        android:id="@+id/drawer_menu_control">
+        <item
+            android:id="@+id/ic_menu_settings"
+            android:icon="@drawable/ic_menu_settings"
+            android:title="@string/setting" />
+        <item
+            android:id="@+id/ic_menu_exit"
+            android:icon="@drawable/ic_menu_exit"
+            android:title="@string/exit" />
+    </group>
+
+</menu>
