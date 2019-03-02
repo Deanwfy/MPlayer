@@ -55,7 +55,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginStart="3dp"
-                android:src="@drawable/music_cover"
+                android:src="@drawable/ic_cover"
                 toolbar:layout_constraintBottom_toBottomOf="parent"
                 toolbar:layout_constraintStart_toStartOf="parent"
                 toolbar:layout_constraintTop_toTopOf="parent"
@@ -64,7 +64,7 @@
             <TextView
                 android:id="@+id/playing_title"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="25dp"
                 android:layout_marginStart="8dp"
                 android:layout_marginEnd="8dp"
                 android:ellipsize="marquee"
@@ -74,14 +74,14 @@
                 android:text="@string/music_title"
                 android:textColor="@color/colorSongTitleText"
                 android:textSize="18sp"
+                app:layout_constraintEnd_toStartOf="@+id/playing_play"
                 toolbar:layout_constraintBottom_toTopOf="@+id/guideline"
-                toolbar:layout_constraintStart_toEndOf="@+id/music_cover"
-                app:layout_constraintEnd_toStartOf="@+id/playNowPlay" />
+                toolbar:layout_constraintStart_toEndOf="@+id/music_cover" />
 
             <TextView
                 android:id="@+id/playing_artist"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="20dp"
                 android:ellipsize="end"
                 android:singleLine="true"
                 android:text="@string/music_artist"
@@ -98,6 +98,7 @@
                 android:layout_marginEnd="3dp"
                 android:layout_marginBottom="3dp"
                 android:background="@drawable/ic_play"
+                android:foreground="@drawable/click_effect"
                 toolbar:layout_constraintBottom_toBottomOf="parent"
                 toolbar:layout_constraintEnd_toEndOf="parent"
                 toolbar:layout_constraintTop_toTopOf="parent" />
@@ -107,7 +108,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                toolbar:layout_constraintGuide_begin="28dp" />
+                app:layout_constraintGuide_begin="30dp"/>
         </android.support.constraint.ConstraintLayout>
 
     </android.support.constraint.ConstraintLayout>

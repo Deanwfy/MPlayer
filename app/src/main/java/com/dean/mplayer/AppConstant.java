@@ -2,14 +2,21 @@ package com.dean.mplayer;
 
 public class AppConstant {
 	public class PlayAction {
-		public static final String ACTION_PLAY = "ic_play";	// 播放
-		public static final String ACTION_PAUSE = "pause";	// 暂停
-		public static final String ACTION_STOP = "stop";	// 停止
-		public static final String ACTION_CONTINUE = "continue";	// 继续
-		public static final String ACTION_PRIVIOUS = "previous";	// 上一首
-		public static final String ACTION_NEXT = "next";	// 下一首
-		public static final String PROGRESS_CHANGE = "progress_change";	// 进度改变
-		public static final String ISPLAYING = "isplaying";	// 正在播放
+		public static final String ACTION_PLAY = "PLAY";	// 播放
+		public static final String ACTION_PAUSE = "PAUSE";	// 暂停
+		public static final String ACTION_STOP = "STOP";	// 停止
+		public static final String ACTION_CONTINUE = "CONTINUE";	// 继续
+		public static final String ACTION_PREVIOUS = "PREVIOUS";	// 上一首
+		public static final String ACTION_NEXT = "NEXT";	// 下一首
+		public static final String PROGRESS_CHANGE = "PROGRESS_CHANGE";	// 进度改变
+		public static final String IS_PLAYING = "IS_PLAYING";	// 正在播放
+	}
+
+	public class PlayMode {
+		public static final String MODE_ORDER = "ORDER";	//顺序播放
+		public static final String MODE_LOOP = "LOOP";	//列表循环
+		public static final String MODE_SINGLE = "SINGLE";	//单曲循环
+		public static final String MODE_RANDOM = "RANDOM";	//随机播放
 	}
 
 	public class MediaIdInfo {

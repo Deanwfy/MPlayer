@@ -34,7 +34,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private String action;	//媒体控制动作
 	private int listPosition = 0;        // 当前正在播放的音乐
 	private List<MusicInfo> musicInfos;   //存放MusicInfo对象的集合
-	private int status = 3;         //播放状态，默认为顺序播放
+	public static String mode = AppConstant.PlayMode.MODE_ORDER;         //播放状态，默认为顺序播放
 	private int currentTime;        //当前播放进度
 
 	String channelId = "MPlayer_channel_1";	//通知渠道Id
@@ -55,18 +55,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		result.sendResult(null);
 	}
 
-	//binder
-/*	@Override
-	public IBinder onBind(Intent intent) {
-		Log.e("onBind: ", "is here");
-		return new ActivityBinder();
-	}
-	public class ActivityBinder extends Binder {
-		public PlayService getService() {
-			return PlayService.this;
-		}
-	}*/
-
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -80,19 +68,24 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				if (status == 1) {		// 单曲循环
-					mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
-				} else if (status == 2) { // 全部循环
-					mediaControllerCompat.getTransportControls().skipToNext();
-				} else if (status == 3) {		// 顺序播放
-					if (listPosition < musicInfos.size() - 1) {
+				switch (mode){
+					case AppConstant.PlayMode.MODE_ORDER:	//顺序播放
+						if (listPosition < musicInfos.size() - 1) {
+							mediaControllerCompat.getTransportControls().skipToNext();
+						}else {
+							mediaControllerCompat.getTransportControls().stop();
+						}
+						break;
+					case AppConstant.PlayMode.MODE_LOOP:	//列表循环
 						mediaControllerCompat.getTransportControls().skipToNext();
-					}else {
-						mediaControllerCompat.getTransportControls().stop();
-					}
-				} else if(status == 4) {    //随机播放
-					listPosition = getRandomIndex(musicInfos.size() - 1);
-					mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						break;
+					case AppConstant.PlayMode.MODE_SINGLE:	//单曲循环
+						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						break;
+					case AppConstant.PlayMode.MODE_RANDOM:	//随机播放
+						listPosition = getRandomIndex(musicInfos.size() - 1);
+						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						break;
 				}
 			}
 		});
@@ -117,7 +110,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				case AppConstant.PlayAction.ACTION_CONTINUE:	//继续
 					mediaControllerCompat.getTransportControls().play();
 					break;
-				case AppConstant.PlayAction.ACTION_PRIVIOUS:	//上一曲
+				case AppConstant.PlayAction.ACTION_PREVIOUS:	//上一曲
 					mediaControllerCompat.getTransportControls().skipToPrevious();
 					break;
 				case AppConstant.PlayAction.ACTION_NEXT:	//下一曲
@@ -168,7 +161,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				.setSmallIcon(R.drawable.ic_notification)
 				.setLargeIcon(musicCover)
 				.setShowWhen(false)
-				.addAction(createAction(R.drawable.ic_notification_prev, "Prev", AppConstant.PlayAction.ACTION_PRIVIOUS))
+				.addAction(createAction(R.drawable.ic_notification_prev, "Prev", AppConstant.PlayAction.ACTION_PREVIOUS))
 				.addAction(playPauseAction)
 				.addAction(createAction(R.drawable.ic_notification_next, "next", AppConstant.PlayAction.ACTION_NEXT));
 		//版本兼容
@@ -178,7 +171,11 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					.setMediaSession(mediaSessionCompat.getSessionToken())
 					.setShowActionsInCompactView(0, 1, 2);    //通知栏折叠状态下保持按键显示
 			mNotificationCompat.setStyle(mediaStyle);
-			mNotificationCompat.setColor(Palette.from(musicCover).generate().getVibrantColor(Color.parseColor("#005b52")));
+			if (musicCover != null) {
+				mNotificationCompat.setColor(Palette.from(musicCover).generate().getVibrantColor(Color.parseColor("#005b52")));
+			}else {
+				mNotificationCompat.setColor(0x005b52);
+			}
 		}
 		if (MediaUtil.isOreo()){
 			mNotificationCompat.setOngoing(true);	//通知常驻
@@ -230,10 +227,9 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			@Override
 			public void onPlayFromUri(Uri uri, Bundle position) {
 				if (position != null) {
-					listPosition = position.getInt("listPosition");
+					listPosition = position.getInt("listPosition", listPosition);
 				}
 				MusicInfo musicInfo = musicInfos.get(listPosition);
-				Log.e("IsPlayingPosition", listPosition + "");
 				MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
 						.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicInfo.getTitle())
 						.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicInfo.getArtist())
@@ -250,8 +246,27 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 								//异步进行播放
 								mediaPlayer.prepareAsync();
 								break;
+							case PlaybackStateCompat.STATE_BUFFERING:
+								break;
+							case PlaybackStateCompat.STATE_CONNECTING:
+								break;
+							case PlaybackStateCompat.STATE_ERROR:
+								break;
+							case PlaybackStateCompat.STATE_FAST_FORWARDING:
+								break;
+							case PlaybackStateCompat.STATE_REWINDING:
+								break;
+							case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+								break;
+							case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
+								break;
+							case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
+								break;
+							case PlaybackStateCompat.STATE_STOPPED:
+								break;
 						}
 					} catch (IOException e) {
+						onStop();
 				}
 			}
 			//停止

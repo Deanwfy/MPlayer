@@ -11,18 +11,19 @@
 
     <ImageView
         android:id="@+id/playNowCover"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="350dp"
+        android:layout_height="350dp"
         app:layout_constraintBottom_toTopOf="@+id/playNowDetail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.6"
         tools:src="@tools:sample/avatars" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/playNowDetail"
         android:layout_width="match_parent"
-        android:layout_height="90dp"
+        android:layout_height="100dp"
         app:layout_constraintBottom_toTopOf="@+id/playNowCurrent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -30,30 +31,41 @@
         <TextView
             android:id="@+id/playNowTitle"
             android:layout_width="0dp"
-            android:layout_height="60dp"
+            android:layout_height="50dp"
             android:layout_marginStart="30dp"
-            android:layout_marginEnd="30dp"
-            android:text="Title"
-            android:textSize="40sp"
-            android:singleLine="true"
+            android:layout_marginEnd="10dp"
             android:ellipsize="marquee"
             android:focusable="true"
             android:focusableInTouchMode="true"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:singleLine="true"
+            android:text="Title"
+            android:textColor="@color/colorSongTitleText"
+            android:textSize="40sp"
+            app:layout_constraintEnd_toStartOf="@+id/playNowMode"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/playNowArtist"
             android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_height="30dp"
+            android:layout_marginTop="8dp"
+            android:singleLine="true"
             android:text="Artist"
             android:textSize="20sp"
-            android:singleLine="true"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/playNowTitle"
             app:layout_constraintStart_toStartOf="@+id/playNowTitle"
             app:layout_constraintTop_toBottomOf="@+id/playNowTitle" />
+
+        <Button
+            android:id="@+id/playNowMode"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="50dp"
+            android:background="@drawable/ic_now_order"
+            android:foreground="@drawable/click_effect"
+            app:layout_constraintBottom_toBottomOf="@+id/playNowArtist"
+            app:layout_constraintEnd_toEndOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
     <SeekBar
@@ -70,7 +82,7 @@
         android:id="@+id/playNowControl"
         android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="30dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -81,6 +93,7 @@
             android:layout_height="60dp"
             android:layout_marginEnd="40dp"
             android:background="@drawable/ic_now_prev"
+            android:foreground="@drawable/click_effect"
             app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
             app:layout_constraintEnd_toStartOf="@+id/playNowPlay"
             app:layout_constraintTop_toTopOf="@+id/playNowPlay" />
@@ -90,6 +103,7 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:background="@drawable/ic_now_play"
+            android:foreground="@drawable/click_effect"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -101,6 +115,7 @@
             android:layout_height="60dp"
             android:layout_marginStart="40dp"
             android:background="@drawable/ic_now_next"
+            android:foreground="@drawable/click_effect"
             app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
             app:layout_constraintStart_toEndOf="@+id/playNowPlay"
             app:layout_constraintTop_toTopOf="@+id/playNowPlay" />

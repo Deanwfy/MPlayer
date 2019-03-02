@@ -15,10 +15,16 @@ import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
+import android.support.graphics.drawable.VectorDrawableCompat;
+import android.support.v4.content.ContextCompat;
 
 public class MediaUtil {
 
@@ -124,10 +130,22 @@ public class MediaUtil {
 	private static final Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
 	//获取默认专辑图片
 	@SuppressWarnings("ResourceType")
-	public static Bitmap getDefaultArtwork(Context context) {
-		BitmapFactory.Options opts = new BitmapFactory.Options();
+	private static Bitmap getDefaultArtwork(Context context) {
+/*		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inPreferredConfig = Bitmap.Config.RGB_565;
-		return BitmapFactory.decodeStream(context.getResources().openRawResource(R.drawable.music_cover), null, opts);
+		return BitmapFactory.decodeStream(context.getResources().openRawResource(R.drawable.ic_cover), null, opts);*/
+		Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_cover);
+		if (drawable instanceof BitmapDrawable) {
+			return ((BitmapDrawable) drawable).getBitmap();
+		} else if (drawable instanceof VectorDrawable || drawable instanceof VectorDrawableCompat) {
+			Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(bitmap);
+			drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+			drawable.draw(canvas);
+			return bitmap;
+		} else {
+			throw new IllegalArgumentException("unsupported drawable type");
+		}
 	}
 
 
