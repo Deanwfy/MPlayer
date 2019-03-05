@@ -27,4 +27,9 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+    <!-- ButtonToCircle -->
+    <style name="CircleButton">
+        <item name="android:radius">25dp</item>
+    </style>
+
 </resources>

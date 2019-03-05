@@ -247,21 +247,13 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 								mediaPlayer.prepareAsync();
 								break;
 							case PlaybackStateCompat.STATE_BUFFERING:
-								break;
 							case PlaybackStateCompat.STATE_CONNECTING:
-								break;
 							case PlaybackStateCompat.STATE_ERROR:
-								break;
 							case PlaybackStateCompat.STATE_FAST_FORWARDING:
-								break;
 							case PlaybackStateCompat.STATE_REWINDING:
-								break;
 							case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
-								break;
 							case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
-								break;
 							case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
-								break;
 							case PlaybackStateCompat.STATE_STOPPED:
 								break;
 						}

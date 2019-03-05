@@ -21,7 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -45,7 +45,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 播放控制按钮
     private ConstraintLayout musicControlPanel;
-    private Button PlayBtn;
+    private ImageButton PlayBtn;
 
     //获取服务
     private MediaControllerCompat mediaController;
@@ -136,17 +136,23 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
             switch (state.getState()) {
                 case PlaybackStateCompat.STATE_NONE://默认状态
-                    PlayBtn.setBackgroundResource(R.drawable.ic_play);
+                    PlayBtn.setImageResource(R.drawable.ic_play);
                     break;
                 case PlaybackStateCompat.STATE_PLAYING:
-                    PlayBtn.setBackgroundResource(R.drawable.ic_pause);
+                    PlayBtn.setImageResource(R.drawable.ic_pause);
                     break;
                 case PlaybackStateCompat.STATE_PAUSED:
-                    PlayBtn.setBackgroundResource(R.drawable.ic_play);
+                    PlayBtn.setImageResource(R.drawable.ic_play);
                     break;
                 case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT://下一首
-                    break;
                 case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS://上一首
+                case PlaybackStateCompat.STATE_BUFFERING:
+                case PlaybackStateCompat.STATE_CONNECTING:
+                case PlaybackStateCompat.STATE_ERROR:
+                case PlaybackStateCompat.STATE_FAST_FORWARDING:
+                case PlaybackStateCompat.STATE_REWINDING:
+                case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
+                case PlaybackStateCompat.STATE_STOPPED:
                     break;
             }
         }
@@ -244,7 +250,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.ic_menu_clock) {
 

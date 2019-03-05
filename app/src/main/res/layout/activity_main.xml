@@ -90,15 +90,16 @@
                 toolbar:layout_constraintStart_toStartOf="@+id/playing_title"
                 toolbar:layout_constraintTop_toTopOf="@+id/guideline" />
 
-            <Button
+            <ImageButton
                 android:id="@+id/playing_play"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="3dp"
                 android:layout_marginEnd="3dp"
                 android:layout_marginBottom="3dp"
-                android:background="@drawable/ic_play"
-                android:foreground="@drawable/click_effect"
+                android:src="@drawable/ic_play"
+                android:scaleType="centerCrop"
+                android:background="?android:attr/selectableItemBackgroundBorderless"
                 toolbar:layout_constraintBottom_toBottomOf="parent"
                 toolbar:layout_constraintEnd_toEndOf="parent"
                 toolbar:layout_constraintTop_toTopOf="parent" />
