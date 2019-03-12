@@ -7,6 +7,6 @@
     <color name="transparent">#00000000</color>
 
     <color name="colorPrimary">#005b52</color>
-    <color name="colorPrimaryDark">#00443d</color>
+    <color name="colorPrimaryDark">#005b52</color>
     <color name="colorAccent">#005b52</color>
 </resources>

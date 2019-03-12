@@ -2,6 +2,8 @@ package com.dean.mplayer;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -15,11 +17,14 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -38,7 +43,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private ListView mMusicList;
     private List<MusicInfo> musicInfos = null;
 
-    // 播放控制显示
+    // 媒体信息
     private TextView PlayingTitle;
     private TextView PlayingArtist;
     private ImageView PlayingCover;
@@ -47,7 +52,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private ConstraintLayout musicControlPanel;
     private ImageButton PlayBtn;
 
-    //获取服务
+    // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
@@ -55,16 +60,22 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        //状态栏透明
+        Window window = getWindow();
+        window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+        window.setStatusBarColor(Color.TRANSPARENT);
 
         Toolbar toolbar = findViewById(R.id.toolbar);   // 标题栏实现
         setSupportActionBar(toolbar);   // ToolBar替换ActionBar
 
         //抽屉
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+        ActionBarDrawerToggle actionBarDrawertoggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
+        drawer.addDrawerListener(actionBarDrawertoggle);
+        actionBarDrawertoggle.syncState();
         //抽屉菜单
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -81,7 +92,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         Intent intent = new Intent(this, PlayService.class);
         startService(intent);
-//        bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE);
     }
 
     private void initMediaBrowser() {
@@ -222,14 +232,16 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    //退出同时结束后台服务
+    // 退出同时结束后台服务
     @Override
     protected void onDestroy() {
+        mediaBrowserCompat.disconnect();
         Intent intent = new Intent(ActivityMain.this, PlayService.class);
         stopService(intent);
         super.onDestroy();
     }
 
+    // 返回退回到桌面
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -248,6 +260,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         return super.onKeyDown(keyCode, event);
     }
 
+    // 抽屉菜单点击事件
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -255,7 +268,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         if (id == R.id.ic_menu_clock) {
 
         } else if (id == R.id.ic_menu_theme) {
-
+            int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+            getDelegate().setLocalNightMode(currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
+                    AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+            recreate();
         } else if (id == R.id.ic_menu_settings) {
 
         } else if (id == R.id.ic_menu_exit) {

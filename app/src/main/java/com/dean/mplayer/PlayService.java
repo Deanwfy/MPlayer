@@ -2,7 +2,10 @@ package com.dean.mplayer;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
+import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -27,15 +30,14 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.graphics.Palette;
-import android.util.Log;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
 	private String action;	//媒体控制动作
 	private int listPosition = 0;        // 当前正在播放的音乐
-	private List<MusicInfo> musicInfos;   //存放MusicInfo对象的集合
-	public static String mode = AppConstant.PlayMode.MODE_ORDER;         //播放状态，默认为顺序播放
-	private int currentTime;        //当前播放进度
+	private List<MusicInfo> musicInfos;   // 存放MusicInfo对象的集合
+	public static String mode = AppConstant.PlayMode.MODE_ORDER;	// 播放状态，默认为顺序播放
+	public static int current = 0;	// 播放进度
 
 	String channelId = "MPlayer_channel_1";	//通知渠道Id
 	NotificationManager notificationManager;	//通知管理器
@@ -43,6 +45,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private MediaSessionCompat mediaSessionCompat;	//mediaSession
 	private PlaybackStateCompat playbackStateCompat;	//播放状态
 	private MediaControllerCompat mediaControllerCompat;	//播放控制
+	private Timer timer = new Timer();
 
 	//extends MediaBrowserServiceCompat
 	@Nullable
@@ -55,6 +58,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		result.sendResult(null);
 	}
 
+	@SuppressLint("HandlerLeak")
 	@Override
 	public void onCreate() {
 		super.onCreate();
@@ -198,6 +202,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			//推送
 			notificationManager.notify(1, mNotificationCompat.build());
 		}
+		//更新进度条
+		updateSeekBar();
 	}
 
 	private void setUpMediaSessionCompat() {
@@ -233,6 +239,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
 						.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicInfo.getTitle())
 						.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicInfo.getArtist())
+						.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicInfo.getDuration())
 						.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, musicInfo.getId(), musicInfo.getAlbumId(), true));
 				mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
 					try {
@@ -313,7 +320,11 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				}
 				onPlayFromUri(musicInfos.get(listPosition).getUri(),null);
 			}
-
+			//跳转播放
+			@Override
+			public void onSeekTo(long pos) {
+				mediaPlayer.seekTo((int)pos);
+			}
 		});
 	}
 
@@ -326,9 +337,18 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				.build();
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
 		sendNotification();
-		if (currentTime > 0) { // 如果音乐不是从头播放
-			mediaPlayer.seekTo(currentTime);
-		}
+	}
+
+	private void updateSeekBar(){
+		TimerTask timerTask = new TimerTask() {
+			@Override
+			public void run() {
+				if(mediaPlayer != null && mediaPlayer.isPlaying()){
+					current = mediaPlayer.getCurrentPosition();
+				}
+			}
+		};
+		timer.schedule(timerTask, 0 ,1000);
 	}
 
 }

@@ -1,9 +1,15 @@
 package com.dean.mplayer;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
@@ -21,12 +27,16 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class PlayNow extends AppCompatActivity {
 
     // 播放控制显示
     private TextView playNowTitle;
     private TextView playNowArtist;
+    private TextView seekBarStart;
+    private TextView seekBarEnd;
     private ImageView playNowCover;
     private SeekBar playNowCurrent;
     private ConstraintLayout playNowLayout;
@@ -45,24 +55,34 @@ public class PlayNow extends AppCompatActivity {
     private List<MusicInfo> musicInfos = null;
     Bitmap cover = null;
 
+    //SeekBar更新
+    private Timer timer = new Timer();
+    private Handler handler;
+    private MediaMetadataCompat metadata;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play_now);
-        getWindow().setFlags(
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         findControlBtnById();
         setPlayNowMode();
         setControlBtnOnClickListener();
         musicInfos = MediaUtil.getMusicInfos(getApplicationContext());
         initMediaBrowser();
     }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaBrowserCompat.disconnect();
+    }
 
     // 统一获取播放控制面板控件id
     private void findControlBtnById() {
         playNowTitle = findViewById(R.id.playNowTitle);
         playNowArtist = findViewById(R.id.playNowArtist);
+        seekBarStart = findViewById(R.id.seekBarStart);
+        seekBarEnd = findViewById(R.id.seekBarEnd);
         playNowCover = findViewById(R.id.playNowCover);
         playNowCurrent = findViewById(R.id.playNowCurrent);
         playNowLayout = findViewById(R.id.play_now);
@@ -76,13 +96,15 @@ public class PlayNow extends AppCompatActivity {
     // 将监听器设置到播放控制面板控件
     private void setControlBtnOnClickListener() {
         ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
+        ControlSeekBarOnChangeListener controlSeekBarOnChangeListener = new ControlSeekBarOnChangeListener();
         playNowMode.setOnClickListener(controlBtnOnClickListener);
         playNowPrev.setOnClickListener(controlBtnOnClickListener);
         playNowPlay.setOnClickListener(controlBtnOnClickListener);
         playNowNext.setOnClickListener(controlBtnOnClickListener);
+        playNowCurrent.setOnSeekBarChangeListener(controlSeekBarOnChangeListener);
     }
 
-    // 命名播放控制面板监听器类，实现监听事件
+    // 命名播放控制面板按键监听器类，实现点击事件监听
     private class ControlBtnOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
@@ -141,6 +163,24 @@ public class PlayNow extends AppCompatActivity {
             }
         }
     }
+    // 命名播放控制面板进度条监听器类，实现拖动事件监听
+    private class ControlSeekBarOnChangeListener implements SeekBar.OnSeekBarChangeListener {
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress,
+                                      boolean fromUser) {
+            seekBarStart.setText(MediaUtil.formatTime(progress));
+            // 进度变化
+        }
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // 开始拖动
+        }
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            mediaController.getTransportControls().seekTo(seekBar.getProgress());
+            // 拖动结束
+        }
+    }
 
     private void setPlayNowMode() {
         switch(PlayService.mode)
@@ -178,9 +218,26 @@ public class PlayNow extends AppCompatActivity {
 
     private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
         // 连接成功
+        @SuppressLint("HandlerLeak")
         @Override
         public void onConnected() {
             try {
+                //SeekBar更新
+                handler = new Handler(){
+                    @Override
+                    public void handleMessage(Message msg) {
+                        super.handleMessage(msg);
+                        switch (msg.what) {
+                            case 0:
+                                playNowCurrent.setMax((int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
+                                seekBarEnd.setText(MediaUtil.formatTime((int)metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)));
+                                break;
+                            case 1:
+                                playNowCurrent.setProgress(PlayService.current);
+                                break;
+                        }
+                    }
+                };
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
                         PlayNow.this,
@@ -244,6 +301,7 @@ public class PlayNow extends AppCompatActivity {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
+                PlayNow.this.metadata = metadata;
                 cover = metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
                 playNowTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
                 playNowArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
@@ -253,8 +311,34 @@ public class PlayNow extends AppCompatActivity {
                 playNowPlay.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
                 playNowNext.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
                 playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                setSeekBarColor(playNowCurrent, Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                handler.sendEmptyMessage(0);
+                updateSeekBar();
             }
         }
+
+        //SeekBar变色
+        private void setSeekBarColor(SeekBar seekBar, int color){
+            LayerDrawable layerDrawable = (LayerDrawable)seekBar.getProgressDrawable();
+            Drawable drawable=layerDrawable.getDrawable(2);
+            drawable.setColorFilter(color, PorterDuff.Mode.SRC);
+            seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+            seekBar.invalidate();
+        }
+
+        // SeekBar更新计时器
+        private void updateSeekBar(){
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING && !playNowCurrent.isPressed()){
+                        handler.sendEmptyMessage(1);
+                    }
+                }
+            };
+            timer.schedule(timerTask, 0 ,1000);
+        }
+
     };
 
 }

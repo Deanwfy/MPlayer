@@ -106,6 +106,7 @@ public class MediaUtil {
 		return musiclist;
 	}
 
+	//时间显示格式
 	public static String formatTime(long time) {
 		String min = time / (1000 * 60) + "";
 		String sec = time % (1000 * 60) + "";

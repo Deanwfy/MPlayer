@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorBarText">#666666</color>
-    <color name="colorSongTitleText">#666666</color>
-    <color name="colorMusicList">#333333</color>
-    <color name="colorControlPanel">#333333</color>
+    <color name="colorBarText">#a1a3a2</color>
+    <color name="colorSongTitleText">#a2a4a2</color>
+    <color name="colorMusicList">#111214</color>
+    <color name="colorControlPanel">#17181a</color>
     <color name="transparent">#00000000</color>
 
-    <color name="colorPrimary">#333333</color>
-    <color name="colorPrimaryDark">#666666</color>
-    <color name="colorAccent">#dddddd</color>
+    <color name="colorPrimary">#17181a</color>
+    <color name="colorPrimaryDark">#17181a</color>
+    <color name="colorAccent">#c1c1c1</color>
 </resources>

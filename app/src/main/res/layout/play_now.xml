@@ -76,15 +76,34 @@
         android:layout_height="20dp"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/playNowControl"
+        app:layout_constraintBottom_toTopOf="@+id/seekBarStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/seekBarStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="@string/seekBar"
+        app:layout_constraintBottom_toTopOf="@+id/playNowControl"
+        app:layout_constraintStart_toStartOf="@+id/playNowCurrent" />
+
+    <TextView
+        android:id="@+id/seekBarEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:text="@string/seekBar"
+        app:layout_constraintBottom_toBottomOf="@+id/seekBarStart"
+        app:layout_constraintEnd_toEndOf="@+id/playNowCurrent"
+        app:layout_constraintTop_toTopOf="@+id/seekBarStart" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/playNowControl"
         android:layout_width="0dp"
         android:layout_height="150dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -94,9 +113,9 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginEnd="40dp"
-            android:src="@drawable/ic_now_prev"
-            android:scaleType="centerCrop"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_now_prev"
             app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
             app:layout_constraintEnd_toStartOf="@+id/playNowPlay"
             app:layout_constraintTop_toTopOf="@+id/playNowPlay" />
@@ -105,9 +124,9 @@
             android:id="@+id/playNowPlay"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_now_play"
-            android:scaleType="centerCrop"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_now_play"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -118,9 +137,9 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_marginStart="40dp"
-            android:src="@drawable/ic_now_next"
-            android:scaleType="centerCrop"
             android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_now_next"
             app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
             app:layout_constraintStart_toEndOf="@+id/playNowPlay"
             app:layout_constraintTop_toTopOf="@+id/playNowPlay" />
