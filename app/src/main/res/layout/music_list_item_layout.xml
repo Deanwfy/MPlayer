@@ -17,7 +17,7 @@
         android:layout_alignParentLeft="true"
         android:text="@string/music_title"
         android:textSize="18dp"
-        android:textColor="@color/colorSongTitleText"
+        android:textColor="@color/colorMusicTitleText"
         />
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,12 +29,14 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="@string/music_artist" />
+            android:text="@string/music_artist"
+            android:textColor="@color/colorMusicArtistText" />
         <TextView
             android:id="@+id/music_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/music_duration" />
+            android:text="@string/music_duration"
+            android:textColor="@color/colorMusicArtistText" />
 
     </LinearLayout>
 

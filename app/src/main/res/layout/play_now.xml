@@ -14,12 +14,12 @@
         android:id="@+id/playNowCover"
         android:layout_width="350dp"
         android:layout_height="350dp"
+        android:src="@drawable/ic_cover"
         app:layout_constraintBottom_toTopOf="@+id/playNowDetail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.6"
-        tools:src="@tools:sample/avatars" />
+        app:layout_constraintVertical_bias="0.6" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/playNowDetail"
@@ -40,7 +40,7 @@
             android:focusableInTouchMode="true"
             android:singleLine="true"
             android:text="@string/music_title"
-            android:textColor="@color/colorSongTitleText"
+            android:textColor="@color/colorPlayNowMusicTitleText"
             android:textSize="40sp"
             app:layout_constraintEnd_toStartOf="@+id/playNowMode"
             app:layout_constraintStart_toStartOf="parent"
@@ -53,6 +53,7 @@
             android:layout_marginTop="8dp"
             android:singleLine="true"
             android:text="@string/music_artist"
+            android:textColor="@color/colorPlayNowMusicArtistText"
             android:textSize="20sp"
             app:layout_constraintEnd_toEndOf="@+id/playNowTitle"
             app:layout_constraintStart_toStartOf="@+id/playNowTitle"

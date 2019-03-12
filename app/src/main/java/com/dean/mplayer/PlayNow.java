@@ -303,15 +303,20 @@ public class PlayNow extends AppCompatActivity {
             if (metadata != null) {
                 PlayNow.this.metadata = metadata;
                 cover = metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
+                int tint = Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52"));
                 playNowTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
                 playNowArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
                 playNowCover.setImageBitmap(cover);
                 playNowLayout.setBackgroundColor(Palette.from(cover).generate().getLightVibrantColor(Color.parseColor("#ffffff")));
-                playNowPrev.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                playNowPlay.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                playNowNext.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                setSeekBarColor(playNowCurrent, Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                playNowTitle.setTextColor(tint);
+                playNowArtist.setTextColor(tint);
+                seekBarStart.setTextColor(tint);
+                seekBarEnd.setTextColor(tint);
+                playNowPrev.getDrawable().mutate().setTint(tint);
+                playNowPlay.getDrawable().mutate().setTint(tint);
+                playNowNext.getDrawable().mutate().setTint(tint);
+                playNowMode.getDrawable().mutate().setTint(tint);
+                setSeekBarColor(playNowCurrent, tint);
                 handler.sendEmptyMessage(0);
                 updateSeekBar();
             }

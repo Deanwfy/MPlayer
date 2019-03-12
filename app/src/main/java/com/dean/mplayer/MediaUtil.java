@@ -69,7 +69,7 @@ public class MediaUtil {
 			Uri uri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
 			int isMusic = cursor.getInt(cursor
 					.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-			if (isMusic != 0) {
+			if (isMusic != 0 && duration>15000) {	//过滤15s内的音频文件
 				mp3Info.setId(id);
 				mp3Info.setTitle(title);
 				mp3Info.setArtist(artist);
@@ -132,9 +132,6 @@ public class MediaUtil {
 	//获取默认专辑图片
 	@SuppressWarnings("ResourceType")
 	private static Bitmap getDefaultArtwork(Context context) {
-/*		BitmapFactory.Options opts = new BitmapFactory.Options();
-		opts.inPreferredConfig = Bitmap.Config.RGB_565;
-		return BitmapFactory.decodeStream(context.getResources().openRawResource(R.drawable.ic_cover), null, opts);*/
 		Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_cover);
 		if (drawable instanceof BitmapDrawable) {
 			return ((BitmapDrawable) drawable).getBitmap();
@@ -149,64 +146,8 @@ public class MediaUtil {
 		}
 	}
 
-
-	//从文件中获取专辑封面位图
-	private static Bitmap getArtworkFromFile(Context context, long songid, long albumid){
-		Bitmap bm = null;
-		if(albumid < 0 && songid < 0) {
-			throw new IllegalArgumentException("Must specify an album or a song id");
-		}
-		try {
-			BitmapFactory.Options options = new BitmapFactory.Options();
-			FileDescriptor fd = null;
-			if(albumid < 0){
-				Uri uri = Uri.parse("content://media/external/audio/media/"
-						+ songid + "/albumart");
-				ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
-				if(pfd != null) {
-					fd = pfd.getFileDescriptor();
-				}
-			} else {
-				Uri uri = ContentUris.withAppendedId(albumArtUri, albumid);
-				ParcelFileDescriptor pfd = context.getContentResolver().openFileDescriptor(uri, "r");
-				if(pfd != null) {
-					fd = pfd.getFileDescriptor();
-				}
-			}
-			options.inSampleSize = 1;
-			// 只进行大小判断
-			options.inJustDecodeBounds = true;
-			// 得到options得到图片大小
-			BitmapFactory.decodeFileDescriptor(fd, null, options);
-			// 调用computeSampleSize得到图片缩放比例
-			options.inSampleSize = 100;
-			// 得到了缩放的比例，读入Bitmap数据
-			options.inJustDecodeBounds = false;
-			options.inDither = false;
-			options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-
-			//根据options参数，减少所需要的内存
-			bm = BitmapFactory.decodeFileDescriptor(fd, null, options);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		return bm;
-	}
-
 	//获取专辑封面位图对象
-	public static Bitmap getArtwork(Context context, long song_id, long album_id, boolean allowdefalut){
-		if(album_id < 0) {
-			if(song_id < 0) {
-				Bitmap bm = getArtworkFromFile(context, song_id, -1);
-				if(bm != null) {
-					return bm;
-				}
-			}
-			if(allowdefalut) {
-				return getDefaultArtwork(context);
-			}
-			return null;
-		}
+	public static Bitmap getArtwork(Context context, long album_id){
 		ContentResolver res = context.getContentResolver();
 		Uri uri = ContentUris.withAppendedId(albumArtUri, album_id);
 		if(uri != null) {
@@ -229,18 +170,7 @@ public class MediaUtil {
 				in = res.openInputStream(uri);
 				return BitmapFactory.decodeStream(in, null, options);
 			} catch (FileNotFoundException e) {
-				Bitmap bm = getArtworkFromFile(context, song_id, album_id);
-				if(bm != null) {
-					if(bm.getConfig() == null) {
-						bm = bm.copy(Bitmap.Config.RGB_565, false);
-						if(bm == null && allowdefalut) {
-							return getDefaultArtwork(context);
-						}
-					}
-				} else if(allowdefalut) {
-					bm = getDefaultArtwork(context);
-				}
-				return bm;
+				return getDefaultArtwork(context);
 			} finally {
 				try {
 					if(in != null) {

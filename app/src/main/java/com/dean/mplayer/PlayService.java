@@ -154,7 +154,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		MusicInfo mp3Info = musicInfos.get(listPosition);
 		String musicTitle = mp3Info.getTitle();
 		String musicArtist = mp3Info.getArtist();
-		Bitmap musicCover = MediaUtil.getArtwork(this, mp3Info.getId(),mp3Info.getAlbumId(), true);
+		Bitmap musicCover = MediaUtil.getArtwork(this,mp3Info.getAlbumId());
 		//通知内容
 		NotificationCompat.Action playPauseAction = playbackStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING ?
 				createAction(R.drawable.ic_notification_play, "Pause", AppConstant.PlayAction.ACTION_PAUSE) :
@@ -240,7 +240,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicInfo.getTitle())
 						.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicInfo.getArtist())
 						.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicInfo.getDuration())
-						.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, musicInfo.getId(), musicInfo.getAlbumId(), true));
+						.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, musicInfo.getAlbumId()));
 				mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
 					try {
 						switch (playbackStateCompat.getState()) {

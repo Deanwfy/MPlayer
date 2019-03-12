@@ -2,6 +2,7 @@ package com.dean.mplayer;
 
 import android.content.ComponentName;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -59,9 +60,14 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 读取配置文件
+        SharedPreferences sharedPreferences = getSharedPreferences("setting", MODE_PRIVATE);
+        int nightMode = sharedPreferences.getInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO);
+        AppCompatDelegate.setDefaultNightMode(nightMode);
+
         setContentView(R.layout.activity_main);
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-        //状态栏透明
+
+        // 状态栏透明
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -70,13 +76,13 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.toolbar);   // 标题栏实现
         setSupportActionBar(toolbar);   // ToolBar替换ActionBar
 
-        //抽屉
+        // 抽屉
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle actionBarDrawertoggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(actionBarDrawertoggle);
         actionBarDrawertoggle.syncState();
-        //抽屉菜单
+        // 抽屉菜单
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -261,19 +267,22 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     }
 
     // 抽屉菜单点击事件
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.ic_menu_clock) {
-
+            //TODO
         } else if (id == R.id.ic_menu_theme) {
             int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            getDelegate().setLocalNightMode(currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
+            int nightMode = (currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
                     AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
+            AppCompatDelegate.setDefaultNightMode(nightMode);
+            SharedPreferences.Editor editor = getSharedPreferences("setting",MODE_PRIVATE).edit();
+            editor.putInt("nightMode",nightMode);
+            editor.apply();
             recreate();
         } else if (id == R.id.ic_menu_settings) {
-
+            //TODO
         } else if (id == R.id.ic_menu_exit) {
             finish();
         }
