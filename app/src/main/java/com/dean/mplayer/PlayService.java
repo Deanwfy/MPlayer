@@ -10,10 +10,13 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.media.MediaPlayer.OnPreparedListener;
@@ -33,19 +36,65 @@ import android.support.v7.graphics.Palette;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
-	private String action;	//媒体控制动作
-	private int listPosition = 0;        // 当前正在播放的音乐
+	public static int listPosition = 0;        // 当前正在播放的音乐
 	private List<MusicInfo> musicInfos;   // 存放MusicInfo对象的集合
 	public static String mode = AppConstant.PlayMode.MODE_ORDER;	// 播放状态，默认为顺序播放
 	public static int current = 0;	// 播放进度
 
-	String channelId = "MPlayer_channel_1";	//通知渠道Id
-	NotificationManager notificationManager;	//通知管理器
+	private int notificationId = 1;	//通知Id
+	private NotificationManager notificationManager;	//通知管理器
 
 	private MediaSessionCompat mediaSessionCompat;	//mediaSession
 	private PlaybackStateCompat playbackStateCompat;	//播放状态
 	private MediaControllerCompat mediaControllerCompat;	//播放控制
 	private Timer timer = new Timer();
+	// 耳机拔出监听
+	private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+	private BecomingNoisyReceiver becomingNoisyReceiver = new BecomingNoisyReceiver();
+	private class BecomingNoisyReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
+				if (mediaPlayer != null){
+					mediaControllerCompat.getTransportControls().pause();
+				}
+			}
+		}
+	}
+	// 音频焦点(播放资源争夺)
+	private AudioManager audioManager;
+	// 注册音频焦点监听器
+	AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
+		public void onAudioFocusChange(int focusChange) {
+			switch (focusChange) {
+				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:	//暂时失去
+					if (mediaPlayer.isPlaying()) {
+						mediaControllerCompat.getTransportControls().pause();
+					}
+					break;
+				case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:	//短暂(瞬间)失去
+					// 音量降低一半
+					int volume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+					if (mediaPlayer.isPlaying() && volume > 0) {
+						audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume / 2, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
+					}
+					break;
+				case AudioManager.AUDIOFOCUS_GAIN:	//长时间(再次)获得
+					if (mediaPlayer == null) {
+						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+					} else if (!mediaPlayer.isPlaying()) {
+						mediaControllerCompat.getTransportControls().play();
+					}
+					break;
+				case AudioManager.AUDIOFOCUS_LOSS:	//长时间丢失
+					if (mediaPlayer != null) {
+						mediaControllerCompat.getTransportControls().pause();
+					}
+					break;
+			}
+		}
+	};
+
 
 	//extends MediaBrowserServiceCompat
 	@Nullable
@@ -64,6 +113,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		super.onCreate();
 		mediaPlayer = new MediaPlayer();
 		musicInfos = MediaUtil.getMusicInfos(this);
+		audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		setUpMediaSessionCompat();
 
 		//设置音乐准备完成时的监听器
@@ -98,7 +148,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 
     @Override
     public int onStartCommand(Intent intent,int flags, int startId) {
-		action = intent.getAction();
+		//媒体控制动作
+		String action = intent.getAction();
 		//播放信息
 		if (action != null) {
 			switch (action) {
@@ -128,10 +179,10 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	@Override
 	public void onDestroy() {
 		if (mediaPlayer != null) {
-			notificationManager.cancelAll();
-			mediaPlayer.stop();
+			mediaControllerCompat.getTransportControls().stop();
 			mediaPlayer.release();
 			mediaPlayer = null;
+			notificationManager.cancelAll();
 		}
 	}
 
@@ -159,7 +210,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		NotificationCompat.Action playPauseAction = playbackStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING ?
 				createAction(R.drawable.ic_notification_play, "Pause", AppConstant.PlayAction.ACTION_PAUSE) :
 				createAction(R.drawable.ic_notification_pause, "Play", AppConstant.PlayAction.ACTION_CONTINUE) ;
-		NotificationCompat.Builder mNotificationCompat = new NotificationCompat.Builder(this, channelId)
+		String channelId = "MPlayer_channel_1";	//通知渠道Id
+		NotificationCompat.Builder notificationCompat = new NotificationCompat.Builder(this, channelId)
 				.setContentTitle(musicTitle)
 				.setContentText(musicArtist)
 				.setSmallIcon(R.drawable.ic_notification)
@@ -170,37 +222,37 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				.addAction(createAction(R.drawable.ic_notification_next, "next", AppConstant.PlayAction.ACTION_NEXT));
 		//版本兼容
 		if (MediaUtil.isLollipop()) {
-			mNotificationCompat.setVisibility(Notification.VISIBILITY_PUBLIC);	//锁屏显示
+			notificationCompat.setVisibility(Notification.VISIBILITY_PUBLIC);	//锁屏显示
 			android.support.v4.media.app.NotificationCompat.MediaStyle mediaStyle = new android.support.v4.media.app.NotificationCompat.MediaStyle()    //通知类型为"多媒体"
 					.setMediaSession(mediaSessionCompat.getSessionToken())
 					.setShowActionsInCompactView(0, 1, 2);    //通知栏折叠状态下保持按键显示
-			mNotificationCompat.setStyle(mediaStyle);
+			notificationCompat.setStyle(mediaStyle);
 			if (musicCover != null) {
-				mNotificationCompat.setColor(Palette.from(musicCover).generate().getVibrantColor(Color.parseColor("#005b52")));
+				notificationCompat.setColor(Palette.from(musicCover).generate().getVibrantColor(Color.parseColor("#005b52")));
 			}else {
-				mNotificationCompat.setColor(0x005b52);
+				notificationCompat.setColor(0x005b52);
 			}
 		}
 		if (MediaUtil.isOreo()){
-			mNotificationCompat.setOngoing(true);	//通知常驻
-			mNotificationCompat.setColorized(true);	//通知变色
+			notificationCompat.setOngoing(true);	//通知常驻
+			notificationCompat.setColorized(true);	//通知变色
 		}
 		//通知点击事件
 		Intent resultIntent = new Intent(this, PlayNow.class);
 		PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
-		mNotificationCompat.setContentIntent(resultPendingIntent);
+		notificationCompat.setContentIntent(resultPendingIntent);
 		//发布通知
 		if (MediaUtil.isOreo()) {
 			//建立通知渠道
 			CharSequence channelName = "MPlayer";
 			int importance = NotificationManager.IMPORTANCE_LOW;
-			NotificationChannel mNotificationChannel = new NotificationChannel(channelId, channelName, importance);
+			NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
 			//创建通知
 			notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			//将通知绑定至通知渠道
-			notificationManager.createNotificationChannel(mNotificationChannel);
+			notificationManager.createNotificationChannel(notificationChannel);
 			//推送
-			notificationManager.notify(1, mNotificationCompat.build());
+			notificationManager.notify(notificationId, notificationCompat.build());
 		}
 		//更新进度条
 		updateSeekBar();
@@ -272,11 +324,13 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			@Override
 			public void onStop(){
 				mediaPlayer.stop();
+				audioManager.abandonAudioFocus(audioFocusChangeListener);
 				playbackStateCompat = new PlaybackStateCompat.Builder()
 						.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
 						.build();
 				mediaSessionCompat.setPlaybackState(playbackStateCompat);
-				sendNotification();
+				unregisterReceiver(becomingNoisyReceiver);
+				notificationManager.cancel(notificationId);
 			}
 			//暂停
 			@Override
@@ -331,12 +385,18 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	//当音乐准备好的时候开始播放
 	@Override
 	public void onPrepared(MediaPlayer mp) {
-		mediaPlayer.start(); // 开始播放
-		playbackStateCompat = new PlaybackStateCompat.Builder()
-				.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
-				.build();
-		mediaSessionCompat.setPlaybackState(playbackStateCompat);
-		sendNotification();
+		int result = audioManager.requestAudioFocus(audioFocusChangeListener,
+				AudioManager.STREAM_MUSIC,
+				AudioManager.AUDIOFOCUS_GAIN);
+		if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {	// 获取到音频焦点
+			mediaPlayer.start(); // 开始播放
+			playbackStateCompat = new PlaybackStateCompat.Builder()
+					.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
+					.build();
+			mediaSessionCompat.setPlaybackState(playbackStateCompat);
+			registerReceiver(becomingNoisyReceiver, intentFilter);
+			sendNotification();
+		}
 	}
 
 	private void updateSeekBar(){

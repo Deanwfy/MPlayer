@@ -1,6 +1,8 @@
 package com.dean.mplayer;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -20,7 +22,9 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -30,6 +34,7 @@ import android.widget.AdapterView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
@@ -52,6 +57,9 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 播放控制按钮
     private ConstraintLayout musicControlPanel;
     private ImageButton PlayBtn;
+
+    //弹窗
+    private PopupWindow popupWindow;
 
     // 媒体播放服务
     private MediaControllerCompat mediaController;
@@ -228,7 +236,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED){
                         mediaController.getTransportControls().play();
                     } else {
-                        mediaController.getTransportControls().playFromUri(musicInfos.get(0).getUri(), null);
+                        mediaController.getTransportControls().playFromUri(musicInfos.get(PlayService.listPosition).getUri(), null);
                     }
                     break;
                 case R.id.music_control_panel:
@@ -271,7 +279,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.ic_menu_clock) {
-            //TODO
+            showNoneEffect();
         } else if (id == R.id.ic_menu_theme) {
             int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             int nightMode = (currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
@@ -289,6 +297,35 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    //睡眠定时弹窗
+    @SuppressLint("InflateParams")
+    private void showNoneEffect() {
+        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View vPopupWindow = inflater.inflate(R.layout.drawer_menu_clock, null, false);//引入弹窗布局
+        popupWindow = new PopupWindow(vPopupWindow, 600,1000, true);
+        addBackground();
+        //引入依附的布局
+        View parentView = LayoutInflater.from(this).inflate(R.layout.drawer_menu_clock, null);
+        //相对于父控件的位置（例如正中央Gravity.CENTER，下方Gravity.BOTTOM等），可以设置偏移或无偏移
+        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0);
+    }
+
+    private void addBackground() {
+        // 设置背景颜色变暗
+        WindowManager.LayoutParams lp = getWindow().getAttributes();
+        lp.alpha = 0.7f;//调节透明度
+        getWindow().setAttributes(lp);
+        //dismiss时恢复原样
+        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                WindowManager.LayoutParams lp = getWindow().getAttributes();
+                lp.alpha = 1f;
+                getWindow().setAttributes(lp);
+            }
+        });
     }
 
 }
