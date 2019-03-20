@@ -82,7 +82,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				case AudioManager.AUDIOFOCUS_GAIN:	//长时间(再次)获得
 					if (mediaPlayer == null) {
 						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
-					} else if (!mediaPlayer.isPlaying()) {
+					}else if (!mediaPlayer.isPlaying()) {
 						mediaControllerCompat.getTransportControls().play();
 					}
 					break;
@@ -122,24 +122,29 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				switch (mode){
-					case AppConstant.PlayMode.MODE_ORDER:	//顺序播放
-						if (listPosition < musicInfos.size() - 1) {
+				if (ActivityMain.needToStop) {
+					mediaControllerCompat.getTransportControls().stop();
+					ActivityMain.needToStop = false;
+				}else {
+					switch (mode) {
+						case AppConstant.PlayMode.MODE_ORDER:    //顺序播放
+							if (listPosition < musicInfos.size() - 1) {
+								mediaControllerCompat.getTransportControls().skipToNext();
+							} else {
+								mediaControllerCompat.getTransportControls().stop();
+							}
+							break;
+						case AppConstant.PlayMode.MODE_LOOP:    //列表循环
 							mediaControllerCompat.getTransportControls().skipToNext();
-						}else {
-							mediaControllerCompat.getTransportControls().stop();
-						}
-						break;
-					case AppConstant.PlayMode.MODE_LOOP:	//列表循环
-						mediaControllerCompat.getTransportControls().skipToNext();
-						break;
-					case AppConstant.PlayMode.MODE_SINGLE:	//单曲循环
-						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
-						break;
-					case AppConstant.PlayMode.MODE_RANDOM:	//随机播放
-						listPosition = getRandomIndex(musicInfos.size() - 1);
-						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
-						break;
+							break;
+						case AppConstant.PlayMode.MODE_SINGLE:    //单曲循环
+							mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+							break;
+						case AppConstant.PlayMode.MODE_RANDOM:    //随机播放
+							listPosition = getRandomIndex(musicInfos.size() - 1);
+							mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+							break;
+					}
 				}
 			}
 		});
@@ -182,7 +187,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			mediaControllerCompat.getTransportControls().stop();
 			mediaPlayer.release();
 			mediaPlayer = null;
-			notificationManager.cancelAll();
 		}
 	}
 
@@ -268,7 +272,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		setSessionToken(mediaSessionCompat.getSessionToken());
 		try {
 			mediaControllerCompat = new MediaControllerCompat(this,mediaSessionCompat.getSessionToken());
-		} catch (RemoteException e) {
+		}catch (RemoteException e) {
 			e.printStackTrace();
 		}
 		//多媒体交互
@@ -323,14 +327,17 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			//停止
 			@Override
 			public void onStop(){
-				mediaPlayer.stop();
-				audioManager.abandonAudioFocus(audioFocusChangeListener);
-				playbackStateCompat = new PlaybackStateCompat.Builder()
-						.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
-						.build();
-				mediaSessionCompat.setPlaybackState(playbackStateCompat);
-				unregisterReceiver(becomingNoisyReceiver);
-				notificationManager.cancel(notificationId);
+				if (mediaPlayer != null) {
+					mediaPlayer.stop();
+					mediaPlayer.reset();
+					audioManager.abandonAudioFocus(audioFocusChangeListener);
+					playbackStateCompat = new PlaybackStateCompat.Builder()
+							.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
+							.build();
+					mediaSessionCompat.setPlaybackState(playbackStateCompat);
+					unregisterReceiver(becomingNoisyReceiver);
+					notificationManager.cancel(notificationId);
+				}
 			}
 			//暂停
 			@Override

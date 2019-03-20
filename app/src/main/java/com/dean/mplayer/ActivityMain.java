@@ -2,7 +2,7 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -19,27 +19,35 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
-import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.PopupWindow;
+import android.widget.NumberPicker;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static com.dean.mplayer.MediaUtil.getMusicMaps;
 
@@ -58,8 +66,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private ConstraintLayout musicControlPanel;
     private ImageButton PlayBtn;
 
-    //弹窗
-    private PopupWindow popupWindow;
+    //睡眠定时计时器
+    private Timer clockTimer;
+    private boolean playFull;
+    public static boolean needToStop;
 
     // 媒体播放服务
     private MediaControllerCompat mediaController;
@@ -72,6 +82,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         SharedPreferences sharedPreferences = getSharedPreferences("setting", MODE_PRIVATE);
         int nightMode = sharedPreferences.getInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO);
         AppCompatDelegate.setDefaultNightMode(nightMode);
+        playFull = sharedPreferences.getBoolean("playFull", false);
 
         setContentView(R.layout.activity_main);
 
@@ -160,6 +171,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
             switch (state.getState()) {
                 case PlaybackStateCompat.STATE_NONE://默认状态
+                    cancelClock();
                     PlayBtn.setImageResource(R.drawable.ic_play);
                     break;
                 case PlaybackStateCompat.STATE_PLAYING:
@@ -279,18 +291,18 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int id = item.getItemId();
         if (id == R.id.ic_menu_clock) {
-            showNoneEffect();
+            setClock();
         } else if (id == R.id.ic_menu_theme) {
             int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
             int nightMode = (currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
                     AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
             AppCompatDelegate.setDefaultNightMode(nightMode);
-            SharedPreferences.Editor editor = getSharedPreferences("setting",MODE_PRIVATE).edit();
+            SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
             editor.putInt("nightMode",nightMode);
             editor.apply();
             recreate();
         } else if (id == R.id.ic_menu_settings) {
-            //TODO
+            Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.ic_menu_exit) {
             finish();
         }
@@ -299,33 +311,140 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    //睡眠定时弹窗
+    // 睡眠定时弹窗
     @SuppressLint("InflateParams")
-    private void showNoneEffect() {
-        LayoutInflater inflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View vPopupWindow = inflater.inflate(R.layout.drawer_menu_clock, null, false);//引入弹窗布局
-        popupWindow = new PopupWindow(vPopupWindow, 600,1000, true);
-        addBackground();
-        //引入依附的布局
-        View parentView = LayoutInflater.from(this).inflate(R.layout.drawer_menu_clock, null);
-        //相对于父控件的位置（例如正中央Gravity.CENTER，下方Gravity.BOTTOM等），可以设置偏移或无偏移
-        popupWindow.showAtLocation(parentView, Gravity.CENTER, 0, 0);
-    }
-
-    private void addBackground() {
-        // 设置背景颜色变暗
-        WindowManager.LayoutParams lp = getWindow().getAttributes();
-        lp.alpha = 0.7f;//调节透明度
-        getWindow().setAttributes(lp);
-        //dismiss时恢复原样
-        popupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+    private void setClock() {
+        // 创建AlertDialog构建器
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        // AlertDialog数据
+        List<String> items = new ArrayList<>();
+        items.add("不设置定时");
+        items.add("15分钟");
+        items.add("30分钟");
+        items.add("45分钟");
+        items.add("60分钟");
+        items.add("自定义");
+        // 自定义布局
+        View menuClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock,null);
+        // 设置AlertDialog参数，加载自定义布局
+        builder.setTitle("睡眠定时").setView(menuClock);
+        // AlertDialog对象
+        final AlertDialog alertDialog = builder.create();
+        // 自定义布局RecyclerLayout适配实现
+        RecyclerView menuClockRecycler = menuClock.findViewById(R.id.menuClockRecycler);
+        LinearLayoutManager menuClockRecyclerLayoutManager = new LinearLayoutManager(this){
             @Override
-            public void onDismiss() {
-                WindowManager.LayoutParams lp = getWindow().getAttributes();
-                lp.alpha = 1f;
-                getWindow().setAttributes(lp);
+            public boolean canScrollVertically() {
+                return false;   //不允许滑动
+            }
+        };
+        menuClockRecycler.setLayoutManager(menuClockRecyclerLayoutManager);
+        MenuClockRecyclerAdapter menuClockRecyclerAdapter = new MenuClockRecyclerAdapter(items);
+        menuClockRecyclerAdapter.setOnItemClickListener(new MenuClockRecyclerAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                switch (position) {
+                    case 0:
+                        if (clockTimer != null) {
+                            cancelClock();
+                            Toast.makeText(ActivityMain.this, "已取消定时停止播放", Toast.LENGTH_SHORT).show();
+                        }
+                        break;
+                    case 1:
+                        runClock(900000);
+                        break;
+                    case 2:
+                        runClock(1800000);
+                        break;
+                    case 3:
+                        runClock(2700000);
+                        break;
+                    case 4:
+                        runClock(3600000);
+                        break;
+                    case 5:
+                        View customClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock_custom, null);
+                        final AlertDialog.Builder customBuilder = new AlertDialog.Builder(ActivityMain.this);
+                        final NumberPicker customNumberPickerHour = customClock.findViewById(R.id.pickerHour);
+                        final NumberPicker customNumberPickerMin = customClock.findViewById(R.id.pickerMin);
+                        customNumberPickerHour.setMinValue(0);
+                        customNumberPickerHour.setMaxValue(23);
+                        customNumberPickerHour.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);   //不可编辑
+                        customNumberPickerHour.setWrapSelectorWheel(false);    //不循环
+                        customNumberPickerMin.setMinValue(0);
+                        customNumberPickerMin.setMaxValue(59);
+                        customNumberPickerMin.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);    //不可编辑
+                        customNumberPickerMin.setWrapSelectorWheel(false);    //不循环
+                        customBuilder.setTitle("自定义睡眠定时").setView(customClock)
+                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        runClock(customNumberPickerHour.getValue() * 3600000 + customNumberPickerMin.getValue() * 60000);
+                                    }
+                                })
+                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        //DoNothing,无需手动调用dismiss
+                                    }
+                                });
+                        customBuilder.create().show();
+                        break;
+                }
+                // 自定义布局需手动调用dismiss使AlertDialog消失
+                alertDialog.dismiss();
             }
         });
+        menuClockRecycler.setAdapter(menuClockRecyclerAdapter);
+        // 当前歌曲结束后再停止
+        CheckBox playFullCheckBox  = menuClock.findViewById(R.id.playFull);
+        playFullCheckBox.setChecked(playFull);
+        playFullCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                playFull = isChecked;
+                SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
+                editor.putBoolean("playFull", playFull);
+                editor.apply();
+            }
+        });
+        // 显示AlertDialog
+        alertDialog.show();
+    }
+
+    //睡眠定时计时器
+    private void runClock(long clockTime){
+        cancelClock();
+        if (clockTime/3600000 > 0){
+            long hour = clockTime / 3600000;
+            long min = (clockTime % 3600000) / 60000;
+            Toast.makeText(this, "已设置"+hour+"小时"+min+"分钟后停止播放", Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(this, "已设置" + clockTime / 60000 + "分钟后停止播放", Toast.LENGTH_SHORT).show();
+        }
+        clockTimer = new Timer();
+        clockTimer.schedule(new TimerTask() {
+            public void run() {
+                int playBackState = mediaController.getPlaybackState().getState();
+                if (!playFull) {
+                    if (playBackState == PlaybackStateCompat.STATE_PLAYING || playBackState == PlaybackStateCompat.STATE_PAUSED) {
+                        mediaController.getTransportControls().stop();
+                    }
+                }else {
+                    if (playBackState == PlaybackStateCompat.STATE_PAUSED) {
+                        mediaController.getTransportControls().stop();
+                    } else if (playBackState == PlaybackStateCompat.STATE_PLAYING) {
+                        needToStop = true;
+                    }
+                }
+            }
+        }, clockTime);
+    }
+    private void cancelClock(){
+        if (clockTimer != null){
+            clockTimer.cancel();
+            needToStop = false;
+        }
     }
 
 }

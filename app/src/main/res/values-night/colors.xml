@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <color name="colorPrimary">#17181a</color>
+    <color name="colorPrimaryDark">#17181a</color>
+    <color name="colorAccent">#c1c1c1</color>
+
     <color name="colorBarText">#a1a3a2</color>
     <color name="colorMusicTitleText">#a2a4a3</color>
     <color name="colorMusicArtistText">#5b5c5e</color>
@@ -10,7 +15,6 @@
     <color name="colorPlayNowMusicTitleText">#009B8A</color>
     <color name="colorPlayNowMusicArtistText">#009B8A</color>
 
-    <color name="colorPrimary">#17181a</color>
-    <color name="colorPrimaryDark">#17181a</color>
-    <color name="colorAccent">#c1c1c1</color>
+    <color name="themeText">#dddddd</color>
+
 </resources>

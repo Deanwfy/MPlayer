@@ -1,71 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#ffffff">
+    android:layout_height="wrap_content">
 
-    <TextView
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/menuClockRecycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="left"
-        android:padding="15dp"
-        android:text="睡眠定时"
-        android:textSize="20sp"
-        android:textColor="#000000"/>
+        android:paddingTop="10dp" />
 
-    <Button
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="5分钟"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
+        android:layout_height="50dp"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp">
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="10分钟"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="20分钟"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="30分钟"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="10dp"
-        android:text="40分钟"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="15dp"
-        android:text="自定义"
-        android:textSize="15sp"
-        android:background="#ffffff"/>
+        <CheckBox
+            android:id="@+id/playFull"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:text="当前歌曲结束后再停止"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
 </LinearLayout>

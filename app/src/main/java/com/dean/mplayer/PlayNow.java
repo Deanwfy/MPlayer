@@ -273,6 +273,7 @@ public class PlayNow extends AppCompatActivity {
                     if (cover != null) {
                         playNowPlay.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
                     }
+                    playNowCurrent.setProgress(0);
                     break;
                 case PlaybackStateCompat.STATE_PLAYING:
                     playNowPlay.setImageResource(R.drawable.ic_now_pause);
