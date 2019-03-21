@@ -115,8 +115,8 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         initMediaBrowser();
 
-        Intent intent = new Intent(this, PlayService.class);
-        startService(intent);
+        Intent intentPlayService = new Intent(this, PlayService.class);
+        startService(intentPlayService);
     }
 
     private void initMediaBrowser() {
@@ -252,8 +252,8 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     }
                     break;
                 case R.id.music_control_panel:
-                    Intent resultIntent = new Intent(ActivityMain.this, PlayNow.class);
-                    startActivity(resultIntent);
+                    Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);
+                    startActivity(intentPlayNow);
             }
         }
     }
@@ -302,7 +302,8 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             editor.apply();
             recreate();
         } else if (id == R.id.ic_menu_settings) {
-            Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
+            Intent intentSetting = new Intent(this, MusicOnline.class);
+            startActivity(intentSetting);
         } else if (id == R.id.ic_menu_exit) {
             finish();
         }
