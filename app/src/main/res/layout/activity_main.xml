@@ -26,9 +26,8 @@
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             toolbar:layout_constraintEnd_toEndOf="parent"
             toolbar:layout_constraintStart_toStartOf="parent"
-            toolbar:layout_constraintTop_toTopOf="parent"
-            toolbar:title="@string/app_name"
-            toolbar:titleTextColor="@color/colorBarText">
+            toolbar:layout_constraintTop_toTopOf="parent">
+
         </android.support.v7.widget.Toolbar>
 
         <ListView

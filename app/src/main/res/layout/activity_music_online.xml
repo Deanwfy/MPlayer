@@ -2,8 +2,47 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MusicOnline">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/music_online_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorPrimary"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+        <EditText
+            android:id="@+id/music_online_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:drawableStart="@drawable/ic_back"
+            android:drawablePadding="10dp"
+            android:gravity="start|center"
+            android:hint="搜索网络歌曲"
+            android:padding="10dp"
+            android:textColorHint="@color/themeText"
+            android:textCursorDrawable="@null"
+            android:textColor="@color/colorBarText"
+            android:lines="1"
+            android:inputType="text"
+            android:background="@null"
+            android:imeOptions="actionSearch"
+            />
+    </android.support.v7.widget.Toolbar>
+
+    <Button
+        android:id="@+id/playMusic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/music_online_toolbar" />
 
 </android.support.constraint.ConstraintLayout>

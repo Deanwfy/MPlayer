@@ -93,7 +93,9 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         window.setStatusBarColor(Color.TRANSPARENT);
 
         Toolbar toolbar = findViewById(R.id.toolbar);   // 标题栏实现
-        setSupportActionBar(toolbar);   // ToolBar替换ActionBar
+        toolbar.inflateMenu(R.menu.toolbar_custom_menu);
+//        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
+        findViewById(R.id.search_online_entry).setOnClickListener(new ControlBtnOnClickListener());
 
         // 抽屉
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -254,6 +256,11 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                 case R.id.music_control_panel:
                     Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);
                     startActivity(intentPlayNow);
+                    break;
+                case R.id.search_online_entry:
+                    Intent intentSearchOnline = new Intent(ActivityMain.this, MusicOnline.class);
+                    startActivity(intentSearchOnline);
+                    break;
             }
         }
     }
@@ -302,8 +309,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             editor.apply();
             recreate();
         } else if (id == R.id.ic_menu_settings) {
-            Intent intentSetting = new Intent(this, MusicOnline.class);
-            startActivity(intentSetting);
+            Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
         } else if (id == R.id.ic_menu_exit) {
             finish();
         }
