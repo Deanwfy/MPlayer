@@ -8,4 +8,5 @@
     <string name="nav_header_title">MPlayer</string>
     <string name="nav_header_subtitle">wfy00800@163.com</string>
     <string name="seekBar">0:00</string>
+    <string name="searchNotice">搜索网络歌曲</string>
 </resources>

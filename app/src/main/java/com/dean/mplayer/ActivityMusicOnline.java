@@ -2,11 +2,7 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.graphics.Color;
 import android.net.Uri;
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.media.MediaBrowserCompat;
@@ -15,34 +11,37 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.graphics.Palette;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
+import java.util.ArrayList;
 import java.util.List;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class MusicOnline extends AppCompatActivity {
+public class ActivityMusicOnline extends AppCompatActivity {
 
+    MusicListRecyclerAdapter musicListRecyclerAdapter;
+    RecyclerView musicListOnlineRecycler;
     EditText searchOnline;
-    Button playMusic;
+    LoadingDialog loadingDialog;
 
     String searchUrl;
-    String songUrl;
-    String playUrl;
+    String musicInfoUrl;
+    List<Songs> musicInfo = new ArrayList<>();  //设置空数据以完成RecyclerAdapter初始化，否则报错（虽然会自动忽略）
 
     //获取服务
     private MediaControllerCompat mediaController;
@@ -56,10 +55,18 @@ public class MusicOnline extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.music_online_toolbar);
         setSupportActionBar(toolbar);
-        searchOnline = findViewById(R.id.music_online_search);
+        toolbar.setNavigationOnClickListener(v -> finish());
+
+        musicListOnlineRecycler = findViewById(R.id.music_list_online);
+        LinearLayoutManager musicListOnlineRecyclerLayoutManager = new LinearLayoutManager(this);
+        musicListOnlineRecycler.setLayoutManager(musicListOnlineRecyclerLayoutManager);
+        musicListOnlineRecycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
+        musicListRecyclerAdapter = new MusicListRecyclerAdapter(musicInfo);
+        musicListOnlineRecycler.setAdapter(musicListRecyclerAdapter);
+
+        searchOnline = findViewById(R.id.music_search_online);
         SearchOnlineListener searchOnlineListener = new SearchOnlineListener();
         searchOnline.setOnKeyListener(searchOnlineListener);
-        playMusic = findViewById(R.id.playMusic);
         initMediaBrowser();
     }
     @Override
@@ -72,21 +79,22 @@ public class MusicOnline extends AppCompatActivity {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP){
+                loadingAnimation();
                 String userInput = searchOnline.getText().toString();
                 if(TextUtils.isEmpty(userInput)){
                     return true;
                 }
                 userInput = userInput.trim();
                 searchUrl = "http://39.108.4.217:8888/search?keywords= " + userInput;
-                Toast.makeText(MusicOnline.this, "已搜索，点击播放", Toast.LENGTH_SHORT).show();
-                sendRequestWithOkHttp(searchUrl, "searchUrl");
+                getSearchUrl(searchUrl);
                 return true;
             }
             return false;
         }
     }
 
-    private void sendRequestWithOkHttp(String url, String type){
+    // 搜索结果
+    private void getSearchUrl(String url){
         new Thread(() -> {
             try {
                 OkHttpClient okHttpClient = new OkHttpClient();
@@ -96,44 +104,62 @@ public class MusicOnline extends AppCompatActivity {
                 Response response = okHttpClient.newCall(request).execute();
                 assert response.body() != null;
                 String responseData = response.body().string();
-                switch (type){
-                    case "searchUrl":
-                        songUrl = "http://39.108.4.217:8888/song/url?id=" + parseJSON(responseData, type);
-                        sendRequestWithOkHttp(songUrl, "songUrl");
-                        break;
-                    case "songUrl":
-                        songUrl = parseJSON(responseData, type);
-                        showUrl(songUrl);
-                        break;
-                }
-//                showResponse(responseData);
+                parseJSON(responseData);
+                uiUpdate();
             }catch (Exception e){
                 e.printStackTrace();
             }
         }).start();
     }
-
-    private String parseJSON(String response, String type){
+    private void parseJSON(String response){
         JSONObject jsonObject = JSON.parseObject(response);
-        switch (type){
-            case "searchUrl":
-                return jsonObject.getJSONObject("result").getJSONArray("songs").getJSONObject(0).getString("id");
-            case "songUrl":
-                return jsonObject.getJSONArray("data").getJSONObject(0).getString("url");
-            default:
-                return "找不到结果";
-        }
+        musicInfo = JSONArray.parseArray((jsonObject.getJSONObject("result").getJSONArray("songs").toJSONString()), Songs.class);
     }
-
-    private void showUrl(final String songUrl){
-        runOnUiThread(() ->
-                playMusic.setOnClickListener(v -> mediaController.getTransportControls().playFromUri(Uri.parse(songUrl), null))
+    private void uiUpdate(){
+        runOnUiThread(() -> {
+                    musicListRecyclerAdapter = new MusicListRecyclerAdapter(musicInfo);
+                    musicListRecyclerAdapter.setOnItemClickListener((view, position) -> {
+                        musicInfoUrl = "http://39.108.4.217:8888/song/url?id=" + String.valueOf(musicInfo.get(position).getId());
+                        getMusicInfoUrl(musicInfoUrl);
+                    });
+                    musicListOnlineRecycler.setAdapter(musicListRecyclerAdapter);
+                    loadingDialog.close();
+                }
         );
     }
 
+    // 从搜索结果中播放
+    private void getMusicInfoUrl(String url){
+        new Thread(() -> {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                setPlayMusic(responseData);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    private void setPlayMusic(String response){
+        JSONObject jsonObject = JSON.parseObject(response);
+        String url = jsonObject.getJSONArray("data").getJSONObject(0).getString("url");
+        mediaController.getTransportControls().playFromUri(Uri.parse(url), null);
+    }
+
+    // 加载动画
+    private void loadingAnimation(){
+        loadingDialog = new LoadingDialog(this);
+        loadingDialog.setLoadingText("搜索中...")
+                     .show();
+    }
 
 
-
+    //——————————————————————————————————MediaBrowser————————————————————————————————————————————
 
     private void initMediaBrowser() {
         if (mediaBrowserCompat == null) {
@@ -159,9 +185,9 @@ public class MusicOnline extends AppCompatActivity {
             try {
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
-                        MusicOnline.this,
+                        ActivityMusicOnline.this,
                         mediaBrowserCompat.getSessionToken());
-                MediaControllerCompat.setMediaController(MusicOnline.this, mediaController);
+                MediaControllerCompat.setMediaController(ActivityMusicOnline.this, mediaController);
                 mediaController.registerCallback(mediaControllerCompatCallback);
                 //设置当前数据
                 mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());
@@ -209,7 +235,7 @@ public class MusicOnline extends AppCompatActivity {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
-                MusicOnline.this.metadata = metadata;
+                ActivityMusicOnline.this.metadata = metadata;
             }
         }
     };

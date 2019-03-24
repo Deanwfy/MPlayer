@@ -146,12 +146,14 @@ public class PlayNow extends AppCompatActivity {
                     }
                     break;
                 case R.id.playNowPlay:
-                    if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
-                        mediaController.getTransportControls().pause();
-                    } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
-                        mediaController.getTransportControls().play();
-                    } else {
-                        mediaController.getTransportControls().playFromUri(musicInfos.get(0).getUri(), null);
+                    if (musicInfos != null && musicInfos.size() != 0) {
+                        if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                            mediaController.getTransportControls().pause();
+                        } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
+                            mediaController.getTransportControls().play();
+                        } else {
+                            mediaController.getTransportControls().playFromUri(musicInfos.get(0).getUri(), null);
+                        }
                     }
                     break;
                 case R.id.playNowPrev:

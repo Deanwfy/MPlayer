@@ -4,6 +4,7 @@
     <color name="colorPrimary">#17181a</color>
     <color name="colorPrimaryDark">#17181a</color>
     <color name="colorAccent">#c1c1c1</color>
+    <color name="drawerArrowStyle">#ffffff</color>
 
     <color name="colorBarText">#a1a3a2</color>
     <color name="colorMusicTitleText">#a2a4a3</color>
@@ -16,5 +17,6 @@
     <color name="colorPlayNowMusicArtistText">#009B8A</color>
 
     <color name="themeText">#dddddd</color>
+    <color name="editNoticeText">#dddddd</color>
 
 </resources>

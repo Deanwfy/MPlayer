@@ -1,12 +1,10 @@
 package com.dean.mplayer;
 
-import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import android.content.ContentResolver;
@@ -21,7 +19,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.ParcelFileDescriptor;
 import android.provider.MediaStore;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
@@ -39,68 +36,71 @@ public class MediaUtil {
 		return Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP;
 	}
 
-	//歌曲信息获取
+	//本地歌曲信息获取
 	public static List<MusicInfo> getMusicInfos(Context context) {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
 				MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 
-		List<MusicInfo> mp3Infos = new ArrayList<>();
-		for (int i = 0; i < cursor.getCount(); i++) {
-			cursor.moveToNext();
-			MusicInfo mp3Info = new MusicInfo();
-			long id = cursor.getLong(cursor
-					.getColumnIndex(MediaStore.Audio.Media._ID));
-			String title = cursor.getString(cursor
-					.getColumnIndex(MediaStore.Audio.Media.TITLE));
-			String artist = cursor.getString(cursor
-					.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-			String album = cursor.getString(cursor
-					.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-			String displayName = cursor.getString(cursor
-					.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
-			long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
-			long duration = cursor.getLong(cursor
-					.getColumnIndex(MediaStore.Audio.Media.DURATION));
-			long size = cursor.getLong(cursor
-					.getColumnIndex(MediaStore.Audio.Media.SIZE));
-			String url = cursor.getString(cursor
-					.getColumnIndex(MediaStore.Audio.Media.DATA));
-			Uri uri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
-			int isMusic = cursor.getInt(cursor
-					.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
-			if (isMusic != 0 && duration>15000) {	//过滤15s内的音频文件
-				mp3Info.setId(id);
-				mp3Info.setTitle(title);
-				mp3Info.setArtist(artist);
-				mp3Info.setAlbum(album);
-				mp3Info.setDisplayName(displayName);
-				mp3Info.setAlbumId(albumId);
-				mp3Info.setDuration(duration);
-				mp3Info.setSize(size);
-				mp3Info.setUrl(url);
-				mp3Info.setUri(uri);
-				mp3Infos.add(mp3Info);
+		List<MusicInfo> musicInfos = new ArrayList<>();
+		if(cursor != null) {
+			while (cursor.moveToNext()) {
+				MusicInfo musicInfo = new MusicInfo();
+				long id = cursor.getLong(cursor
+						.getColumnIndex(MediaStore.Audio.Media._ID));
+				String title = cursor.getString(cursor
+						.getColumnIndex(MediaStore.Audio.Media.TITLE));
+				String artist = cursor.getString(cursor
+						.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+				String album = cursor.getString(cursor
+						.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+				String displayName = cursor.getString(cursor
+						.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
+				long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+				long duration = cursor.getLong(cursor
+						.getColumnIndex(MediaStore.Audio.Media.DURATION));
+				long size = cursor.getLong(cursor
+						.getColumnIndex(MediaStore.Audio.Media.SIZE));
+				String url = cursor.getString(cursor
+						.getColumnIndex(MediaStore.Audio.Media.DATA));
+				Uri uri = Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, String.valueOf(id));
+				int isMusic = cursor.getInt(cursor
+						.getColumnIndex(MediaStore.Audio.Media.IS_MUSIC));
+				if (isMusic != 0 && duration > 15000) {    //过滤15s内的音频文件
+					musicInfo.setId(id);
+					musicInfo.setTitle(title);
+					musicInfo.setArtist(artist);
+					musicInfo.setAlbum(album);
+					musicInfo.setDisplayName(displayName);
+					musicInfo.setAlbumId(albumId);
+					musicInfo.setDuration(duration);
+					musicInfo.setSize(size);
+					musicInfo.setUrl(url);
+					musicInfo.setUri(uri);
+					musicInfos.add(musicInfo);
+				}
 			}
+			cursor.close();
+			return musicInfos;
+		}else {
+			return null;
 		}
-		return mp3Infos;
 	}
 
 	public static List<HashMap<String, String>> getMusicMaps(
-			List<MusicInfo> mp3Infos) {
+			List<MusicInfo> musicInfos) {
 		List<HashMap<String, String>> musiclist = new ArrayList<>();
-		for (Iterator iterator = mp3Infos.iterator(); iterator.hasNext();) {
-			MusicInfo mp3Info = (MusicInfo) iterator.next();
+		for (MusicInfo musicInfo : musicInfos) {
 			HashMap<String, String> map = new HashMap<>();
-			map.put("title", mp3Info.getTitle());
-			map.put("artist", mp3Info.getArtist());
-			map.put("album", mp3Info.getAlbum());
-			map.put("displayName", mp3Info.getDisplayName());
-			map.put("albumId", String.valueOf(mp3Info.getAlbumId()));
-			map.put("duration", formatTime(mp3Info.getDuration()));
-			map.put("size", String.valueOf(mp3Info.getSize()));
-			map.put("url", mp3Info.getUrl());
-			map.put("uri",String.valueOf(mp3Info.getUri()));
+			map.put("title", musicInfo.getTitle());
+			map.put("artist", musicInfo.getArtist());
+			map.put("album", musicInfo.getAlbum());
+			map.put("displayName", musicInfo.getDisplayName());
+			map.put("albumId", String.valueOf(musicInfo.getAlbumId()));
+			map.put("duration", formatTime(musicInfo.getDuration()));
+			map.put("size", String.valueOf(musicInfo.getSize()));
+			map.put("url", musicInfo.getUrl());
+			map.put("uri", String.valueOf(musicInfo.getUri()));
 			musiclist.add(map);
 		}
 		return musiclist;

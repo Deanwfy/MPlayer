@@ -5,44 +5,47 @@
     android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MusicOnline">
+    tools:context=".ActivityMusicOnline"
+    tools:ignore="Autofill">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/music_online_toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorPrimary"
         android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
         android:theme="?attr/actionBarTheme"
+        app:navigationIcon="@drawable/ic_back"
+        app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
+
         <EditText
-            android:id="@+id/music_online_search"
+            android:id="@+id/music_search_online"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:drawableStart="@drawable/ic_back"
-            android:drawablePadding="10dp"
-            android:gravity="start|center"
-            android:hint="搜索网络歌曲"
-            android:padding="10dp"
-            android:textColorHint="@color/themeText"
-            android:textCursorDrawable="@null"
-            android:textColor="@color/colorBarText"
-            android:lines="1"
-            android:inputType="text"
             android:background="@null"
+            android:gravity="start|center"
+            android:hint="@string/searchNotice"
             android:imeOptions="actionSearch"
-            />
+            android:inputType="text"
+            android:lines="1"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+            android:textColor="@color/drawerArrowStyle"
+            android:textColorHint="@color/editNoticeText"
+            android:textCursorDrawable="@null" />
     </android.support.v7.widget.Toolbar>
 
-    <Button
-        android:id="@+id/playMusic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/music_list_online"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/music_online_toolbar" />
+        app:layout_constraintTop_toBottomOf="@+id/music_online_toolbar"
+        android:scrollbars="vertical"/>
 
 </android.support.constraint.ConstraintLayout>

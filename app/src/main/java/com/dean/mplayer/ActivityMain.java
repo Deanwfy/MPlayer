@@ -2,7 +2,6 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -33,7 +32,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -92,7 +90,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         window.setStatusBarColor(Color.TRANSPARENT);
 
-        Toolbar toolbar = findViewById(R.id.toolbar);   // 标题栏实现
+        Toolbar toolbar = findViewById(R.id.main_toolbar);   // 标题栏实现
         toolbar.inflateMenu(R.menu.toolbar_custom_menu);
 //        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
         findViewById(R.id.search_online_entry).setOnClickListener(new ControlBtnOnClickListener());
@@ -109,8 +107,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         mMusicList = findViewById(R.id.music_list);
         mMusicList.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        musicInfos = MediaUtil.getMusicInfos(getApplicationContext());    // 获取歌曲信息
-        setListAdapter(getMusicMaps(musicInfos));  // 显示歌曲列表
+        musicInfos = MediaUtil.getMusicInfos(this);    // 获取歌曲信息
+        if (musicInfos != null && musicInfos.size() != 0) {
+            setListAdapter(getMusicMaps(musicInfos));  // 显示歌曲列表
+        }
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
@@ -240,17 +240,19 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     }
 
     // 命名播放控制面板监听器类，实现监听事件
-    private class ControlBtnOnClickListener implements OnClickListener{
+    private class ControlBtnOnClickListener implements OnClickListener {
         @Override
-        public void onClick(View v){
+        public void onClick(View v) {
             switch (v.getId()){
                 case R.id.playing_play:
-                    if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
-                        mediaController.getTransportControls().pause();
-                    } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED){
-                        mediaController.getTransportControls().play();
-                    } else {
-                        mediaController.getTransportControls().playFromUri(musicInfos.get(PlayService.listPosition).getUri(), null);
+                    if (musicInfos != null && musicInfos.size() != 0) {
+                        if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                            mediaController.getTransportControls().pause();
+                        } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
+                            mediaController.getTransportControls().play();
+                        } else {
+                            mediaController.getTransportControls().playFromUri(musicInfos.get(PlayService.listPosition).getUri(), null);
+                        }
                     }
                     break;
                 case R.id.music_control_panel:
@@ -258,7 +260,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     startActivity(intentPlayNow);
                     break;
                 case R.id.search_online_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMain.this, MusicOnline.class);
+                    Intent intentSearchOnline = new Intent(ActivityMain.this, ActivityMusicOnline.class);
                     startActivity(intentSearchOnline);
                     break;
             }
@@ -347,73 +349,57 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         };
         menuClockRecycler.setLayoutManager(menuClockRecyclerLayoutManager);
         MenuClockRecyclerAdapter menuClockRecyclerAdapter = new MenuClockRecyclerAdapter(items);
-        menuClockRecyclerAdapter.setOnItemClickListener(new MenuClockRecyclerAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                switch (position) {
-                    case 0:
-                        if (clockTimer != null) {
-                            cancelClock();
-                            Toast.makeText(ActivityMain.this, "已取消定时停止播放", Toast.LENGTH_SHORT).show();
-                        }
-                        break;
-                    case 1:
-                        runClock(900000);
-                        break;
-                    case 2:
-                        runClock(1800000);
-                        break;
-                    case 3:
-                        runClock(2700000);
-                        break;
-                    case 4:
-                        runClock(3600000);
-                        break;
-                    case 5:
-                        View customClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock_custom, null);
-                        final AlertDialog.Builder customBuilder = new AlertDialog.Builder(ActivityMain.this);
-                        final NumberPicker customNumberPickerHour = customClock.findViewById(R.id.pickerHour);
-                        final NumberPicker customNumberPickerMin = customClock.findViewById(R.id.pickerMin);
-                        customNumberPickerHour.setMinValue(0);
-                        customNumberPickerHour.setMaxValue(23);
-                        customNumberPickerHour.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);   //不可编辑
-                        customNumberPickerHour.setWrapSelectorWheel(false);    //不循环
-                        customNumberPickerMin.setMinValue(0);
-                        customNumberPickerMin.setMaxValue(59);
-                        customNumberPickerMin.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);    //不可编辑
-                        customNumberPickerMin.setWrapSelectorWheel(false);    //不循环
-                        customBuilder.setTitle("自定义睡眠定时").setView(customClock)
-                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        runClock(customNumberPickerHour.getValue() * 3600000 + customNumberPickerMin.getValue() * 60000);
-                                    }
-                                })
-                                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        //DoNothing,无需手动调用dismiss
-                                    }
-                                });
-                        customBuilder.create().show();
-                        break;
-                }
-                // 自定义布局需手动调用dismiss使AlertDialog消失
-                alertDialog.dismiss();
+        menuClockRecyclerAdapter.setOnItemClickListener((view, position) -> {
+            switch (position) {
+                case 0:
+                    if (clockTimer != null) {
+                        cancelClock();
+                        Toast.makeText(ActivityMain.this, "已取消定时停止播放", Toast.LENGTH_SHORT).show();
+                    }
+                    break;
+                case 1:
+                    runClock(900000);
+                    break;
+                case 2:
+                    runClock(1800000);
+                    break;
+                case 3:
+                    runClock(2700000);
+                    break;
+                case 4:
+                    runClock(3600000);
+                    break;
+                case 5:
+                    View customClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock_custom, null);
+                    final AlertDialog.Builder customBuilder = new AlertDialog.Builder(ActivityMain.this);
+                    final NumberPicker customNumberPickerHour = customClock.findViewById(R.id.pickerHour);
+                    final NumberPicker customNumberPickerMin = customClock.findViewById(R.id.pickerMin);
+                    customNumberPickerHour.setMinValue(0);
+                    customNumberPickerHour.setMaxValue(23);
+                    customNumberPickerHour.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);   //不可编辑
+                    customNumberPickerHour.setWrapSelectorWheel(false);    //不循环
+                    customNumberPickerMin.setMinValue(0);
+                    customNumberPickerMin.setMaxValue(59);
+                    customNumberPickerMin.setDescendantFocusability(DatePicker.FOCUS_BLOCK_DESCENDANTS);    //不可编辑
+                    customNumberPickerMin.setWrapSelectorWheel(false);    //不循环
+                    customBuilder.setTitle("自定义睡眠定时").setView(customClock)
+                            .setPositiveButton("确定", (dialog, which) -> runClock(customNumberPickerHour.getValue() * 3600000 + customNumberPickerMin.getValue() * 60000))
+                            .setNegativeButton("取消", (dialog, which) -> {});
+                    customBuilder.create().show();
+                    break;
             }
+            // 自定义布局需手动调用dismiss使AlertDialog消失
+            alertDialog.dismiss();
         });
         menuClockRecycler.setAdapter(menuClockRecyclerAdapter);
         // 当前歌曲结束后再停止
         CheckBox playFullCheckBox  = menuClock.findViewById(R.id.playFull);
         playFullCheckBox.setChecked(playFull);
-        playFullCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                playFull = isChecked;
-                SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
-                editor.putBoolean("playFull", playFull);
-                editor.apply();
-            }
+        playFullCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            playFull = isChecked;
+            SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
+            editor.putBoolean("playFull", playFull);
+            editor.apply();
         });
         // 显示AlertDialog
         alertDialog.show();

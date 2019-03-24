@@ -42,4 +42,5 @@ dependencies {
     implementation 'com.google.android.exoplayer:exoplayer:2.7.3'
     implementation 'com.squareup.okhttp3:okhttp:3.14.0'
     implementation 'com.alibaba:fastjson:1.1.55.android'
+    implementation 'com.github.ForgetAll:LoadingDialog:v1.1.0-alpha'
 }
