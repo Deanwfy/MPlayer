@@ -53,6 +53,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 列表显示
     private ListView musicListView;
+    private List<MusicInfo> musicInfo = new ArrayList<>();
     static List<PlayList> playList = new ArrayList<>();
     public static int listPosition = 0;
 
@@ -108,21 +109,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         musicListView = findViewById(R.id.music_list);
         musicListView.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        List<MusicInfo> musicInfo = MediaUtil.getMusicLocal(this);
+        musicInfo = MediaUtil.getMusicLocal(this);
         if (musicInfo != null && musicInfo.size() != 0) {
             setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
-            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++){
-                playList.add(new PlayList(
-                        musicInfo.get(musicCountLocal).getId(),
-                        musicInfo.get(musicCountLocal).getTitle(),
-                        musicInfo.get(musicCountLocal).getAlbum(),
-                        musicInfo.get(musicCountLocal).getArtist(),
-                        musicInfo.get(musicCountLocal).getDuration(),
-                        musicInfo.get(musicCountLocal).getUri(),
-                        musicInfo.get(musicCountLocal).getAlbumId()
-                        )
-                );
-            }
+            initPlayList();
         }
 
         findControlBtnById(); // 获取播放控制面板控件
@@ -132,6 +122,21 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
+    }
+
+    private void initPlayList(){
+        for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++){
+            playList.add(new PlayList(
+                            musicInfo.get(musicCountLocal).getId(),
+                            musicInfo.get(musicCountLocal).getTitle(),
+                            musicInfo.get(musicCountLocal).getAlbum(),
+                            musicInfo.get(musicCountLocal).getArtist(),
+                            musicInfo.get(musicCountLocal).getDuration(),
+                            musicInfo.get(musicCountLocal).getUri(),
+                            musicInfo.get(musicCountLocal).getAlbumId()
+                    )
+            );
+        }
     }
 
     private void initMediaBrowser() {
@@ -230,6 +235,8 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            playList.clear();
+            initPlayList();
             listPosition = --position;
             mediaController.getTransportControls().skipToNext();
         }
