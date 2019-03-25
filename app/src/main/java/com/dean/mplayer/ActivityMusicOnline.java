@@ -120,7 +120,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
                     musicListRecyclerAdapter = new MusicListRecyclerAdapter(musicInfo);
                     musicListRecyclerAdapter.setOnItemClickListener((view, position) -> {
                         musicInfoUrl = "http://39.108.4.217:8888/song/url?id=" + String.valueOf(musicInfo.get(position).getId());
-                        getMusicInfoUrl(musicInfoUrl);
+                        getMusicInfoUrl(musicInfoUrl, position);
                     });
                     musicListOnlineRecycler.setAdapter(musicListRecyclerAdapter);
                     loadingDialog.close();
@@ -129,7 +129,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
     }
 
     // 从搜索结果中播放
-    private void getMusicInfoUrl(String url){
+    private void getMusicInfoUrl(String url, int position){
         new Thread(() -> {
             try {
                 OkHttpClient okHttpClient = new OkHttpClient();
@@ -139,22 +139,30 @@ public class ActivityMusicOnline extends AppCompatActivity {
                 Response response = okHttpClient.newCall(request).execute();
                 assert response.body() != null;
                 String responseData = response.body().string();
-                setPlayMusic(responseData);
+                setPlayMusic(responseData, position);
             }catch (Exception e){
                 e.printStackTrace();
             }
         }).start();
     }
-    private void setPlayMusic(String response){
+    private void setPlayMusic(String response, int position){
         JSONObject jsonObject = JSON.parseObject(response);
-        String url = jsonObject.getJSONArray("data").getJSONObject(0).getString("url");
-        mediaController.getTransportControls().playFromUri(Uri.parse(url), null);
+        long id = musicInfo.get(position).getId();
+        String title = musicInfo.get(position).getName();
+        String album = musicInfo.get(position).getAlbum().getName();
+        String artist = musicInfo.get(position).getArtists().get(0).getName();
+        long duration = musicInfo.get(position).getDuration();
+        Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
+        long albumId = musicInfo.get(position).getAlbum().getId();
+        ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumId));
+        mediaController.getTransportControls().skipToNext();
     }
 
     // 加载动画
     private void loadingAnimation(){
         loadingDialog = new LoadingDialog(this);
         loadingDialog.setLoadingText("搜索中...")
+                     .setInterceptBack(false)
                      .show();
     }
 

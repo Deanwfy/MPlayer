@@ -52,8 +52,9 @@ import static com.dean.mplayer.MediaUtil.getMusicMaps;
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
-    private ListView mMusicList;
-    private List<MusicInfo> musicInfos = null;
+    private ListView musicListView;
+    static List<PlayList> playList = new ArrayList<>();
+    public static int listPosition = 0;
 
     // 媒体信息
     private TextView PlayingTitle;
@@ -105,11 +106,23 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        mMusicList = findViewById(R.id.music_list);
-        mMusicList.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        musicInfos = MediaUtil.getMusicInfos(this);    // 获取歌曲信息
-        if (musicInfos != null && musicInfos.size() != 0) {
-            setListAdapter(getMusicMaps(musicInfos));  // 显示歌曲列表
+        musicListView = findViewById(R.id.music_list);
+        musicListView.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
+        List<MusicInfo> musicInfo = MediaUtil.getMusicLocal(this);
+        if (musicInfo != null && musicInfo.size() != 0) {
+            setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
+            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++){
+                playList.add(new PlayList(
+                        musicInfo.get(musicCountLocal).getId(),
+                        musicInfo.get(musicCountLocal).getTitle(),
+                        musicInfo.get(musicCountLocal).getAlbum(),
+                        musicInfo.get(musicCountLocal).getArtist(),
+                        musicInfo.get(musicCountLocal).getDuration(),
+                        musicInfo.get(musicCountLocal).getUri(),
+                        musicInfo.get(musicCountLocal).getAlbumId()
+                        )
+                );
+            }
         }
 
         findControlBtnById(); // 获取播放控制面板控件
@@ -210,16 +223,15 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         mAdapter = new SimpleAdapter(this, musiclist,
                 R.layout.music_list_item_layout, new String[] { "title", "artist","duration" },
                 new int[] { R.id.music_title, R.id.music_artist , R.id.music_duration });
-        mMusicList.setAdapter(mAdapter);
+        musicListView.setAdapter(mAdapter);
     }
 
     // 歌曲列表监听器
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Bundle listPosition = new Bundle();
-            listPosition.putInt("listPosition", position);
-            mediaController.getTransportControls().playFromUri(musicInfos.get(position).getUri(), listPosition);
+            listPosition = --position;
+            mediaController.getTransportControls().skipToNext();
         }
     }
 
@@ -245,13 +257,13 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.playing_play:
-                    if (musicInfos != null && musicInfos.size() != 0) {
+                    if (playList != null && playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                             mediaController.getTransportControls().pause();
                         } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                             mediaController.getTransportControls().play();
                         } else {
-                            mediaController.getTransportControls().playFromUri(musicInfos.get(PlayService.listPosition).getUri(), null);
+                            mediaController.getTransportControls().playFromUri(playList.get(listPosition).getUri(), null);
                         }
                     }
                     break;
@@ -270,6 +282,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 退出同时结束后台服务
     @Override
     protected void onDestroy() {
+        mediaController.getTransportControls().stop();
         mediaBrowserCompat.disconnect();
         Intent intent = new Intent(ActivityMain.this, PlayService.class);
         stopService(intent);

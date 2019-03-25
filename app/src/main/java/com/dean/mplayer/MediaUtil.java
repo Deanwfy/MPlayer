@@ -37,7 +37,7 @@ public class MediaUtil {
 	}
 
 	//本地歌曲信息获取
-	public static List<MusicInfo> getMusicInfos(Context context) {
+	public static List<MusicInfo> getMusicLocal(Context context) {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
 				MediaStore.Audio.Media.DEFAULT_SORT_ORDER);

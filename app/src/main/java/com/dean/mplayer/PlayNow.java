@@ -68,7 +68,7 @@ public class PlayNow extends AppCompatActivity {
         findControlBtnById();
         setPlayNowMode();
         setControlBtnOnClickListener();
-        musicInfos = MediaUtil.getMusicInfos(getApplicationContext());
+        musicInfos = MediaUtil.getMusicLocal(this);
         initMediaBrowser();
     }
     @Override

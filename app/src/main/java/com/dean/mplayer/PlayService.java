@@ -35,8 +35,7 @@ import android.support.v7.graphics.Palette;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
-	public static int listPosition = 0;        // 当前正在播放的音乐
-	private List<MusicInfo> musicInfos;   // 存放MusicInfo对象的集合
+	private List<PlayList> playLists = ActivityMain.playList; // 播放列表
 	public static String mode = AppConstant.PlayMode.MODE_ORDER;	// 播放状态，默认为顺序播放
 	public static int current = 0;	// 播放进度
 
@@ -65,7 +64,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	// 注册音频焦点监听器
 	AudioManager.OnAudioFocusChangeListener audioFocusChangeListener = new AudioManager.OnAudioFocusChangeListener() {
 		public void onAudioFocusChange(int focusChange) {
-			if (musicInfos != null && musicInfos.size() != 0) {
+			if (playLists != null && playLists.size() != 0) {
 				switch (focusChange) {
 					case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:    //暂时失去
 						if (mediaPlayer.isPlaying()) {
@@ -81,7 +80,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						break;
 					case AudioManager.AUDIOFOCUS_GAIN:    //长时间(再次)获得
 						if (mediaPlayer == null) {
-							mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+							mediaControllerCompat.getTransportControls().playFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 						} else if (!mediaPlayer.isPlaying()) {
 							mediaControllerCompat.getTransportControls().play();
 						}
@@ -113,7 +112,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	public void onCreate() {
 		super.onCreate();
 		mediaPlayer = new MediaPlayer();
-		musicInfos = MediaUtil.getMusicInfos(this);
 		audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		setUpMediaSessionCompat();
 
@@ -124,10 +122,10 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			if (ActivityMain.needToStop) {
 				mediaControllerCompat.getTransportControls().stop();
 				ActivityMain.needToStop = false;
-			}else if (musicInfos != null && musicInfos.size() != 0) {
+			}else if (playLists != null && playLists.size() != 0) {
 				switch (mode) {
 					case AppConstant.PlayMode.MODE_ORDER:    //顺序播放
-						if (listPosition < musicInfos.size() - 1) {
+						if (ActivityMain.listPosition < playLists.size() - 1) {
 							mediaControllerCompat.getTransportControls().skipToNext();
 						} else {
 							mediaControllerCompat.getTransportControls().stop();
@@ -137,11 +135,11 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						mediaControllerCompat.getTransportControls().skipToNext();
 						break;
 					case AppConstant.PlayMode.MODE_SINGLE:    //单曲循环
-						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						mediaControllerCompat.getTransportControls().playFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 						break;
 					case AppConstant.PlayMode.MODE_RANDOM:    //随机播放
-						listPosition = getRandomIndex(musicInfos.size() - 1);
-						mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+						ActivityMain.listPosition = getRandomIndex(playLists.size() - 1);
+						mediaControllerCompat.getTransportControls().playFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 						break;
 				}
 			}else mediaControllerCompat.getTransportControls().stop();
@@ -157,7 +155,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		if (action != null) {
 			switch (action) {
 				case AppConstant.PlayAction.ACTION_PLAY:	//直接播放
-					mediaControllerCompat.getTransportControls().playFromUri(musicInfos.get(listPosition).getUri(), null);
+					mediaControllerCompat.getTransportControls().playFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 					break;
 				case AppConstant.PlayAction.ACTION_PAUSE:	//暂停
 					mediaControllerCompat.getTransportControls().pause();
@@ -203,12 +201,12 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 
 	//发送／更新通知
 	private void sendNotification(){
-		if (musicInfos != null && musicInfos.size() != 0) {
+		if (playLists != null && playLists.size() != 0) {
 			//获取歌曲信息
-			MusicInfo mp3Info = musicInfos.get(listPosition);
-			String musicTitle = mp3Info.getTitle();
-			String musicArtist = mp3Info.getArtist();
-			Bitmap musicCover = MediaUtil.getArtwork(this, mp3Info.getAlbumId());
+			PlayList playList = playLists.get(ActivityMain.listPosition);
+			String musicTitle = playList.getTitle();
+			String musicArtist = playList.getArtist();
+			Bitmap musicCover = MediaUtil.getArtwork(this, playList.getAlbumId());
 			//通知内容
 			NotificationCompat.Action playPauseAction = playbackStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING ?
 					createAction(R.drawable.ic_notification_play, "Pause", AppConstant.PlayAction.ACTION_PAUSE) :
@@ -288,42 +286,39 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			//播放
 			@Override
 			public void onPlayFromUri(Uri uri, Bundle position) {
-				if (position != null) {
-					listPosition = position.getInt("listPosition", listPosition);
-				}
-				if (musicInfos != null && musicInfos.size() != 0) {
-					MusicInfo musicInfo = musicInfos.get(listPosition);
+				if (playLists != null && playLists.size() != 0) {
+					PlayList playList= playLists.get(ActivityMain.listPosition);
 					MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
-							.putString(MediaMetadataCompat.METADATA_KEY_TITLE, musicInfo.getTitle())
-							.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, musicInfo.getArtist())
-							.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, musicInfo.getDuration())
-							.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, musicInfo.getAlbumId()));
+							.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playList.getTitle())
+							.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playList.getArtist())
+							.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, playList.getDuration())
+							.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, MediaUtil.getArtwork(PlayService.this, playList.getAlbumId()));
 					mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
 				}
-					try {
-						switch (playbackStateCompat.getState()) {
-							case PlaybackStateCompat.STATE_PLAYING:
-							case PlaybackStateCompat.STATE_PAUSED:
-							case PlaybackStateCompat.STATE_NONE:
-								mediaPlayer.reset();
-								//设置播放地址
-								mediaPlayer.setDataSource(PlayService.this, uri);
-								//异步进行播放
-								mediaPlayer.prepareAsync();
-								break;
-							case PlaybackStateCompat.STATE_BUFFERING:
-							case PlaybackStateCompat.STATE_CONNECTING:
-							case PlaybackStateCompat.STATE_ERROR:
-							case PlaybackStateCompat.STATE_FAST_FORWARDING:
-							case PlaybackStateCompat.STATE_REWINDING:
-							case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
-							case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
-							case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
-							case PlaybackStateCompat.STATE_STOPPED:
-								break;
-						}
-					} catch (IOException e) {
-						onStop();
+				try {
+					switch (playbackStateCompat.getState()) {
+						case PlaybackStateCompat.STATE_PLAYING:
+						case PlaybackStateCompat.STATE_PAUSED:
+						case PlaybackStateCompat.STATE_NONE:
+							mediaPlayer.reset();
+							//设置播放地址
+							mediaPlayer.setDataSource(PlayService.this, uri);
+							//异步进行播放
+							mediaPlayer.prepareAsync();
+							break;
+						case PlaybackStateCompat.STATE_BUFFERING:
+						case PlaybackStateCompat.STATE_CONNECTING:
+						case PlaybackStateCompat.STATE_ERROR:
+						case PlaybackStateCompat.STATE_FAST_FORWARDING:
+						case PlaybackStateCompat.STATE_REWINDING:
+						case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT:
+						case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS:
+						case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
+						case PlaybackStateCompat.STATE_STOPPED:
+							break;
+					}
+				} catch (IOException e) {
+					onStop();
 				}
 			}
 			//停止
@@ -366,25 +361,25 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			//上一曲
 			@Override
 			public void onSkipToPrevious() {
-				if (musicInfos != null && musicInfos.size() != 0) {
-					if (listPosition > 0) {
-						listPosition--;
+				if (playLists != null && playLists.size() != 0) {
+					if (ActivityMain.listPosition > 0) {
+						ActivityMain.listPosition--;
 					} else {
-						listPosition = musicInfos.size() - 1;
+						ActivityMain.listPosition = playLists.size() - 1;
 					}
-					onPlayFromUri(musicInfos.get(listPosition).getUri(), null);
+					onPlayFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 				}
 			}
 			//下一曲
 			@Override
 			public void onSkipToNext() {
-				if (musicInfos != null && musicInfos.size() != 0) {
-					if (listPosition < musicInfos.size() - 1) {
-						listPosition++;
+				if (playLists != null && playLists.size() != 0) {
+					if (ActivityMain.listPosition < playLists.size() - 1) {
+						ActivityMain.listPosition++;
 					} else {
-						listPosition = 0;
+						ActivityMain.listPosition = 0;
 					}
-					onPlayFromUri(musicInfos.get(listPosition).getUri(), null);
+					onPlayFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 				}
 			}
 			//跳转播放
