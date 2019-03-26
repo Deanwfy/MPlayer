@@ -53,7 +53,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-				if (mediaPlayer != null){
+				if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE){
 					mediaControllerCompat.getTransportControls().pause();
 				}
 			}
@@ -86,7 +86,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						}
 						break;
 					case AudioManager.AUDIOFOCUS_LOSS:    //长时间丢失
-						if (mediaPlayer != null) {
+						if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
 							mediaControllerCompat.getTransportControls().pause();
 						}
 						break;
@@ -179,10 +179,17 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 
 	@Override
 	public void onDestroy() {
-		if (mediaPlayer != null) {
-			mediaControllerCompat.getTransportControls().stop();
+		if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
+			mediaPlayer.stop();
 			mediaPlayer.release();
 			mediaPlayer = null;
+			audioManager.abandonAudioFocus(audioFocusChangeListener);
+			playbackStateCompat = new PlaybackStateCompat.Builder()
+					.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
+					.build();
+			mediaSessionCompat.setPlaybackState(playbackStateCompat);
+			unregisterReceiver(becomingNoisyReceiver);
+			notificationManager.cancelAll();
 		}
 	}
 
@@ -324,7 +331,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			//停止
 			@Override
 			public void onStop(){
-				if (mediaPlayer != null) {
+				if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
 					mediaPlayer.stop();
 					mediaPlayer.reset();
 					audioManager.abandonAudioFocus(audioFocusChangeListener);
@@ -411,7 +418,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		TimerTask timerTask = new TimerTask() {
 			@Override
 			public void run() {
-				if(mediaPlayer != null && mediaPlayer.isPlaying()){
+				if(playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE && mediaPlayer.isPlaying()){
 					current = mediaPlayer.getCurrentPosition();
 				}
 			}

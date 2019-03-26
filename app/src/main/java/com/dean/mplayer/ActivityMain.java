@@ -1,9 +1,11 @@
 package com.dean.mplayer;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -11,12 +13,15 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +57,8 @@ import static com.dean.mplayer.MediaUtil.getMusicMaps;
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private SimpleAdapter listAdapter;
     private ListView musicListView;
     private List<MusicInfo> musicInfo = new ArrayList<>();
     static List<PlayList> playList = new ArrayList<>();
@@ -74,6 +81,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
+    private Intent intentPlayService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -109,19 +117,58 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         musicListView = findViewById(R.id.music_list);
         musicListView.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        musicInfo = MediaUtil.getMusicLocal(this);
-        if (musicInfo != null && musicInfo.size() != 0) {
-            setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
-            initPlayList();
-        }
+        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+
+        requestPermission();    // 权限申请
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
 
         initMediaBrowser();
 
-        Intent intentPlayService = new Intent(this, PlayService.class);
+        intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
+    }
+
+    // 动态权限申请
+    private void requestPermission() {
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.READ_CONTACTS)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE);
+            }
+        }
+    }
+    private void showWaringDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("权限申请")
+                .setMessage("请前往设置->应用->MPlayer->权限中打开相关权限，否则部分功能无法正常使用")
+                .setNegativeButton("确定", (dialog, which) -> {})
+                .show();
+    }
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    musicInfo = MediaUtil.getMusicLocal(this);
+                    if (musicInfo != null && musicInfo.size() != 0) {
+                        setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
+                        listAdapter.notifyDataSetChanged();
+                        swipeRefreshLayout.setRefreshing(false);
+                        initPlayList();
+                    }
+                } else {
+                    showWaringDialog();
+                }
+                break;
+            }
+        }
     }
 
     private void initPlayList(){
@@ -224,11 +271,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 歌曲列表显示适配器
     public void setListAdapter(List<HashMap<String, String>> musiclist) {
-        SimpleAdapter mAdapter;
-        mAdapter = new SimpleAdapter(this, musiclist,
+        listAdapter = new SimpleAdapter(this, musiclist,
                 R.layout.music_list_item_layout, new String[] { "title", "artist","duration" },
                 new int[] { R.id.music_title, R.id.music_artist , R.id.music_duration });
-        musicListView.setAdapter(mAdapter);
+        musicListView.setAdapter(listAdapter);
     }
 
     // 歌曲列表监听器
@@ -289,10 +335,8 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 退出同时结束后台服务
     @Override
     protected void onDestroy() {
-        mediaController.getTransportControls().stop();
         mediaBrowserCompat.disconnect();
-        Intent intent = new Intent(ActivityMain.this, PlayService.class);
-        stopService(intent);
+        stopService(intentPlayService);
         super.onDestroy();
     }
 

@@ -25,22 +25,31 @@
             android:minHeight="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             android:theme="?attr/actionBarTheme"
+            android:fitsSystemWindows="true"
             toolbar:layout_constraintEnd_toEndOf="parent"
             toolbar:layout_constraintStart_toStartOf="parent"
             toolbar:layout_constraintTop_toTopOf="parent">
 
         </android.support.v7.widget.Toolbar>
 
-        <ListView
-            android:id="@+id/music_list"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/colorMusicList"
-            toolbar:layout_constraintBottom_toTopOf="@+id/music_control_panel"
-            toolbar:layout_constraintEnd_toEndOf="parent"
-            toolbar:layout_constraintStart_toStartOf="parent"
-            toolbar:layout_constraintTop_toBottomOf="@+id/main_toolbar">
-        </ListView>
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipe_refresh"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp">
+
+            <ListView
+                android:id="@+id/music_list"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@color/colorMusicList"
+                toolbar:layout_constraintBottom_toTopOf="@+id/music_control_panel"
+                toolbar:layout_constraintEnd_toEndOf="parent"
+                toolbar:layout_constraintStart_toStartOf="parent"
+                toolbar:layout_constraintTop_toBottomOf="@+id/main_toolbar">
+            </ListView>
+
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <android.support.constraint.ConstraintLayout
             android:id="@+id/music_control_panel"

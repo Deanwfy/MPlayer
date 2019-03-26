@@ -28,4 +28,8 @@ public class AppConstant {
 		public static final String MEDIA_ID_ARTIST = "__LOCAL_ARTIST__";
 		public static final String MEDIA_ID_ARTIST_DETAIL = "__LOCAL_ARTIST_DETAIL__";
 	}
+
+	public class Permission {
+		public static final int PERMISSION_READ_EXTERNAL_STORAGE = 1;
+	}
 }
