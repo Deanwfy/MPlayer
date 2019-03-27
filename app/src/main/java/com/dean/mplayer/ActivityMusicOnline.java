@@ -154,8 +154,14 @@ public class ActivityMusicOnline extends AppCompatActivity {
         long duration = musicInfo.get(position).getDuration();
         Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
         long albumId = musicInfo.get(position).getAlbum().getId();
-        ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumId));
-        mediaController.getTransportControls().skipToNext();
+        if (ActivityMain.playList.size() != 0) {
+            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumId));
+            mediaController.getTransportControls().skipToNext();
+        }else {
+            //　无本地音乐的情况（直接播放网络音乐）
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumId));
+            mediaController.getTransportControls().playFromUri(uri, null);
+        }
     }
 
     // 加载动画

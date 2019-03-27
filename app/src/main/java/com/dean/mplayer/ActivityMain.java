@@ -81,7 +81,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
-    private Intent intentPlayService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,7 +127,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         initMediaBrowser();
 
-        intentPlayService = new Intent(this, PlayService.class);
+        Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
     }
 
@@ -336,6 +335,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onDestroy() {
         mediaBrowserCompat.disconnect();
+        Intent intentPlayService = new Intent(this, PlayService.class);
         stopService(intentPlayService);
         super.onDestroy();
     }

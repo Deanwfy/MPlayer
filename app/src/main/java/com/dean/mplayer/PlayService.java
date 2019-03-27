@@ -35,7 +35,8 @@ import android.support.v7.graphics.Palette;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
-	private List<PlayList> playLists = ActivityMain.playList; // 播放列表
+	private List<PlayList> playLists; // 播放列表
+	private PlayList playList;
 	public static String mode = AppConstant.PlayMode.MODE_ORDER;	// 播放状态，默认为顺序播放
 	public static int current = 0;	// 播放进度
 
@@ -114,7 +115,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		mediaPlayer = new MediaPlayer();
 		audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 		setUpMediaSessionCompat();
-
 		//设置音乐准备完成时的监听器
 		mediaPlayer.setOnPreparedListener(this);
 		//设置音乐播放完成时的监听器
@@ -210,7 +210,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private void sendNotification(){
 		if (playLists != null && playLists.size() != 0) {
 			//获取歌曲信息
-			PlayList playList = playLists.get(ActivityMain.listPosition);
+			playList = playLists.get(ActivityMain.listPosition);
 			String musicTitle = playList.getTitle();
 			String musicArtist = playList.getArtist();
 			Bitmap musicCover = MediaUtil.getArtwork(this, playList.getAlbumId());
@@ -228,6 +228,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					.addAction(createAction(R.drawable.ic_notification_prev, "Prev", AppConstant.PlayAction.ACTION_PREVIOUS))
 					.addAction(playPauseAction)
 					.addAction(createAction(R.drawable.ic_notification_next, "next", AppConstant.PlayAction.ACTION_NEXT));
+
 			//版本兼容
 			if (MediaUtil.isLollipop()) {
 				notificationCompat.setVisibility(Notification.VISIBILITY_PUBLIC);    //锁屏显示
@@ -250,18 +251,18 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
 			notificationCompat.setContentIntent(resultPendingIntent);
 			//发布通知
+			//创建通知
+			notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 			if (MediaUtil.isOreo()) {
 				//建立通知渠道
 				CharSequence channelName = "MPlayer";
 				int importance = NotificationManager.IMPORTANCE_LOW;
 				NotificationChannel notificationChannel = new NotificationChannel(channelId, channelName, importance);
-				//创建通知
-				notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 				//将通知绑定至通知渠道
 				notificationManager.createNotificationChannel(notificationChannel);
-				//推送
-				notificationManager.notify(notificationId, notificationCompat.build());
 			}
+			//推送
+			notificationManager.notify(notificationId, notificationCompat.build());
 			//更新进度条
 			updateSeekBar();
 		}
@@ -286,7 +287,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS);
 		//设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
-//		sendNotification();
+		//加载播放列表
+		playLists = ActivityMain.playList;
 
 		//回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
@@ -294,7 +296,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			@Override
 			public void onPlayFromUri(Uri uri, Bundle position) {
 				if (playLists != null && playLists.size() != 0) {
-					PlayList playList= playLists.get(ActivityMain.listPosition);
+					playList = playLists.get(ActivityMain.listPosition);
 					MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
 							.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playList.getTitle())
 							.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playList.getArtist())
