@@ -139,7 +139,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE);
             } else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE);
+                initPlayList();
             }
         }
     }
@@ -155,13 +155,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         switch (requestCode) {
             case AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    musicInfo = MediaUtil.getMusicLocal(this);
-                    if (musicInfo != null && musicInfo.size() != 0) {
-                        setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
-                        listAdapter.notifyDataSetChanged();
-                        swipeRefreshLayout.setRefreshing(false);
-                        initPlayList();
-                    }
+                    initPlayList();
                 } else {
                     showWaringDialog();
                 }
@@ -170,18 +164,25 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // 加载播放列表
     private void initPlayList(){
-        for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++){
-            playList.add(new PlayList(
-                            musicInfo.get(musicCountLocal).getId(),
-                            musicInfo.get(musicCountLocal).getTitle(),
-                            musicInfo.get(musicCountLocal).getAlbum(),
-                            musicInfo.get(musicCountLocal).getArtist(),
-                            musicInfo.get(musicCountLocal).getDuration(),
-                            musicInfo.get(musicCountLocal).getUri(),
-                            musicInfo.get(musicCountLocal).getAlbumId()
-                    )
-            );
+        musicInfo = MediaUtil.getMusicLocal(this);
+        if (musicInfo != null && musicInfo.size() != 0) {
+            setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
+            listAdapter.notifyDataSetChanged();
+            swipeRefreshLayout.setRefreshing(false);
+            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
+                playList.add(new PlayList(
+                                musicInfo.get(musicCountLocal).getId(),
+                                musicInfo.get(musicCountLocal).getTitle(),
+                                musicInfo.get(musicCountLocal).getAlbum(),
+                                musicInfo.get(musicCountLocal).getArtist(),
+                                musicInfo.get(musicCountLocal).getDuration(),
+                                musicInfo.get(musicCountLocal).getUri(),
+                                musicInfo.get(musicCountLocal).getAlbumId()
+                                )
+                        );
+            }
         }
     }
 
