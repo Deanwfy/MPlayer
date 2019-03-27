@@ -2,6 +2,7 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -162,6 +163,8 @@ public class ActivityMusicOnline extends AppCompatActivity {
             ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumId));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
+        Intent playNowIntent = new Intent(this, PlayNow.class);
+        startActivity(playNowIntent);
     }
 
     // 加载动画

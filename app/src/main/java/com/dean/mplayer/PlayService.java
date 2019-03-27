@@ -47,6 +47,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	private PlaybackStateCompat playbackStateCompat;	//播放状态
 	private MediaControllerCompat mediaControllerCompat;	//播放控制
 	private Timer timer = new Timer();
+	// 音频焦点标志-是否是由失焦导致的暂停
+	boolean pausedByLossTransient = false;
 	// 耳机拔出监听
 	private IntentFilter intentFilter = new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
 	private BecomingNoisyReceiver becomingNoisyReceiver = new BecomingNoisyReceiver();
@@ -70,6 +72,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:    //暂时失去
 						if (mediaPlayer.isPlaying()) {
 							mediaControllerCompat.getTransportControls().pause();
+							pausedByLossTransient = true;
 						}
 						break;
 					case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:    //短暂(瞬间)失去
@@ -79,16 +82,15 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 							audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, volume / 2, AudioManager.FLAG_REMOVE_SOUND_AND_VIBRATE);
 						}
 						break;
-					case AudioManager.AUDIOFOCUS_GAIN:    //长时间(再次)获得
-						if (mediaPlayer == null) {
-							mediaControllerCompat.getTransportControls().playFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
-						} else if (!mediaPlayer.isPlaying()) {
-							mediaControllerCompat.getTransportControls().play();
-						}
-						break;
 					case AudioManager.AUDIOFOCUS_LOSS:    //长时间丢失
 						if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
 							mediaControllerCompat.getTransportControls().pause();
+						}
+						break;
+					case AudioManager.AUDIOFOCUS_GAIN:    //长时间获得
+						if (!mediaPlayer.isPlaying() && pausedByLossTransient) {
+							mediaControllerCompat.getTransportControls().play();
+							pausedByLossTransient = false;
 						}
 						break;
 				}
