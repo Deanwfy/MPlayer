@@ -3,6 +3,7 @@ package com.dean.mplayer;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import java.util.ArrayList;
@@ -140,13 +142,13 @@ public class ActivityMusicOnline extends AppCompatActivity {
                 Response response = okHttpClient.newCall(request).execute();
                 assert response.body() != null;
                 String responseData = response.body().string();
-                setPlayMusic(responseData, position);
+                setOnlineMusicInfo(responseData, position);
             }catch (Exception e){
                 e.printStackTrace();
             }
         }).start();
     }
-    private void setPlayMusic(String response, int position){
+    private void setOnlineMusicInfo(String response, int position){
         JSONObject jsonObject = JSON.parseObject(response);
         long id = musicInfo.get(position).getId();
         String title = musicInfo.get(position).getName();
@@ -155,12 +157,34 @@ public class ActivityMusicOnline extends AppCompatActivity {
         long duration = musicInfo.get(position).getDuration();
         Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
         long albumId = musicInfo.get(position).getAlbum().getId();
+        getAlbumCover(id, title, album, artist, duration, uri, albumId);
+    }
+    private void getAlbumCover(long id, String title, String album, String artist, long duration, Uri uri, long albumId){
+        String url = "http://39.108.4.217:8888/album?id=" + albumId;
+        new Thread(() -> {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(url)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                JSONObject jsonObject = JSON.parseObject(responseData);
+                Bitmap albumBitmap = Picasso.get().load(jsonObject.getJSONArray("songs").getJSONObject(0).getJSONObject("al").getString("picUrl")).get();
+                playOnlineMusic(id, title, album, artist, duration, uri, albumBitmap);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
         if (ActivityMain.playList.size() != 0) {
-            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumId));
+            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　无本地音乐的情况（直接播放网络音乐）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumId));
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         Intent playNowIntent = new Intent(this, PlayNow.class);

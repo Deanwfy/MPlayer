@@ -1,5 +1,6 @@
 package com.dean.mplayer;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 public class MusicInfo{
@@ -7,6 +8,7 @@ public class MusicInfo{
 	private String title;
 	private String album;
 	private long albumId;
+	private Bitmap albumBitmap;
 	private String displayName;
 	private String artist;
 	private long duration;
@@ -20,7 +22,7 @@ public class MusicInfo{
 		super();
 	}
 
-	public MusicInfo(long id, String title, String album, long albumId,
+	public MusicInfo(long id, String title, String album, long albumId, Bitmap albumBitmap,
 					 String displayName, String artist, long duration, long size,
 					 String url, Uri uri, String lrcTitle, String lrcSize) {
 		super();
@@ -28,6 +30,7 @@ public class MusicInfo{
 		this.title = title;
 		this.album = album;
 		this.albumId = albumId;
+		this.albumBitmap = albumBitmap;
 		this.displayName = displayName;
 		this.artist = artist;
 		this.duration = duration;
@@ -71,14 +74,20 @@ public class MusicInfo{
 		this.album = album;
 	}
 
-	
-
 	public long getAlbumId() {
 		return albumId;
 	}
 
 	public void setAlbumId(long albumId) {
 		this.albumId = albumId;
+	}
+
+	public Bitmap getAlbumBitmap() {
+		return albumBitmap;
+	}
+
+	public void setAlbumBitmap(Bitmap albumBitmap) {
+		this.albumBitmap = albumBitmap;
 	}
 
 	public String getArtist() {
@@ -137,7 +146,5 @@ public class MusicInfo{
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
 	}
-	
-	
 
 }

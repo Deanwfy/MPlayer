@@ -1,4 +1,5 @@
 package com.dean.mplayer;
+import android.graphics.Bitmap;
 import android.net.Uri;
 
 public class PlayList {
@@ -9,13 +10,13 @@ public class PlayList {
     private String album;
     private long duration;
     private Uri uri;
-    private long albumId;
+    private Bitmap albumBitmap;
 
     public PlayList() {
         super();
     }
 
-    public PlayList(long id, String title, String album, String artist, long duration, Uri uri, long albumId) {
+    public PlayList(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap) {
         super();
         this.id = id;
         this.title = title;
@@ -23,7 +24,7 @@ public class PlayList {
         this.artist = artist;
         this.duration = duration;
         this.uri = uri;
-        this.albumId = albumId;
+        this.albumBitmap = albumBitmap;
     }
 
     public void setId(long id) {
@@ -68,11 +69,11 @@ public class PlayList {
         return uri;
      }
 
-    public long getAlbumId() {
-        return albumId;
+    public Bitmap getAlbumBitmap() {
+        return albumBitmap;
     }
-     public void setAlbumId(long albumId) {
-        this.albumId = albumId;
+     public void setAlbumBitmap(Bitmap albumBitmap) {
+        this.albumBitmap = albumBitmap;
     }
 
     @Override

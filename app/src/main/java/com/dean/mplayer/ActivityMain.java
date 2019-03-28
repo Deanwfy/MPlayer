@@ -120,10 +120,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
-        requestPermission();    // 权限申请
-
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
+
+        requestPermission();    // 权限申请
 
         initMediaBrowser();
 
@@ -179,11 +179,12 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                                 musicInfo.get(musicCountLocal).getArtist(),
                                 musicInfo.get(musicCountLocal).getDuration(),
                                 musicInfo.get(musicCountLocal).getUri(),
-                                musicInfo.get(musicCountLocal).getAlbumId()
+                                musicInfo.get(musicCountLocal).getAlbumBitmap()
                                 )
                         );
             }
         }
+
     }
 
     private void initMediaBrowser() {

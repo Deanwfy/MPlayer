@@ -57,6 +57,7 @@ public class MediaUtil {
 				String displayName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
 				long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
+				Bitmap albumBitmap = getArtwork(context, albumId);
 				long duration = cursor.getLong(cursor
 						.getColumnIndex(MediaStore.Audio.Media.DURATION));
 				long size = cursor.getLong(cursor
@@ -73,6 +74,7 @@ public class MediaUtil {
 					musicInfo.setAlbum(album);
 					musicInfo.setDisplayName(displayName);
 					musicInfo.setAlbumId(albumId);
+					musicInfo.setAlbumBitmap(albumBitmap);
 					musicInfo.setDuration(duration);
 					musicInfo.setSize(size);
 					musicInfo.setUrl(url);
@@ -129,23 +131,6 @@ public class MediaUtil {
 
 	//获取专辑封面的Uri
 	private static final Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
-	//获取默认专辑图片
-	@SuppressWarnings("ResourceType")
-	private static Bitmap getDefaultArtwork(Context context) {
-		Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_cover);
-		if (drawable instanceof BitmapDrawable) {
-			return ((BitmapDrawable) drawable).getBitmap();
-		} else if (drawable instanceof VectorDrawable || drawable instanceof VectorDrawableCompat) {
-			Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-			Canvas canvas = new Canvas(bitmap);
-			drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-			drawable.draw(canvas);
-			return bitmap;
-		} else {
-			throw new IllegalArgumentException("unsupported drawable type");
-		}
-	}
-
 	//获取专辑封面位图对象
 	public static Bitmap getArtwork(Context context, long album_id){
 		ContentResolver res = context.getContentResolver();
@@ -182,6 +167,22 @@ public class MediaUtil {
 			}
 		}
 		return null;
+	}
+	//获取默认专辑图片
+	@SuppressWarnings("ResourceType")
+	private static Bitmap getDefaultArtwork(Context context) {
+		Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_cover);
+		if (drawable instanceof BitmapDrawable) {
+			return ((BitmapDrawable) drawable).getBitmap();
+		} else if (drawable instanceof VectorDrawable || drawable instanceof VectorDrawableCompat) {
+			Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(bitmap);
+			drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+			drawable.draw(canvas);
+			return bitmap;
+		} else {
+			throw new IllegalArgumentException("unsupported drawable type");
+		}
 	}
 
 	//图片缩放
