@@ -42,8 +42,6 @@ public class ActivityMusicOnline extends AppCompatActivity {
     EditText searchOnline;
     LoadingDialog loadingDialog;
 
-    String searchUrl;
-    String musicInfoUrl;
     List<Songs> musicInfo = new ArrayList<>();  //设置空数据以完成RecyclerAdapter初始化，否则报错（虽然会自动忽略）
 
     //获取服务
@@ -82,14 +80,12 @@ public class ActivityMusicOnline extends AppCompatActivity {
         @Override
         public boolean onKey(View v, int keyCode, KeyEvent event) {
             if(keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP){
-                loadingAnimation();
+                loadingAnimation("搜索中...");
                 String userInput = searchOnline.getText().toString();
                 if(TextUtils.isEmpty(userInput)){
                     return true;
                 }
-                userInput = userInput.trim();
-                searchUrl = "http://39.108.4.217:8888/search?keywords= " + userInput;
-                getSearchUrl(searchUrl);
+                getSearchUrl(userInput.trim());
                 return true;
             }
             return false;
@@ -97,12 +93,13 @@ public class ActivityMusicOnline extends AppCompatActivity {
     }
 
     // 搜索结果
-    private void getSearchUrl(String url){
+    private void getSearchUrl(String userInput){
+        String searchUrl = "http://39.108.4.217:8888/search?keywords= " + userInput;
         new Thread(() -> {
             try {
                 OkHttpClient okHttpClient = new OkHttpClient();
                 Request request = new Request.Builder()
-                        .url(url)
+                        .url(searchUrl)
                         .build();
                 Response response = okHttpClient.newCall(request).execute();
                 assert response.body() != null;
@@ -121,23 +118,44 @@ public class ActivityMusicOnline extends AppCompatActivity {
     private void uiUpdate(){
         runOnUiThread(() -> {
                     musicListRecyclerAdapter = new MusicListRecyclerAdapter(musicInfo);
-                    musicListRecyclerAdapter.setOnItemClickListener((view, position) -> {
-                        musicInfoUrl = "http://39.108.4.217:8888/song/url?id=" + String.valueOf(musicInfo.get(position).getId());
-                        getMusicInfoUrl(musicInfoUrl, position);
-                    });
+                    musicListRecyclerAdapter.setOnItemClickListener((view, position) -> getMusicCheck(position));
                     musicListOnlineRecycler.setAdapter(musicListRecyclerAdapter);
                     loadingDialog.close();
                 }
         );
     }
-
-    // 从搜索结果中播放
-    private void getMusicInfoUrl(String url, int position){
+    // 检查所选音乐是否可用
+    private void getMusicCheck(int position){
+        String musicCheckUrl = "http://39.108.4.217:8888/check/music?id=" + String.valueOf(musicInfo.get(position).getId());
         new Thread(() -> {
             try {
                 OkHttpClient okHttpClient = new OkHttpClient();
                 Request request = new Request.Builder()
-                        .url(url)
+                        .url(musicCheckUrl)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                String state = JSON.parseObject(responseData).getString("success");
+                if (state.equals("true")){
+                    musicCheckResult(true, true);
+                    getMusicInfoUrl(position);
+                }else {
+                    musicCheckResult(false, false);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    // 从搜索结果中播放
+    private void getMusicInfoUrl(int position){
+        String musicInfoUrl = "http://39.108.4.217:8888/song/url?id=" + String.valueOf(musicInfo.get(position).getId());
+        new Thread(() -> {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(musicInfoUrl)
                         .build();
                 Response response = okHttpClient.newCall(request).execute();
                 assert response.body() != null;
@@ -187,19 +205,31 @@ public class ActivityMusicOnline extends AppCompatActivity {
             ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
+        musicCheckResult(true, false);
         Intent playNowIntent = new Intent(this, PlayNow.class);
         startActivity(playNowIntent);
     }
 
     // 加载动画
-    private void loadingAnimation(){
+    private void loadingAnimation(String dialogText){
         loadingDialog = new LoadingDialog(this);
-        loadingDialog.setLoadingText("搜索中...")
+        loadingDialog.setLoadingText(dialogText)
                      .setInterceptBack(false)
                      .show();
     }
 
-
+    // 版权提示
+    private void musicCheckResult(boolean result, boolean show){
+        if (result) {
+            if (show) {
+                runOnUiThread(() -> loadingAnimation("加载中..."));
+            }else {
+                runOnUiThread(() -> loadingDialog.close());
+            }
+        }else {
+            runOnUiThread(() -> Toast.makeText(this, "抱歉，暂无版权", Toast.LENGTH_SHORT).show());
+        }
+    }
     //——————————————————————————————————MediaBrowser————————————————————————————————————————————
 
     private void initMediaBrowser() {
