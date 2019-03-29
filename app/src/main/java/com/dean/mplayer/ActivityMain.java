@@ -58,7 +58,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 列表显示
     private SwipeRefreshLayout swipeRefreshLayout;
-    private SimpleAdapter listAdapter;
     private ListView musicListView;
     private List<MusicInfo> musicInfo = new ArrayList<>();
     static List<PlayList> playList = new ArrayList<>();
@@ -164,13 +163,32 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // 加载播放列表
+    // 加载播放列表,显示本地音乐
     private void initPlayList(){
-        musicInfo = MediaUtil.getMusicLocal(this);
+        new Thread(() -> {
+            musicInfo = MediaUtil.getMusicLocal(this);
+            if (musicInfo != null && musicInfo.size() != 0) {
+                runOnUiThread(() -> setListAdapter(getMusicMaps(musicInfo)));   // 显示歌曲列表
+                swipeRefreshLayout.setRefreshing(false);
+                for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
+                    playList.add(new PlayList(
+                                    musicInfo.get(musicCountLocal).getId(),
+                                    musicInfo.get(musicCountLocal).getTitle(),
+                                    musicInfo.get(musicCountLocal).getAlbum(),
+                                    musicInfo.get(musicCountLocal).getArtist(),
+                                    musicInfo.get(musicCountLocal).getDuration(),
+                                    musicInfo.get(musicCountLocal).getUri(),
+                                    musicInfo.get(musicCountLocal).getAlbumBitmap()
+                            )
+                    );
+                }
+            }
+        }).start();
+    }
+    // 刷新播放列表
+    private void refreshPlayList(){
+        playList.clear();
         if (musicInfo != null && musicInfo.size() != 0) {
-            setListAdapter(getMusicMaps(musicInfo));  // 显示歌曲列表
-            listAdapter.notifyDataSetChanged();
-            swipeRefreshLayout.setRefreshing(false);
             for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
                 playList.add(new PlayList(
                                 musicInfo.get(musicCountLocal).getId(),
@@ -180,11 +198,10 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                                 musicInfo.get(musicCountLocal).getDuration(),
                                 musicInfo.get(musicCountLocal).getUri(),
                                 musicInfo.get(musicCountLocal).getAlbumBitmap()
-                                )
-                        );
+                        )
+                );
             }
         }
-
     }
 
     private void initMediaBrowser() {
@@ -271,19 +288,19 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     };
 
     // 歌曲列表显示适配器
-    public void setListAdapter(List<HashMap<String, String>> musiclist) {
-        listAdapter = new SimpleAdapter(this, musiclist,
-                R.layout.music_list_item_layout, new String[] { "title", "artist","duration" },
-                new int[] { R.id.music_title, R.id.music_artist , R.id.music_duration });
+    public void setListAdapter(List<HashMap<String, String>> musicList) {
+        SimpleAdapter listAdapter = new SimpleAdapter(this, musicList,
+                R.layout.music_list_item_layout, new String[]{"title", "artist", "duration"},
+                new int[]{R.id.music_title, R.id.music_artist, R.id.music_duration});
         musicListView.setAdapter(listAdapter);
+        listAdapter.notifyDataSetChanged();
     }
 
     // 歌曲列表监听器
     private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            playList.clear();
-            initPlayList();
+            refreshPlayList();
             listPosition = --position;
             mediaController.getTransportControls().skipToNext();
         }
