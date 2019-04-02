@@ -26,16 +26,22 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
@@ -71,6 +77,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     // 播放控制按钮
     private ConstraintLayout musicControlPanel;
     private ImageButton PlayBtn;
+    private ImageButton ListBtn;
 
     //睡眠定时计时器
     private Timer clockTimer;
@@ -167,22 +174,24 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private void initPlayList(){
         new Thread(() -> {
             musicInfo = MediaUtil.getMusicLocal(this);
-            if (musicInfo != null && musicInfo.size() != 0) {
-                runOnUiThread(() -> setListAdapter(getMusicMaps(musicInfo)));   // 显示歌曲列表
-                swipeRefreshLayout.setRefreshing(false);
-                for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
-                    playList.add(new PlayList(
-                                    musicInfo.get(musicCountLocal).getId(),
-                                    musicInfo.get(musicCountLocal).getTitle(),
-                                    musicInfo.get(musicCountLocal).getAlbum(),
-                                    musicInfo.get(musicCountLocal).getArtist(),
-                                    musicInfo.get(musicCountLocal).getDuration(),
-                                    musicInfo.get(musicCountLocal).getUri(),
-                                    musicInfo.get(musicCountLocal).getAlbumBitmap()
-                            )
-                    );
+            runOnUiThread(() -> {
+                if (musicInfo != null && musicInfo.size() != 0) {
+                    runOnUiThread(() -> setListAdapter(getMusicMaps(musicInfo)));   // 显示歌曲列表
+                    swipeRefreshLayout.setRefreshing(false);
+                    for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
+                        playList.add(new PlayList(
+                                        musicInfo.get(musicCountLocal).getId(),
+                                        musicInfo.get(musicCountLocal).getTitle(),
+                                        musicInfo.get(musicCountLocal).getAlbum(),
+                                        musicInfo.get(musicCountLocal).getArtist(),
+                                        musicInfo.get(musicCountLocal).getDuration(),
+                                        musicInfo.get(musicCountLocal).getUri(),
+                                        musicInfo.get(musicCountLocal).getAlbumBitmap()
+                                )
+                        );
+                    }
                 }
-            }
+            });
         }).start();
     }
     // 刷新播放列表
@@ -310,6 +319,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private void findControlBtnById(){
         musicControlPanel = findViewById(R.id.music_control_panel);
         PlayBtn = findViewById(R.id.playing_play);
+        ListBtn = findViewById(R.id.playing_list);
         PlayingTitle = findViewById(R.id.playing_title);
         PlayingArtist = findViewById(R.id.playing_artist);
         PlayingCover = findViewById(R.id.music_cover);
@@ -319,9 +329,9 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     private void setControlBtnOnClickListener(){
         ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
         PlayBtn.setOnClickListener(controlBtnOnClickListener);
+        ListBtn.setOnClickListener(controlBtnOnClickListener);
         musicControlPanel.setOnClickListener(controlBtnOnClickListener);
     }
-
     // 命名播放控制面板监听器类，实现监听事件
     private class ControlBtnOnClickListener implements OnClickListener {
         @Override
@@ -337,6 +347,47 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                             mediaController.getTransportControls().playFromUri(playList.get(listPosition).getUri(), null);
                         }
                     }
+                    break;
+                case R.id.playing_list:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
+                    // 自定义布局
+                    @SuppressLint("InflateParams")
+                    View playListView = LayoutInflater.from(ActivityMain.this).inflate(R.layout.play_list,null);
+                    // 设置AlertDialog参数，加载自定义布局
+                    builder.setView(playListView);
+                    // AlertDialog对象
+                    AlertDialog alertDialogMusicList = builder.create();
+                    // 自定义布局RecyclerLayout适配实现
+                    RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
+                    LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMain.this);
+                    playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
+                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
+                    playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
+                        listPosition = --position;
+                        mediaController.getTransportControls().skipToNext();
+                    });
+                    playListRecycler.setAdapter(playListRecyclerAdapter);
+                    // 关闭按钮
+                    Button buttonClose = playListView.findViewById(R.id.play_list_close);
+                    buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
+                    // 显示
+                    alertDialogMusicList.show();
+                    // 获取屏幕
+                    DisplayMetrics displayMetrics = new DisplayMetrics();
+                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+                    // 获取列表dialog
+                    Window windowDialog = alertDialogMusicList.getWindow();
+                    assert windowDialog != null;
+                    //去掉dialog默认的padding
+                    windowDialog.getDecorView().setPadding(0, 0, 0, 0);
+                    windowDialog.getDecorView().setBackgroundColor(ActivityMain.this.getResources().getColor(R.color.colorControlPanel));
+                    // 设置大小
+                    WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
+                    layoutParams.width = displayMetrics.widthPixels;
+//                    layoutParams.height = (int)(displayMetrics.heightPixels * 0.6);
+                    // 设置位置为底部
+                    layoutParams.gravity = Gravity.BOTTOM;
+                    windowDialog.setAttributes(layoutParams);
                     break;
                 case R.id.music_control_panel:
                     Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);

@@ -10,7 +10,7 @@
     <color name="colorMusicTitleText">#333333</color>
     <color name="colorMusicArtistText">#7f7f7f</color>
     <color name="colorMusicList">#f3f4f6</color>
-    <color name="colorControlPanel">#ffffff</color>
+    <color name="colorControlPanel">#FFFFFF</color>
     <color name="transparent">#00000000</color>
 
     <color name="colorPlayNowMusicTitleText">#009B8A</color>

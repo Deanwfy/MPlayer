@@ -20,4 +20,25 @@
 
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.ActionBar" />
 
+
+    <!-- PlayList进出动画 -->
+    <style name="DialogPlayListAnimate" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/dialog_playlist_enter</item>  //进入时的动画
+        <item name="android:windowExitAnimation">@anim/dialog_playlist_exit</item>    //退出时的动画
+    </style>
+    <style name="DialogPlayList" parent="@android:style/Theme.Holo.Dialog">
+        <!-- 是否有边框 -->
+        <item name="android:windowFrame">@null</item>
+        <!--是否在悬浮Activity之上 -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- 标题 -->
+        <item name="android:windowNoTitle">false</item>
+        <!-- 阴影 -->
+        <item name="android:windowIsTranslucent">true</item><!--半透明-->
+        <!-- 进入和退出的动画 -->
+        <item name="android:windowAnimationStyle">@style/DialogPlayListAnimate</item>
+        <!-- 点外边可以消失 -->
+        <item name="android:windowCloseOnTouchOutside">true</item>
+    </style>
+
 </resources>
