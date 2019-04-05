@@ -30,6 +30,6 @@ public class AppConstant {
 	}
 
 	public class Permission {
-		public static final int PERMISSION_READ_EXTERNAL_STORAGE = 1;
+		public static final int PERMISSION_READ_WRITE_EXTERNAL_STORAGE = 1;
 	}
 }

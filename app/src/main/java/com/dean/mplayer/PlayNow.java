@@ -52,7 +52,6 @@ public class PlayNow extends AppCompatActivity {
     private MediaBrowserCompat mediaBrowserCompat;
 
     //歌曲信息
-    private List<MusicInfo> musicInfos = null;
     Bitmap cover = null;
 
     //SeekBar更新
@@ -68,7 +67,6 @@ public class PlayNow extends AppCompatActivity {
         findControlBtnById();
         setPlayNowMode();
         setControlBtnOnClickListener();
-        musicInfos = MediaUtil.getMusicLocal(this);
         initMediaBrowser();
     }
     @Override
@@ -146,13 +144,13 @@ public class PlayNow extends AppCompatActivity {
                     }
                     break;
                 case R.id.playNowPlay:
-                    if (musicInfos != null && musicInfos.size() != 0) {
+                    if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                             mediaController.getTransportControls().pause();
                         } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                             mediaController.getTransportControls().play();
                         } else {
-                            mediaController.getTransportControls().playFromUri(musicInfos.get(0).getUri(), null);
+                            mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(0).getUri(), null);
                         }
                     }
                     break;

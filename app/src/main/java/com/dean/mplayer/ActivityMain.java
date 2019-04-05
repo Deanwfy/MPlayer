@@ -26,12 +26,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.app.AppCompatDelegate;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.Display;
+import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -52,6 +51,8 @@ import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,7 @@ import static com.dean.mplayer.MediaUtil.getMusicMaps;
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
+    private LoadingDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ListView musicListView;
     private List<MusicInfo> musicInfo = new ArrayList<>();
@@ -128,7 +130,16 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
+        registerForContextMenu(musicListView);
+        musicListView.setOnItemLongClickListener((parent, view, position, id) -> {
+            musicListView.showContextMenu();
+            return true;
+        });
 
+        loadingDialog = new LoadingDialog(this);
+        loadingDialog.setLoadingText("扫描中...")
+                .setInterceptBack(false)
+                .show();
         requestPermission();    // 权限申请
 
         initMediaBrowser();
@@ -139,14 +150,13 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 动态权限申请
     private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.READ_CONTACTS)
-                != PackageManager.PERMISSION_GRANTED) {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE);
-            } else {
-                initPlayList();
-            }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE);
+        } else {
+            initPlayList();
         }
     }
     private void showWaringDialog() {
@@ -155,11 +165,12 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                 .setMessage("请前往设置->应用->MPlayer->权限中打开相关权限，否则部分功能无法正常使用")
                 .setNegativeButton("确定", (dialog, which) -> {})
                 .show();
+        loadingDialog.close();
     }
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
-            case AppConstant.Permission.PERMISSION_READ_EXTERNAL_STORAGE: {
+            case AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     initPlayList();
                 } else {
@@ -176,7 +187,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             musicInfo = MediaUtil.getMusicLocal(this);
             runOnUiThread(() -> {
                 if (musicInfo != null && musicInfo.size() != 0) {
-                    runOnUiThread(() -> setListAdapter(getMusicMaps(musicInfo)));   // 显示歌曲列表
+                    setListAdapter(getMusicMaps(musicInfo));   // 显示歌曲列表
                     swipeRefreshLayout.setRefreshing(false);
                     for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
                         playList.add(new PlayList(
@@ -191,6 +202,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                         );
                     }
                 }
+                loadingDialog.close();
             });
         }).start();
     }
@@ -399,6 +411,12 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     break;
             }
         }
+    }
+    // 列表长按菜单
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        menu.add(0,0,0,"删除");
     }
 
     // 退出同时结束后台服务

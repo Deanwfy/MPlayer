@@ -23,6 +23,8 @@ import android.provider.MediaStore;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.squareup.picasso.Picasso;
+
 public class MediaUtil {
 
 	//版本判断
@@ -129,44 +131,14 @@ public class MediaUtil {
 		return min + ":" + sec.trim().substring(0, 2);
 	}
 
-	//获取专辑封面的Uri
-	private static final Uri albumArtUri = Uri.parse("content://media/external/audio/albumart");
 	//获取专辑封面位图对象
-	public static Bitmap getArtwork(Context context, long album_id){
-		ContentResolver res = context.getContentResolver();
-		Uri uri = ContentUris.withAppendedId(albumArtUri, album_id);
-		if(uri != null) {
-			InputStream in = null;
-			try {
-				in = res.openInputStream(uri);
-				BitmapFactory.Options options = new BitmapFactory.Options();
-				//先制定原始大小
-				options.inSampleSize = 1;
-				//只进行大小判断
-				options.inJustDecodeBounds = true;
-				//调用此方法得到options得到图片的大小
-				BitmapFactory.decodeStream(in, null, options);
-				//调用computeSampleSize得到图片缩放比例, target:800
-				options.inSampleSize = computeSampleSize(options, 800);
-				//得到缩放比例，读入Bitmap数据
-				options.inJustDecodeBounds = false;
-				options.inDither = false;
-				options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-				in = res.openInputStream(uri);
-				return BitmapFactory.decodeStream(in, null, options);
-			} catch (FileNotFoundException e) {
-				return getDefaultArtwork(context);
-			} finally {
-				try {
-					if(in != null) {
-						in.close();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+	public static Bitmap getArtwork(Context context, long album_id) {
+			Uri uri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), album_id);
+		try {
+			return Picasso.get().load(uri).error(R.drawable.ic_cover).get();
+		} catch (IOException e) {
+			return getDefaultArtwork(context);
 		}
-		return null;
 	}
 	//获取默认专辑图片
 	@SuppressWarnings("ResourceType")

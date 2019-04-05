@@ -30,7 +30,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="@string/music_artist"
-            android:textColor="@color/colorMusicArtistText" />
+            android:textColor="@color/colorMusicArtistText"
+            android:ellipsize="end"
+            android:singleLine="true" />
         <TextView
             android:id="@+id/music_duration"
             android:layout_width="wrap_content"
