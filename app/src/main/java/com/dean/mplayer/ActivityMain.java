@@ -1,11 +1,9 @@
 package com.dean.mplayer;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -13,15 +11,12 @@ import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,7 +25,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.ContextMenu;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -39,35 +33,23 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.NumberPicker;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static com.dean.mplayer.MediaUtil.getMusicMaps;
-
 public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
-    private LoadingDialog loadingDialog;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private ListView musicListView;
-    private List<MusicInfo> musicInfo = new ArrayList<>();
     static List<PlayList> playList = new ArrayList<>();
     public static int listPosition = 0;
 
@@ -87,7 +69,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     public static boolean needToStop;
 
     // 媒体播放服务
-    private MediaControllerCompat mediaController;
+    public static MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
     @Override
@@ -122,107 +104,22 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        musicListView = findViewById(R.id.music_list);
-        musicListView.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
-        swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
-        swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
-
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
-        registerForContextMenu(musicListView);
-        musicListView.setOnItemLongClickListener((parent, view, position, id) -> {
-            musicListView.showContextMenu();
-            return true;
-        });
 
-        loadingDialog = new LoadingDialog(this);
-        loadingDialog.setLoadingText("扫描中...")
-                .setInterceptBack(false)
-                .show();
-        requestPermission();    // 权限申请
+        // Fragment动态加载
+/*
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentMusicLocal = new FragmentMusicLocal();
+        fragmentTransaction.add(R.id.fragment_music_local, fragmentMusicLocal);
+        fragmentTransaction.commit();
+*/
 
         initMediaBrowser();
 
         Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
-    }
-
-    // 动态权限申请
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE);
-        } else {
-            initPlayList();
-        }
-    }
-    private void showWaringDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("权限申请")
-                .setMessage("请前往设置->应用->MPlayer->权限中打开相关权限，否则部分功能无法正常使用")
-                .setNegativeButton("确定", (dialog, which) -> {})
-                .show();
-        loadingDialog.close();
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initPlayList();
-                } else {
-                    showWaringDialog();
-                }
-                break;
-            }
-        }
-    }
-
-    // 加载播放列表,显示本地音乐
-    private void initPlayList(){
-        new Thread(() -> {
-            musicInfo = MediaUtil.getMusicLocal(this);
-            runOnUiThread(() -> {
-                if (musicInfo != null && musicInfo.size() != 0) {
-                    setListAdapter(getMusicMaps(musicInfo));   // 显示歌曲列表
-                    swipeRefreshLayout.setRefreshing(false);
-                    for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
-                        playList.add(new PlayList(
-                                        musicInfo.get(musicCountLocal).getId(),
-                                        musicInfo.get(musicCountLocal).getTitle(),
-                                        musicInfo.get(musicCountLocal).getAlbum(),
-                                        musicInfo.get(musicCountLocal).getArtist(),
-                                        musicInfo.get(musicCountLocal).getDuration(),
-                                        musicInfo.get(musicCountLocal).getUri(),
-                                        musicInfo.get(musicCountLocal).getAlbumBitmap()
-                                )
-                        );
-                    }
-                }
-                loadingDialog.close();
-            });
-        }).start();
-    }
-    // 刷新播放列表
-    private void refreshPlayList(){
-        playList.clear();
-        if (musicInfo != null && musicInfo.size() != 0) {
-            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
-                playList.add(new PlayList(
-                                musicInfo.get(musicCountLocal).getId(),
-                                musicInfo.get(musicCountLocal).getTitle(),
-                                musicInfo.get(musicCountLocal).getAlbum(),
-                                musicInfo.get(musicCountLocal).getArtist(),
-                                musicInfo.get(musicCountLocal).getDuration(),
-                                musicInfo.get(musicCountLocal).getUri(),
-                                musicInfo.get(musicCountLocal).getAlbumBitmap()
-                        )
-                );
-            }
-        }
     }
 
     private void initMediaBrowser() {
@@ -308,24 +205,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         }
     };
 
-    // 歌曲列表显示适配器
-    public void setListAdapter(List<HashMap<String, String>> musicList) {
-        SimpleAdapter listAdapter = new SimpleAdapter(this, musicList,
-                R.layout.music_list_item_layout, new String[]{"title", "artist", "duration"},
-                new int[]{R.id.music_title, R.id.music_artist, R.id.music_duration});
-        musicListView.setAdapter(listAdapter);
-        listAdapter.notifyDataSetChanged();
-    }
-
-    // 歌曲列表监听器
-    private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            refreshPlayList();
-            listPosition = --position;
-            mediaController.getTransportControls().skipToNext();
-        }
-    }
 
     // 统一获取播放控制面板控件id
     private void findControlBtnById(){
@@ -339,11 +218,12 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
     // 将监听器设置到播放控制面板控件
     private void setControlBtnOnClickListener(){
-        ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
+        ActivityMain.ControlBtnOnClickListener controlBtnOnClickListener = new ActivityMain.ControlBtnOnClickListener();
         PlayBtn.setOnClickListener(controlBtnOnClickListener);
         ListBtn.setOnClickListener(controlBtnOnClickListener);
         musicControlPanel.setOnClickListener(controlBtnOnClickListener);
     }
+
     // 命名播放控制面板监听器类，实现监听事件
     private class ControlBtnOnClickListener implements OnClickListener {
         @Override
@@ -411,12 +291,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     break;
             }
         }
-    }
-    // 列表长按菜单
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0,0,0,"删除");
     }
 
     // 退出同时结束后台服务

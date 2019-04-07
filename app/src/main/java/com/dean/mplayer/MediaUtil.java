@@ -157,26 +157,4 @@ public class MediaUtil {
 		}
 	}
 
-	//图片缩放
-	public static int computeSampleSize(BitmapFactory.Options options, int target) {
-		int w = options.outWidth;
-		int h = options.outHeight;
-		int candidateW = w / target;
-		int candidateH = h / target;
-		int candidate = Math.max(candidateW, candidateH);
-		if(candidate == 0) {
-			return 1;
-		}
-		if(candidate > 1) {
-			if((w > target) && (w / candidate) < target) {
-				candidate -= 1;
-			}
-		}
-		if(candidate > 1) {
-			if((h > target) && (h / candidate) < target) {
-				candidate -= 1;
-			}
-		}
-		return candidate;
-	}
 }
