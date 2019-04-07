@@ -17,11 +17,12 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ListView
-            android:id="@+id/music_list"
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/music_list_local"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/colorMusicList" />
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:scrollbars="vertical"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 

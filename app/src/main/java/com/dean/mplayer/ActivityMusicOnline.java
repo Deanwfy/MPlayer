@@ -61,7 +61,6 @@ public class ActivityMusicOnline extends AppCompatActivity {
         musicListOnlineRecycler = findViewById(R.id.music_list_online);
         LinearLayoutManager musicListOnlineRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListOnlineRecycler.setLayoutManager(musicListOnlineRecyclerLayoutManager);
-        musicListOnlineRecycler.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
         musicListRecyclerAdapter = new MusicListRecyclerAdapter(musicInfo);
         musicListOnlineRecycler.setAdapter(musicListRecyclerAdapter);
 

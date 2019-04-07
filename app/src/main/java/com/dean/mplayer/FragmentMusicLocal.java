@@ -12,21 +12,18 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ListView;
-import android.widget.SimpleAdapter;
 
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-
-import static com.dean.mplayer.MediaUtil.getMusicMaps;
 
 public class FragmentMusicLocal extends Fragment {
 
@@ -36,7 +33,7 @@ public class FragmentMusicLocal extends Fragment {
 
     private LoadingDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private ListView musicListView;
+    private RecyclerView musicListLocalRecyclerView;
     private List<MusicInfo> musicInfo = new ArrayList<>();
     private View fragmentMusicLocal;
     private Activity activityMain;
@@ -57,17 +54,18 @@ public class FragmentMusicLocal extends Fragment {
     public void onViewCreated(@NonNull View viewer, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(viewer, savedInstanceState);
 
-        musicListView = fragmentMusicLocal.findViewById(R.id.music_list);
-        musicListView.setOnItemClickListener(new MusicListItemClickListener());    // 将监听器设置到歌曲列表
+        musicListLocalRecyclerView = fragmentMusicLocal.findViewById(R.id.music_list_local);
         swipeRefreshLayout = fragmentMusicLocal.findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
-        registerForContextMenu(musicListView);
-        musicListView.setOnItemLongClickListener((parent, view, position, id) -> {
-            musicListView.showContextMenu();
+/*长按菜单
+        registerForContextMenu(musicListLocalRecyclerView);
+        musicListLocalRecyclerView.setOnLongClickListener((view) -> {
+            musicListLocalRecyclerView.showContextMenu();
             return true;
         });
+*/
 
         loadingDialog = new LoadingDialog(getActivity());
         loadingDialog.setLoadingText("扫描中...")
@@ -95,8 +93,10 @@ public class FragmentMusicLocal extends Fragment {
             musicInfo = MediaUtil.getMusicLocal(activityMain);
             activityMain.runOnUiThread(() -> {
                 if (musicInfo != null && musicInfo.size() != 0) {
-                    setListAdapter(getMusicMaps(musicInfo));   // 显示歌曲列表
+                    // 显示歌曲列表，设置监听器
+                    setListAdapter();
                     swipeRefreshLayout.setRefreshing(false);
+                    // 默认将本地歌曲作为播放列表
                     for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
                         ActivityMain.playList.add(new PlayList(
                                         musicInfo.get(musicCountLocal).getId(),
@@ -134,22 +134,17 @@ public class FragmentMusicLocal extends Fragment {
     }
 
     // 歌曲列表显示适配器
-    public void setListAdapter(List<HashMap<String, String>> musicList) {
-        SimpleAdapter listAdapter = new SimpleAdapter(activityMain, musicList,
-                R.layout.music_list_item_layout, new String[]{"title", "artist", "duration"},
-                new int[]{R.id.music_title, R.id.music_artist, R.id.music_duration});
-        musicListView.setAdapter(listAdapter);
-        listAdapter.notifyDataSetChanged();
-    }
-
-    // 歌曲列表监听器
-    private class MusicListItemClickListener implements AdapterView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+    public void setListAdapter() {
+        LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(activityMain);
+        musicListLocalRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
+        MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(musicInfo);
+        musicListLocalRecyclerAdapter.setOnItemClickListener(((view, position) -> {
             refreshPlayList();
             ActivityMain.listPosition = --position;
             ActivityMain.mediaController.getTransportControls().skipToNext();
-        }
+        }));
+        musicListLocalRecyclerView.setAdapter(musicListLocalRecyclerAdapter);
+        musicListLocalRecyclerAdapter.notifyDataSetChanged();
     }
 
     // 动态权限申请
