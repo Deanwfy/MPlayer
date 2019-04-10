@@ -6,6 +6,7 @@
     android:descendantFocusability="blocksDescendants"
     android:background="?android:attr/selectableItemBackground"
     android:orientation="vertical"
+    android:longClickable="true"
     android:paddingTop="8dp"
     android:paddingBottom="8dp"
     android:paddingLeft="5dp"

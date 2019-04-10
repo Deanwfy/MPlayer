@@ -45,5 +45,5 @@ dependencies {
     implementation 'com.alibaba:fastjson:1.1.55.android'
     implementation 'com.github.ForgetAll:LoadingDialog:v1.1.0-alpha'
     implementation 'com.squareup.picasso:picasso:2.71828'
-    implementation 'me.kaelaela:verticalviewpager:1.0.0@aar'
+    implementation 'com.r0adkll:slidableactivity:2.0.6'
 }

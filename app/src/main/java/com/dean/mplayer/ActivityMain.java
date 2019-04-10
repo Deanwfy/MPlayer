@@ -1,11 +1,13 @@
 package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -17,6 +19,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.ViewDragHelper;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -25,10 +28,12 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -42,6 +47,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -103,6 +109,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         // 抽屉菜单
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        setDrawerLeftEdgeSize(this, drawer);
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
@@ -120,6 +127,35 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
+    }
+
+    //通过反射更改DrawerLayout默认滑动响应范围
+    private void setDrawerLeftEdgeSize(Activity activity, DrawerLayout drawerLayout) {
+        if (activity == null || drawerLayout == null) return;
+        try {
+            // 找到 ViewDragHelper 并设置 Accessible 为true
+            Field leftDraggerField =
+                    drawerLayout.getClass().getDeclaredField("mLeftDragger");
+            leftDraggerField.setAccessible(true);
+            ViewDragHelper leftDragger = (ViewDragHelper) leftDraggerField.get(drawerLayout);
+
+            // 找到 edgeSizeField 并设置 Accessible 为true
+            Field edgeSizeField = leftDragger.getClass().getDeclaredField("mEdgeSize");
+            edgeSizeField.setAccessible(true);
+            int edgeSize = edgeSizeField.getInt(leftDragger);
+
+            // 设置新的边缘大小
+            Point displaySize = new Point();
+            activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
+            edgeSizeField.setInt(leftDragger, Math.max(edgeSize, (int) (displaySize.x *
+                    (float) 0.6))); /*在这里调整*/
+        } catch (NoSuchFieldException e) {
+            //ignore
+        } catch (IllegalArgumentException e) {
+            //ignore
+        } catch (IllegalAccessException e) {
+            //ignore
+        }
     }
 
     private void initMediaBrowser() {
@@ -217,11 +253,13 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
     }
 
     // 将监听器设置到播放控制面板控件
+    @SuppressLint("ClickableViewAccessibility")
     private void setControlBtnOnClickListener(){
-        ActivityMain.ControlBtnOnClickListener controlBtnOnClickListener = new ActivityMain.ControlBtnOnClickListener();
+        ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
         PlayBtn.setOnClickListener(controlBtnOnClickListener);
         ListBtn.setOnClickListener(controlBtnOnClickListener);
-        musicControlPanel.setOnClickListener(controlBtnOnClickListener);
+        GestureDetector gestureDetector = new GestureDetector(this, new ControlPanelOnGestureListener());
+        musicControlPanel.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
     }
 
     // 命名播放控制面板监听器类，实现监听事件
@@ -241,7 +279,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     }
                     break;
                 case R.id.playing_list:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this, R.style.DialogPlayList);
                     // 自定义布局
                     @SuppressLint("InflateParams")
                     View playListView = LayoutInflater.from(ActivityMain.this).inflate(R.layout.play_list,null);
@@ -281,16 +319,35 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     layoutParams.gravity = Gravity.BOTTOM;
                     windowDialog.setAttributes(layoutParams);
                     break;
-                case R.id.music_control_panel:
-                    Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);
-                    startActivity(intentPlayNow);
-                    break;
                 case R.id.search_online_entry:
                     Intent intentSearchOnline = new Intent(ActivityMain.this, ActivityMusicOnline.class);
                     startActivity(intentSearchOnline);
                     break;
             }
         }
+    }
+    private class ControlPanelOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+        @Override
+        public boolean onDown(MotionEvent e) {
+            return true;
+        }
+        @Override
+        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+            if (e1.getRawY() - e2.getRawY() > 50) {
+                startActivityPlayNow();
+            }
+            return true;
+        }
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            startActivityPlayNow();
+            return false;
+        }
+    }
+    private void startActivityPlayNow(){
+        Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);
+        startActivity(intentPlayNow);
+        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 退出同时结束后台服务

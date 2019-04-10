@@ -26,6 +26,10 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
+
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -63,6 +67,12 @@ public class PlayNow extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.play_now);
+        SlidrConfig slidrConfig = new SlidrConfig.Builder()
+                .primaryColor(getResources().getColor(R.color.colorPrimaryDark))
+                .secondaryColor(getResources().getColor(R.color.drawerArrowStyle))
+                .position(SlidrPosition.TOP)
+                .build();
+        Slidr.attach(this, slidrConfig);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         findControlBtnById();
         setPlayNowMode();
@@ -73,6 +83,13 @@ public class PlayNow extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mediaBrowserCompat.disconnect();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+        overridePendingTransition(0, R.anim.activity_playnow_exit);
     }
 
     // 统一获取播放控制面板控件id

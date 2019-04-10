@@ -12,7 +12,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.ContextMenu;
@@ -59,13 +58,8 @@ public class FragmentMusicLocal extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
-/*长按菜单
+        //长按菜单
         registerForContextMenu(musicListLocalRecyclerView);
-        musicListLocalRecyclerView.setOnLongClickListener((view) -> {
-            musicListLocalRecyclerView.showContextMenu();
-            return true;
-        });
-*/
 
         loadingDialog = new LoadingDialog(getActivity());
         loadingDialog.setLoadingText("扫描中...")
@@ -142,6 +136,9 @@ public class FragmentMusicLocal extends Fragment {
             refreshPlayList();
             ActivityMain.listPosition = --position;
             ActivityMain.mediaController.getTransportControls().skipToNext();
+        }));
+        musicListLocalRecyclerAdapter.setOnItemLongClickListener(((view, position) -> {
+            musicListLocalRecyclerView.showContextMenu();
         }));
         musicListLocalRecyclerView.setAdapter(musicListLocalRecyclerAdapter);
         musicListLocalRecyclerAdapter.notifyDataSetChanged();

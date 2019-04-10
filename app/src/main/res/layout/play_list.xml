@@ -2,9 +2,10 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    style="@style/DialogPlayListAnimate">
+    android:background="@color/colorControlPanel">
 
 
     <android.support.constraint.ConstraintLayout
@@ -50,6 +51,8 @@
         android:layout_height="wrap_content"
         android:text="@string/play_list_close"
         android:background="@color/colorControlPanel"
+        android:foreground="?android:attr/selectableItemBackground"
+        tools:ignore="UnusedAttribute"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
