@@ -9,6 +9,7 @@
         android:layout_height="45dp"
         android:gravity="center_vertical"
         android:maxLines="1"
+        android:background="?android:attr/selectableItemBackground"
         android:paddingStart="25dp"
         android:paddingEnd="25dp"
         android:textSize="16sp"

@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class PlayNow extends AppCompatActivity {
+public class ActivityNowPlay extends AppCompatActivity {
 
     // 播放控制显示
     private TextView playNowTitle;
@@ -257,9 +257,9 @@ public class PlayNow extends AppCompatActivity {
                 };
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
-                        PlayNow.this,
+                        ActivityNowPlay.this,
                         mediaBrowserCompat.getSessionToken());
-                MediaControllerCompat.setMediaController(PlayNow.this, mediaController);
+                MediaControllerCompat.setMediaController(ActivityNowPlay.this, mediaController);
                 mediaController.registerCallback(mediaControllerCompatCallback);
                 //设置当前数据
                 mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());
@@ -319,7 +319,7 @@ public class PlayNow extends AppCompatActivity {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
-                PlayNow.this.metadata = metadata;
+                ActivityNowPlay.this.metadata = metadata;
                 cover = metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART);
                 int tint = Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52"));
                 playNowTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));

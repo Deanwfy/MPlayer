@@ -98,7 +98,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         Toolbar toolbar = findViewById(R.id.main_toolbar);   // 标题栏实现
         toolbar.inflateMenu(R.menu.toolbar_custom_menu);
 //        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
-        findViewById(R.id.search_online_entry).setOnClickListener(new ControlBtnOnClickListener());
+        findViewById(R.id.search_entry).setOnClickListener(new ControlBtnOnClickListener());
 
         // 抽屉
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -113,15 +113,6 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
-
-        // Fragment动态加载
-/*
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentMusicLocal = new FragmentMusicLocal();
-        fragmentTransaction.add(R.id.fragment_music_local, fragmentMusicLocal);
-        fragmentTransaction.commit();
-*/
 
         initMediaBrowser();
 
@@ -148,7 +139,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
             Point displaySize = new Point();
             activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
             edgeSizeField.setInt(leftDragger, Math.max(edgeSize, (int) (displaySize.x *
-                    (float) 0.6))); /*在这里调整*/
+                    (float) 0.1))); /*在这里调整*/
         } catch (NoSuchFieldException e) {
             //ignore
         } catch (IllegalArgumentException e) {
@@ -319,7 +310,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
                     layoutParams.gravity = Gravity.BOTTOM;
                     windowDialog.setAttributes(layoutParams);
                     break;
-                case R.id.search_online_entry:
+                case R.id.search_entry:
                     Intent intentSearchOnline = new Intent(ActivityMain.this, ActivityMusicOnline.class);
                     startActivity(intentSearchOnline);
                     break;
@@ -345,7 +336,7 @@ public class ActivityMain extends AppCompatActivity implements NavigationView.On
         }
     }
     private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMain.this, PlayNow.class);
+        Intent intentPlayNow = new Intent(ActivityMain.this, ActivityNowPlay.class);
         startActivity(intentPlayNow);
         overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }

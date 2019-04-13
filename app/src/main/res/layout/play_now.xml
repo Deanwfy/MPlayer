@@ -10,14 +10,14 @@
     android:background="@color/colorControlPanel"
 
     tools:ignore="ContentDescription"
-    tools:context="com.dean.mplayer.PlayNow">
+    tools:context="com.dean.mplayer.ActivityNowPlay">
 
     <ImageView
         android:id="@+id/playNowCover"
         android:layout_width="350dp"
         android:layout_height="350dp"
         android:src="@drawable/ic_cover"
-        app:layout_constraintBottom_toTopOf="@+id/playNowDetail"
+        app:layout_constraintBottom_toTopOf="@id/playNowDetail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -27,7 +27,7 @@
         android:id="@+id/playNowDetail"
         android:layout_width="match_parent"
         android:layout_height="100dp"
-        app:layout_constraintBottom_toTopOf="@+id/playNowCurrent"
+        app:layout_constraintBottom_toTopOf="@id/playNowCurrent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
@@ -44,7 +44,7 @@
             android:text="@string/music_title"
             android:textColor="@color/colorPlayNowMusicTitleText"
             android:textSize="40sp"
-            app:layout_constraintEnd_toStartOf="@+id/playNowMode"
+            app:layout_constraintEnd_toStartOf="@id/playNowMode"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -57,9 +57,9 @@
             android:text="@string/music_artist"
             android:textColor="@color/colorPlayNowMusicArtistText"
             android:textSize="20sp"
-            app:layout_constraintEnd_toEndOf="@+id/playNowTitle"
-            app:layout_constraintStart_toStartOf="@+id/playNowTitle"
-            app:layout_constraintTop_toBottomOf="@+id/playNowTitle" />
+            app:layout_constraintEnd_toEndOf="@id/playNowTitle"
+            app:layout_constraintStart_toStartOf="@id/playNowTitle"
+            app:layout_constraintTop_toBottomOf="@id/playNowTitle" />
 
         <ImageButton
             android:id="@+id/playNowMode"
@@ -69,7 +69,7 @@
             android:src="@drawable/ic_now_order"
             android:scaleType="centerCrop"
             android:background="?android:attr/selectableItemBackgroundBorderless"
-            app:layout_constraintBottom_toBottomOf="@+id/playNowArtist"
+            app:layout_constraintBottom_toBottomOf="@id/playNowArtist"
             app:layout_constraintEnd_toEndOf="parent" />
     </android.support.constraint.ConstraintLayout>
 
@@ -79,7 +79,7 @@
         android:layout_height="20dp"
         android:layout_marginStart="30dp"
         android:layout_marginEnd="30dp"
-        app:layout_constraintBottom_toTopOf="@+id/seekBarStart"
+        app:layout_constraintBottom_toTopOf="@id/seekBarStart"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -89,8 +89,8 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:text="@string/seekBar"
-        app:layout_constraintBottom_toTopOf="@+id/playNowControl"
-        app:layout_constraintStart_toStartOf="@+id/playNowCurrent" />
+        app:layout_constraintBottom_toTopOf="@id/playNowControl"
+        app:layout_constraintStart_toStartOf="@id/playNowCurrent" />
 
     <TextView
         android:id="@+id/seekBarEnd"
@@ -98,9 +98,9 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="@string/seekBar"
-        app:layout_constraintBottom_toBottomOf="@+id/seekBarStart"
-        app:layout_constraintEnd_toEndOf="@+id/playNowCurrent"
-        app:layout_constraintTop_toTopOf="@+id/seekBarStart" />
+        app:layout_constraintBottom_toBottomOf="@id/seekBarStart"
+        app:layout_constraintEnd_toEndOf="@id/playNowCurrent"
+        app:layout_constraintTop_toTopOf="@id/seekBarStart" />
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/playNowControl"
@@ -119,9 +119,9 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_now_prev"
-            app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
-            app:layout_constraintEnd_toStartOf="@+id/playNowPlay"
-            app:layout_constraintTop_toTopOf="@+id/playNowPlay" />
+            app:layout_constraintBottom_toBottomOf="@id/playNowPlay"
+            app:layout_constraintEnd_toStartOf="@id/playNowPlay"
+            app:layout_constraintTop_toTopOf="@id/playNowPlay" />
 
         <ImageButton
             android:id="@+id/playNowPlay"
@@ -143,9 +143,9 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_now_next"
-            app:layout_constraintBottom_toBottomOf="@+id/playNowPlay"
-            app:layout_constraintStart_toEndOf="@+id/playNowPlay"
-            app:layout_constraintTop_toTopOf="@+id/playNowPlay" />
+            app:layout_constraintBottom_toBottomOf="@id/playNowPlay"
+            app:layout_constraintStart_toEndOf="@id/playNowPlay"
+            app:layout_constraintTop_toTopOf="@id/playNowPlay" />
     </android.support.constraint.ConstraintLayout>
 
 </android.support.constraint.ConstraintLayout>

@@ -1,32 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorControlPanel"
-    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
-    tools:ignore="ContentDescription"
-    android:id="@+id/activity_viewpager">
+    android:fitsSystemWindows="true"
+    tools:context=".ActivityMusicLocal"
+    tools:ignore="ContentDescription">
 
-    <fragment
-        android:id="@+id/main_category"
-        android:name="com.dean.mplayer.FragmentMainCategory"
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/music_local_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="?attr/actionBarSize"
+        android:background="?attr/colorPrimary"
+        android:theme="?attr/actionBarTheme"
+        app:navigationIcon="@drawable/ic_back"
+        app:contentInsetStartWithNavigation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        toolbar:layout_constraintBottom_toTopOf="@id/music_control_panel"
-        toolbar:layout_constraintEnd_toEndOf="parent"
-        toolbar:layout_constraintStart_toStartOf="parent"
-        toolbar:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/music_control_panel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/music_local_toolbar">
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/music_list_local"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="vertical" />
+    </android.support.v4.widget.SwipeRefreshLayout>
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/music_control_panel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/colorControlPanel"
-        toolbar:layout_constraintBottom_toBottomOf="parent"
-        toolbar:layout_constraintEnd_toEndOf="parent"
-        toolbar:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <ImageView
             android:id="@+id/music_cover"
@@ -34,9 +53,9 @@
             android:layout_height="50dp"
             android:layout_marginStart="3dp"
             android:src="@drawable/ic_cover"
-            toolbar:layout_constraintBottom_toBottomOf="parent"
-            toolbar:layout_constraintStart_toStartOf="parent"
-            toolbar:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/playing_title"
@@ -51,9 +70,9 @@
             android:text="@string/music_title"
             android:textColor="@color/colorMusicTitleText"
             android:textSize="18sp"
-            toolbar:layout_constraintEnd_toStartOf="@id/playing_play"
-            toolbar:layout_constraintBottom_toTopOf="@id/guideline"
-            toolbar:layout_constraintStart_toEndOf="@id/music_cover" />
+            app:layout_constraintEnd_toStartOf="@id/playing_play"
+            app:layout_constraintBottom_toTopOf="@id/guideline"
+            app:layout_constraintStart_toEndOf="@id/music_cover" />
 
         <TextView
             android:id="@+id/playing_artist"
@@ -64,9 +83,9 @@
             android:text="@string/music_artist"
             android:textColor="@color/colorMusicArtistText"
             android:textSize="14sp"
-            toolbar:layout_constraintEnd_toEndOf="@id/playing_title"
-            toolbar:layout_constraintStart_toStartOf="@id/playing_title"
-            toolbar:layout_constraintTop_toTopOf="@id/guideline" />
+            app:layout_constraintEnd_toEndOf="@id/playing_title"
+            app:layout_constraintStart_toStartOf="@id/playing_title"
+            app:layout_constraintTop_toTopOf="@id/guideline" />
 
         <ImageButton
             android:id="@+id/playing_play"
@@ -75,9 +94,9 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_play"
-            toolbar:layout_constraintBottom_toBottomOf="@id/playing_list"
-            toolbar:layout_constraintEnd_toStartOf="@id/playing_list"
-            toolbar:layout_constraintTop_toTopOf="@id/playing_list" />
+            app:layout_constraintBottom_toBottomOf="@id/playing_list"
+            app:layout_constraintEnd_toStartOf="@id/playing_list"
+            app:layout_constraintTop_toTopOf="@id/playing_list" />
 
         <ImageButton
             android:id="@+id/playing_list"
@@ -89,16 +108,16 @@
             android:background="?android:attr/selectableItemBackgroundBorderless"
             android:scaleType="centerCrop"
             android:src="@drawable/ic_playlist"
-            toolbar:layout_constraintBottom_toBottomOf="parent"
-            toolbar:layout_constraintEnd_toEndOf="parent"
-            toolbar:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <android.support.constraint.Guideline
             android:id="@+id/guideline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            toolbar:layout_constraintGuide_begin="30dp" />
+            app:layout_constraintGuide_begin="30dp" />
     </android.support.constraint.ConstraintLayout>
-
+    
 </android.support.constraint.ConstraintLayout>

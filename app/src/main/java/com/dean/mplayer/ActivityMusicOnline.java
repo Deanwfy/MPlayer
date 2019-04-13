@@ -204,7 +204,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         musicCheckResult(true, false);
-        Intent playNowIntent = new Intent(this, PlayNow.class);
+        Intent playNowIntent = new Intent(this, ActivityNowPlay.class);
         startActivity(playNowIntent);
     }
 

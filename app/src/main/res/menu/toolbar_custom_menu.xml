@@ -6,7 +6,7 @@
     tools:ignore="MenuTitle">
 
     <item
-        android:id="@+id/search_online_entry"
+        android:id="@+id/search_entry"
         android:icon="@drawable/ic_search"
         app:showAsAction="ifRoom" />
 

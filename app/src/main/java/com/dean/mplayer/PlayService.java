@@ -249,7 +249,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				notificationCompat.setColorized(true);    //通知变色
 			}
 			//通知点击事件
-			Intent resultIntent = new Intent(this, PlayNow.class);
+			Intent resultIntent = new Intent(this, ActivityNowPlay.class);
 			PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
 			notificationCompat.setContentIntent(resultPendingIntent);
 			//发布通知
