@@ -10,18 +10,26 @@
     tools:context=".ActivityMusicLocal"
     tools:ignore="ContentDescription">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/music_local_toolbar"
-        android:layout_width="match_parent"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_music_local_appbar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="?attr/actionBarTheme"
-        app:navigationIcon="@drawable/ic_back"
-        app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/music_local_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/ic_back"
+            app:contentInsetStartWithNavigation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -30,7 +38,7 @@
         app:layout_constraintBottom_toTopOf="@id/music_control_panel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/music_local_toolbar">
+        app:layout_constraintTop_toBottomOf="@id/activity_music_local_appbar">
         <android.support.v7.widget.RecyclerView
             android:id="@+id/music_list_local"
             android:layout_width="match_parent"

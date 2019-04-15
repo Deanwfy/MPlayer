@@ -25,6 +25,7 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.onlineSearch.Songs;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
@@ -206,6 +207,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
         musicCheckResult(true, false);
         Intent playNowIntent = new Intent(this, ActivityNowPlay.class);
         startActivity(playNowIntent);
+        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 加载动画
@@ -228,6 +230,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
             runOnUiThread(() -> Toast.makeText(this, "抱歉，暂无版权", Toast.LENGTH_SHORT).show());
         }
     }
+
     //——————————————————————————————————MediaBrowser————————————————————————————————————————————
 
     private void initMediaBrowser() {

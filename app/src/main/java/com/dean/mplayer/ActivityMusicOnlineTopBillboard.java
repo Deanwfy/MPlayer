@@ -1,16 +1,14 @@
 package com.dean.mplayer;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -35,17 +33,29 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.List;
+import android.widget.Toast;
+
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.onlineTopBillboard.Tracks;
+import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
-public class ActivityMusicLocal extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
 
     // 列表显示
     private LoadingDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
-    private RecyclerView musicListLocalRecyclerView;
-    private List<MusicInfo> musicInfo = new ArrayList<>();
+    private RecyclerView musicListOnlineTopBillboardRecycler;
+    private MusicListOnlineTopBillboardRecyclerAdapter musicListOnlineTopBillboardRecyclerAdapter;
+    List<Tracks> musicInfo = new ArrayList<>();
 
     // 媒体信息
     private TextView PlayingTitle;
@@ -74,103 +84,152 @@ public class ActivityMusicLocal extends AppCompatActivity {
         findViewById(R.id.search_entry).setOnClickListener(new ControlBtnOnClickListener());
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
-        swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
+        swipeRefreshLayout.setOnRefreshListener(this::getSearchUrl);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
-
-        // 本地音乐列表
-        musicListLocalRecyclerView = findViewById(R.id.music_list_local);
-        registerForContextMenu(musicListLocalRecyclerView); // 长按菜单
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
         initMediaBrowser();
 
-        loadingDialog = new LoadingDialog(this);
-        loadingDialog.setLoadingText("扫描中...")
-                .setInterceptBack(false)
-                .show();
-        requestPermission();    // 权限申请
-
+        musicListOnlineTopBillboardRecycler = findViewById(R.id.music_list_local);
+        registerForContextMenu(musicListOnlineTopBillboardRecycler); // 长按菜单
+        LinearLayoutManager musicListOnlineRecyclerLayoutManager = new LinearLayoutManager(this);
+        musicListOnlineTopBillboardRecycler.setLayoutManager(musicListOnlineRecyclerLayoutManager);
+        musicListOnlineTopBillboardRecyclerAdapter = new MusicListOnlineTopBillboardRecyclerAdapter(musicInfo);
+        musicListOnlineTopBillboardRecycler.setAdapter(musicListOnlineTopBillboardRecyclerAdapter);
+        
+        loadingAnimation("获取中...");
+        getSearchUrl();
     }
 
-    // 动态权限申请
-    private void requestPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE);
-        } else {
-            initPlayList();
-        }
-    }
-    private void showWaringDialog() {
-        new AlertDialog.Builder(this)
-                .setTitle("权限申请")
-                .setMessage("请前往设置->应用->MPlayer->权限中打开相关权限，否则部分功能无法正常使用")
-                .setNegativeButton("确定", (dialog, which) -> {})
-                .show();
-        loadingDialog.close();
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case AppConstant.Permission.PERMISSION_READ_WRITE_EXTERNAL_STORAGE: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    initPlayList();
-                } else {
-                    showWaringDialog();
-                }
-                break;
-            }
-        }
-    }
-
-    // 加载本地音乐
-    private void initPlayList(){
+    private void getSearchUrl(){
+        String searchUrl = "http://39.108.4.217:8888/top/list?idx=6";
         new Thread(() -> {
-            musicInfo = MediaUtil.getMusicLocal(this);
-            runOnUiThread(() -> {
-                if (musicInfo != null && musicInfo.size() != 0) {
-                    setListAdapter();   // 显示歌曲列表
-                    swipeRefreshLayout.setRefreshing(false);
-                }
-                loadingDialog.close();
-            });
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(searchUrl)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                parseJSON(responseData);
+                uiUpdate();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }).start();
     }
-    // 歌曲列表显示适配器
-    public void setListAdapter() {
-        LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(this);
-        musicListLocalRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
-        MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(musicInfo);
-        musicListLocalRecyclerAdapter.setOnItemClickListener(((view, position) -> {
-            refreshPlayList();
-            ActivityMain.listPosition = --position;
-            ActivityMain.mediaController.getTransportControls().skipToNext();
-        }));
-        musicListLocalRecyclerAdapter.setOnItemLongClickListener(((view, position) -> musicListLocalRecyclerView.showContextMenu()));
-        musicListLocalRecyclerView.setAdapter(musicListLocalRecyclerAdapter);
-        musicListLocalRecyclerAdapter.notifyDataSetChanged();
+    private void parseJSON(String response){
+        JSONObject jsonObject = JSON.parseObject(response);
+        musicInfo = JSON.parseArray((jsonObject.getJSONObject("playlist").getJSONArray("tracks").toJSONString()), Tracks.class);
     }
-    // 刷新播放列表
-    private void refreshPlayList(){
-        ActivityMain.playList.clear();
-        if (musicInfo != null && musicInfo.size() != 0) {
-            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
-                ActivityMain.playList.add(new PlayList(
-                                musicInfo.get(musicCountLocal).getId(),
-                                musicInfo.get(musicCountLocal).getTitle(),
-                                musicInfo.get(musicCountLocal).getAlbum(),
-                                musicInfo.get(musicCountLocal).getArtist(),
-                                musicInfo.get(musicCountLocal).getDuration(),
-                                musicInfo.get(musicCountLocal).getUri(),
-                                musicInfo.get(musicCountLocal).getAlbumBitmap()
-                        )
-                );
+    private void uiUpdate(){
+        runOnUiThread(() -> {
+                    musicListOnlineTopBillboardRecyclerAdapter = new MusicListOnlineTopBillboardRecyclerAdapter(musicInfo);
+                    musicListOnlineTopBillboardRecyclerAdapter.setOnItemClickListener((view, position) -> getMusicCheck(position));
+                    musicListOnlineTopBillboardRecyclerAdapter.setOnItemLongClickListener(((view, position) -> musicListOnlineTopBillboardRecycler.showContextMenu()));
+                    musicListOnlineTopBillboardRecycler.setAdapter(musicListOnlineTopBillboardRecyclerAdapter);
+                    loadingDialog.close();
+                    swipeRefreshLayout.setRefreshing(false);
+                }
+        );
+    }
+    // 检查所选音乐是否可用
+    private void getMusicCheck(int position){
+        String musicCheckUrl = "http://39.108.4.217:8888/check/music?id=" + String.valueOf(musicInfo.get(position).getId());
+        new Thread(() -> {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(musicCheckUrl)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                String state = JSON.parseObject(responseData).getString("success");
+                if (state.equals("true")){
+                    musicCheckResult(true, true);
+                    getMusicInfoUrl(position);
+                }else {
+                    musicCheckResult(false, false);
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
+        }).start();
+    }
+    // 从搜索结果中播放
+    private void getMusicInfoUrl(int position){
+        String musicInfoUrl = "http://39.108.4.217:8888/song/url?id=" + String.valueOf(musicInfo.get(position).getId());
+        new Thread(() -> {
+            try {
+                OkHttpClient okHttpClient = new OkHttpClient();
+                Request request = new Request.Builder()
+                        .url(musicInfoUrl)
+                        .build();
+                Response response = okHttpClient.newCall(request).execute();
+                assert response.body() != null;
+                String responseData = response.body().string();
+                setOnlineMusicInfo(responseData, position);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }).start();
+    }
+    private void setOnlineMusicInfo(String response, int position){
+        JSONObject jsonObject = JSON.parseObject(response);
+        long id = musicInfo.get(position).getId();
+        String title = musicInfo.get(position).getName();
+        String album = musicInfo.get(position).getAl().getName();
+        String artist = musicInfo.get(position).getAr().get(0).getName();
+        long duration = musicInfo.get(position).getDt();
+        Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
+        try {
+            Bitmap albumBitmap = Picasso.get().load(musicInfo.get(position).getAl().getPicUrl()).get();
+            playOnlineMusic(id, title, album, artist, duration, uri, albumBitmap);
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
+
+    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
+        if (ActivityMain.playList.size() != 0) {
+            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+            mediaController.getTransportControls().skipToNext();
+        }else {
+            //　无本地音乐的情况（直接播放网络音乐）
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+            mediaController.getTransportControls().playFromUri(uri, null);
+        }
+        musicCheckResult(true, false);
+        Intent playNowIntent = new Intent(this, ActivityNowPlay.class);
+        startActivity(playNowIntent);
+        overridePendingTransition(R.anim.activity_playnow_enter, 0);
+    }
+
+    // 加载动画
+    private void loadingAnimation(String dialogText){
+        loadingDialog = new LoadingDialog(this);
+        loadingDialog.setLoadingText(dialogText)
+                .setInterceptBack(false)
+                .show();
+    }
+
+    // 版权提示
+    private void musicCheckResult(boolean result, boolean show){
+        if (result) {
+            if (show) {
+                runOnUiThread(() -> loadingAnimation("加载中..."));
+            }else {
+                runOnUiThread(() -> loadingDialog.close());
+            }
+        }else {
+            runOnUiThread(() -> Toast.makeText(this, "抱歉，暂无版权", Toast.LENGTH_SHORT).show());
+        }
+    }
+
+    //——————————————————————————————————MediaBrowser————————————————————————————————————————————
 
     private void initMediaBrowser() {
         if (mediaBrowserCompat == null) {
@@ -195,9 +254,9 @@ public class ActivityMusicLocal extends AppCompatActivity {
             try {
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
-                        ActivityMusicLocal.this,
+                        ActivityMusicOnlineTopBillboard.this,
                         mediaBrowserCompat.getSessionToken());
-                MediaControllerCompat.setMediaController(ActivityMusicLocal.this, mediaController);
+                MediaControllerCompat.setMediaController(ActivityMusicOnlineTopBillboard.this, mediaController);
                 mediaController.registerCallback(mediaControllerCompatCallback);
                 //设置当前数据
                 mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());
@@ -290,17 +349,17 @@ public class ActivityMusicLocal extends AppCompatActivity {
                     }
                     break;
                 case R.id.playing_list:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusicLocal.this, R.style.DialogPlayList);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusicOnlineTopBillboard.this, R.style.DialogPlayList);
                     // 自定义布局
                     @SuppressLint("InflateParams")
-                    View playListView = LayoutInflater.from(ActivityMusicLocal.this).inflate(R.layout.play_list,null);
+                    View playListView = LayoutInflater.from(ActivityMusicOnlineTopBillboard.this).inflate(R.layout.play_list,null);
                     // 设置AlertDialog参数，加载自定义布局
                     builder.setView(playListView);
                     // AlertDialog对象
                     AlertDialog alertDialogMusicList = builder.create();
                     // 自定义布局RecyclerLayout适配实现
                     RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
-                    LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMusicLocal.this);
+                    LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMusicOnlineTopBillboard.this);
                     playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
                     PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(ActivityMain.playList);
                     playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
@@ -321,7 +380,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
                     assert windowDialog != null;
                     //去掉dialog默认的padding
                     windowDialog.getDecorView().setPadding(0, 0, 0, 0);
-                    windowDialog.getDecorView().setBackgroundColor(ActivityMusicLocal.this.getResources().getColor(R.color.colorControlPanel));
+                    windowDialog.getDecorView().setBackgroundColor(ActivityMusicOnlineTopBillboard.this.getResources().getColor(R.color.colorControlPanel));
                     // 设置大小
                     WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
                     layoutParams.width = displayMetrics.widthPixels;
@@ -331,7 +390,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
                     windowDialog.setAttributes(layoutParams);
                     break;
                 case R.id.search_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMusicLocal.this, ActivityMusicOnline.class);
+                    Intent intentSearchOnline = new Intent(ActivityMusicOnlineTopBillboard.this, ActivityMusicOnline.class);
                     startActivity(intentSearchOnline);
                     break;
             }
@@ -356,7 +415,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
         }
     }
     private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMusicLocal.this, ActivityNowPlay.class);
+        Intent intentPlayNow = new Intent(ActivityMusicOnlineTopBillboard.this, ActivityNowPlay.class);
         startActivity(intentPlayNow);
         overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
@@ -365,7 +424,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0,0,0,"删除");
+        menu.add(0,0,0,"下一首播放");
     }
 
     // 退出时断开媒体中心连接

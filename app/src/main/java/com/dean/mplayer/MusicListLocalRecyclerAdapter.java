@@ -74,10 +74,11 @@ public class MusicListLocalRecyclerAdapter extends RecyclerView.Adapter<MusicLis
         this.onItemLongClickListener = listener;
     }
 
-    //点击事件接口
+    // 点击事件接口
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
     }
+    //　长按事件接口
     public interface  OnItemLongClickListener{
         void onItemLongClick(View view, int position);
     }

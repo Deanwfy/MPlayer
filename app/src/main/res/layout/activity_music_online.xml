@@ -9,35 +9,43 @@
     tools:context=".ActivityMusicOnline"
     tools:ignore="Autofill">
 
-    <android.support.v7.widget.Toolbar
-        android:id="@+id/music_online_toolbar"
-        android:layout_width="match_parent"
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/activity_music_online_appbar"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:minHeight="?attr/actionBarSize"
-        android:background="?attr/colorPrimary"
-        android:theme="?attr/actionBarTheme"
-        app:navigationIcon="@drawable/ic_back"
-        app:contentInsetStartWithNavigation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
-
-        <EditText
-            android:id="@+id/music_search_online"
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/music_online_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@null"
-            android:gravity="start|center"
-            android:hint="@string/searchNotice"
-            android:imeOptions="actionSearch"
-            android:inputType="text"
-            android:lines="1"
-            android:paddingTop="10dp"
-            android:paddingBottom="10dp"
-            android:textColor="@color/drawerArrowStyle"
-            android:textColorHint="@color/editNoticeText"
-            android:textCursorDrawable="@null" />
-    </android.support.v7.widget.Toolbar>
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="?attr/actionBarTheme"
+            app:navigationIcon="@drawable/ic_back"
+            app:contentInsetStartWithNavigation="0dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <EditText
+                android:id="@+id/music_search_online"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:gravity="start|center"
+                android:hint="@string/searchNotice"
+                android:imeOptions="actionSearch"
+                android:inputType="text"
+                android:lines="1"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textColor="@color/drawerArrowStyle"
+                android:textColorHint="@color/editNoticeText"
+                android:textCursorDrawable="@null" />
+        </android.support.v7.widget.Toolbar>
+    </android.support.design.widget.AppBarLayout>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/music_list_online"
@@ -46,7 +54,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/music_online_toolbar"
+        app:layout_constraintTop_toBottomOf="@id/activity_music_online_appbar"
         android:scrollbars="vertical"/>
 
 </android.support.constraint.ConstraintLayout>
