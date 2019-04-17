@@ -188,8 +188,8 @@ public class ActivityMusicOnline extends AppCompatActivity {
                 assert response.body() != null;
                 String responseData = response.body().string();
                 JSONObject jsonObject = JSON.parseObject(responseData);
-                Bitmap albumBitmap = Picasso.get().load(jsonObject.getJSONArray("songs").getJSONObject(0).getJSONObject("al").getString("picUrl")).get();
-                playOnlineMusic(id, title, album, artist, duration, uri, albumBitmap);
+                Bitmap albumCover = Picasso.get().load(jsonObject.getJSONArray("songs").getJSONObject(0).getJSONObject("al").getString("picUrl")).get();
+                playOnlineMusic(id, title, album, artist, duration, uri, albumCover);
             }catch (Exception e){
                 e.printStackTrace();
             }
@@ -200,7 +200,7 @@ public class ActivityMusicOnline extends AppCompatActivity {
             ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
             mediaController.getTransportControls().skipToNext();
         }else {
-            //　无本地音乐的情况（直接播放网络音乐）
+            //　播放列表为空的情况（直接播放网络音乐）
             ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
             mediaController.getTransportControls().playFromUri(uri, null);
         }

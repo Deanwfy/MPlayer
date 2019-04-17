@@ -31,7 +31,6 @@
                     android:layout_height="match_parent"
                     android:background="?attr/colorPrimary"
                     android:fitsSystemWindows="true"
-                    android:theme="?attr/actionBarTheme"
                     app:layout_scrollFlags="scroll|enterAlways"
                     toolbar:layout_constraintEnd_toEndOf="parent"
                     toolbar:layout_constraintStart_toStartOf="parent"

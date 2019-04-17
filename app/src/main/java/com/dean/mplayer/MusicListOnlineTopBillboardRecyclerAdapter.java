@@ -11,7 +11,7 @@ import com.dean.mplayer.onlineTopBillboard.Tracks;
 
 import java.util.List;
 
-public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Adapter<MusicListOnlineTopBillboardRecyclerAdapter.ListClockRecyclerAdapterHolder> implements View.OnClickListener, View.OnLongClickListener{
+public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Adapter<MusicListOnlineTopBillboardRecyclerAdapter.ListClockRecyclerAdapterHolder> implements View.OnClickListener{
 
     class ListClockRecyclerAdapterHolder extends RecyclerView.ViewHolder{
         TextView musicTitle;
@@ -27,7 +27,6 @@ public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Ada
 
     private List<Tracks> musicList;
     private OnItemClickListener onItemClickListener = null;
-    private MusicListLocalRecyclerAdapter.OnItemLongClickListener onItemLongClickListener = null;
     MusicListOnlineTopBillboardRecyclerAdapter(List<Tracks> musicList){
         this.musicList = musicList;
     }
@@ -61,27 +60,13 @@ public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Ada
             onItemClickListener.onItemClick(v, (int)v.getTag());
         }
     }
-    @Override
-    public boolean onLongClick(View v) {
-        if (onItemLongClickListener != null){
-            onItemLongClickListener.onItemLongClick(v, (int)v.getTag());
-        }
-        return true;
-    }
 
     void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
-    }
-    void setOnItemLongClickListener(MusicListLocalRecyclerAdapter.OnItemLongClickListener listener){
-        this.onItemLongClickListener = listener;
     }
 
     //点击事件接口
     public interface OnItemClickListener {
         void onItemClick(View view, int position);
-    }
-    //　长按事件接口
-    public interface  OnItemLongClickListener{
-        void onItemLongClick(View view, int position);
     }
 }

@@ -75,13 +75,13 @@ public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_music_local);
+        setContentView(R.layout.activity_music_base);
 
-        Toolbar toolbar = findViewById(R.id.music_local_toolbar);   // 标题栏实现
-        toolbar.inflateMenu(R.menu.toolbar_custom_menu);
-        toolbar.setNavigationOnClickListener(v -> finish());
-//        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
-        findViewById(R.id.search_entry).setOnClickListener(new ControlBtnOnClickListener());
+        Toolbar toolbar = findViewById(R.id.activity_music_base_toolbar);   // 标题栏实现
+        toolbar.setTitle(R.string.activity_music_online_top_billboard); // 必须放在setSupportActionBar前面
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
+        toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this::getSearchUrl);
@@ -91,8 +91,7 @@ public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
         initMediaBrowser();
 
-        musicListOnlineTopBillboardRecycler = findViewById(R.id.music_list_local);
-        registerForContextMenu(musicListOnlineTopBillboardRecycler); // 长按菜单
+        musicListOnlineTopBillboardRecycler = findViewById(R.id.activity_music_base_list);
         LinearLayoutManager musicListOnlineRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListOnlineTopBillboardRecycler.setLayoutManager(musicListOnlineRecyclerLayoutManager);
         musicListOnlineTopBillboardRecyclerAdapter = new MusicListOnlineTopBillboardRecyclerAdapter(musicInfo);
@@ -128,7 +127,6 @@ public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
         runOnUiThread(() -> {
                     musicListOnlineTopBillboardRecyclerAdapter = new MusicListOnlineTopBillboardRecyclerAdapter(musicInfo);
                     musicListOnlineTopBillboardRecyclerAdapter.setOnItemClickListener((view, position) -> getMusicCheck(position));
-                    musicListOnlineTopBillboardRecyclerAdapter.setOnItemLongClickListener(((view, position) -> musicListOnlineTopBillboardRecycler.showContextMenu()));
                     musicListOnlineTopBillboardRecycler.setAdapter(musicListOnlineTopBillboardRecyclerAdapter);
                     loadingDialog.close();
                     swipeRefreshLayout.setRefreshing(false);
@@ -388,10 +386,6 @@ public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
                     // 设置位置为底部
                     layoutParams.gravity = Gravity.BOTTOM;
                     windowDialog.setAttributes(layoutParams);
-                    break;
-                case R.id.search_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMusicOnlineTopBillboard.this, ActivityMusicOnline.class);
-                    startActivity(intentSearchOnline);
                     break;
             }
         }

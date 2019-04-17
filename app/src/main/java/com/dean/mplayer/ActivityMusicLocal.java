@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
@@ -20,24 +22,32 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.ContextMenu;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
+
 import java.util.ArrayList;
 import java.util.List;
-import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 public class ActivityMusicLocal extends AppCompatActivity {
 
@@ -45,6 +55,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
     private LoadingDialog loadingDialog;
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView musicListLocalRecyclerView;
+    private MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter;
     private List<MusicInfo> musicInfo = new ArrayList<>();
 
     // 媒体信息
@@ -61,25 +72,65 @@ public class ActivityMusicLocal extends AppCompatActivity {
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
+    // Toolbar本地搜索
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_search_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.toolbar_search_menu);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+        searchView.setQueryHint(getResources().getString(R.string.searchNoticeLocal));
+        // 图标样式，通过Style中的colorControlNormal进行了设置
+//        ImageView iconSearch = searchView.findViewById(android.support.v7.appcompat.R.id.search_button);
+//        iconSearch.setColorFilter(ContextCompat.getColor(this, R.color.drawerArrowStyle));
+//        ImageView iconClose = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
+//        iconClose.setColorFilter(ContextCompat.getColor(this, R.color.drawerArrowStyle));
+        // 搜索框样式
+        EditText editText = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        editText.setTextColor(ContextCompat.getColor(this, R.color.drawerArrowStyle));
+        editText.setHintTextColor(ContextCompat.getColor(this, R.color.editNoticeText));
+        // 控件间隔
+        LinearLayout search_edit_frame = searchView.findViewById(R.id.search_edit_frame);
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) search_edit_frame.getLayoutParams();
+        params.leftMargin = 0;
+        params.rightMargin = 0;
+        search_edit_frame.setLayoutParams(params);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                musicListLocalRecyclerAdapter.getFilter().filter(s);
+                musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                musicListLocalRecyclerAdapter.getFilter().filter(s);
+                musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
+                return true;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_music_local);
+        setContentView(R.layout.activity_music_base);
 
-        Toolbar toolbar = findViewById(R.id.music_local_toolbar);   // 标题栏实现
-        toolbar.inflateMenu(R.menu.toolbar_custom_menu);
-        toolbar.setNavigationOnClickListener(v -> finish());
-//        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
-        findViewById(R.id.search_entry).setOnClickListener(new ControlBtnOnClickListener());
+        Toolbar toolbar = findViewById(R.id.activity_music_base_toolbar);   // 标题栏实现
+        toolbar.setTitle(R.string.activity_music_local); // 必须放在setSupportActionBar前面
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
+        toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
 
         // 本地音乐列表
-        musicListLocalRecyclerView = findViewById(R.id.music_list_local);
-        registerForContextMenu(musicListLocalRecyclerView); // 长按菜单
+        musicListLocalRecyclerView = findViewById(R.id.activity_music_base_list);
 
         findControlBtnById(); // 获取播放控制面板控件
         setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
@@ -143,19 +194,19 @@ public class ActivityMusicLocal extends AppCompatActivity {
     public void setListAdapter() {
         LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListLocalRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
-        MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(musicInfo);
+        musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(musicInfo);
         musicListLocalRecyclerAdapter.setOnItemClickListener(((view, position) -> {
             refreshPlayList();
             ActivityMain.listPosition = --position;
             ActivityMain.mediaController.getTransportControls().skipToNext();
         }));
-        musicListLocalRecyclerAdapter.setOnItemLongClickListener(((view, position) -> musicListLocalRecyclerView.showContextMenu()));
         musicListLocalRecyclerView.setAdapter(musicListLocalRecyclerAdapter);
         musicListLocalRecyclerAdapter.notifyDataSetChanged();
     }
     // 刷新播放列表
     private void refreshPlayList(){
         ActivityMain.playList.clear();
+        musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
         if (musicInfo != null && musicInfo.size() != 0) {
             for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
                 ActivityMain.playList.add(new PlayList(
@@ -361,11 +412,34 @@ public class ActivityMusicLocal extends AppCompatActivity {
         overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
-    // 列表长按菜单
+    // 列表长按菜单点击事件
     @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        menu.add(0,0,0,"删除");
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case 0:
+                MusicInfo itemMusicInfo = musicInfo.get(musicListLocalRecyclerAdapter.getContextMenuPosition());
+                long id = itemMusicInfo.getId();
+                String title = itemMusicInfo.getTitle();
+                String album = itemMusicInfo.getAlbum();
+                String artist = itemMusicInfo.getArtist();
+                long duration = itemMusicInfo.getDuration();
+                Uri uri = itemMusicInfo.getUri();
+                Bitmap albumCover = itemMusicInfo.getAlbumBitmap();
+                addToNext(id, title, album, artist, duration, uri, albumCover);
+                break;
+            case 1:
+                Toast.makeText(this, "删除", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        return super.onContextItemSelected(item);
+    }
+    private void addToNext(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
+        if (ActivityMain.playList.size() != 0) {
+            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+        }else {
+            //　播放列表为空的情况
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+        }
     }
 
     // 退出时断开媒体中心连接

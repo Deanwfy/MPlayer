@@ -50,6 +50,17 @@ public class MusicInfo{
 				+ ", lrcSize=" + lrcSize + "]";
 	}
 
+	public boolean contains(CharSequence charSequence){
+		String searchKey = charSequence.toString();
+		if (title.contains(searchKey)){
+			return true;
+		}
+		else if (artist.contains(searchKey)){
+			return true;
+		}
+		else return album.contains(searchKey);
+	}
+
 	public long getId() {
 		return id;
 	}

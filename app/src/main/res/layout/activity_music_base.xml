@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorControlPanel"
@@ -11,24 +10,20 @@
     tools:ignore="ContentDescription">
 
     <android.support.design.widget.AppBarLayout
-        android:id="@+id/activity_music_local_appbar"
+        android:id="@+id/activity_music_base_appbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
         <android.support.v7.widget.Toolbar
-            android:id="@+id/music_local_toolbar"
+            android:id="@+id/activity_music_base_toolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="?attr/actionBarSize"
+            android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/ic_back"
-            app:contentInsetStartWithNavigation="0dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:contentInsetStart="0dp"
+            app:contentInsetStartWithNavigation="0dp" />
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout
@@ -38,9 +33,9 @@
         app:layout_constraintBottom_toTopOf="@id/music_control_panel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_music_local_appbar">
+        app:layout_constraintTop_toBottomOf="@id/activity_music_base_appbar">
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/music_list_local"
+            android:id="@+id/activity_music_base_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical" />
