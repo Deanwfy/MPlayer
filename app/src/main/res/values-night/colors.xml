@@ -19,4 +19,6 @@
     <color name="themeText">#dddddd</color>
     <color name="editNoticeText">#dddddd</color>
 
+    <color name="colorButton">#c7c7c7</color>
+
 </resources>

@@ -57,4 +57,9 @@
         <item name="android:windowExitAnimation">@anim/dialog_playlist_exit</item>
     </style>
 
+    <!-- CheckBox看不清楚 -->
+    <style name="CheckBoxStyle" parent="@android:style/Widget.Material.CompoundButton.CheckBox">
+        <item name="android:colorControlNormal">@color/colorButton</item>
+    </style>
+
 </resources>
