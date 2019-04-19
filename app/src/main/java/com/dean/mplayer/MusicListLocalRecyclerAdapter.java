@@ -110,7 +110,6 @@ public class MusicListLocalRecyclerAdapter extends RecyclerView.Adapter<MusicLis
             }
         };
     }
-
     // 获取搜索结果
     List<MusicInfo> getMusicListLocalFilter(){
         return musicListLocalFilter;

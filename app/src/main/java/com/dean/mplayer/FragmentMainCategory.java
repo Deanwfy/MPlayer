@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,21 +61,23 @@ public class FragmentMainCategory extends Fragment {
         category.add("美国Billboard周榜");
         LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(activityMain);
         mainCategoryRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
-        MenuClockRecyclerAdapter menuClockRecyclerAdapter = new MenuClockRecyclerAdapter(category);
-        menuClockRecyclerAdapter.setOnItemClickListener(((view, position) -> {
+        BaseRecyclerAdapter baseRecyclerAdapter = new BaseRecyclerAdapter(category);
+        baseRecyclerAdapter.setOnItemClickListener(((view, position) -> {
+            ActivityOptionsCompat optionsCompat =
+                    ActivityOptionsCompat.makeSceneTransitionAnimation(activityMain, view, "CategoryName");
             switch (position){
                 case 0:
                     Intent intentMusicLocal = new Intent(activityMain, ActivityMusicLocal.class);
-                    startActivity(intentMusicLocal);
+                    startActivity(intentMusicLocal, optionsCompat.toBundle());
                     break;
                 case 1:
                     Intent intentMusicOnlineTopBillboard = new Intent(activityMain, ActivityMusicOnlineTopBillboard.class);
-                    startActivity(intentMusicOnlineTopBillboard);
+                    startActivity(intentMusicOnlineTopBillboard, optionsCompat.toBundle());
                     break;
             }
         }));
-        mainCategoryRecyclerView.setAdapter(menuClockRecyclerAdapter);
-        menuClockRecyclerAdapter.notifyDataSetChanged();
+        mainCategoryRecyclerView.setAdapter(baseRecyclerAdapter);
+        baseRecyclerAdapter.notifyDataSetChanged();
     }
 
 }

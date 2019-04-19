@@ -167,13 +167,14 @@ public class ActivityMusicOnline extends AppCompatActivity {
     }
     private void setOnlineMusicInfo(String response, int position){
         JSONObject jsonObject = JSON.parseObject(response);
-        long id = musicInfo.get(position).getId();
-        String title = musicInfo.get(position).getName();
-        String album = musicInfo.get(position).getAlbum().getName();
-        String artist = musicInfo.get(position).getArtists().get(0).getName();
-        long duration = musicInfo.get(position).getDuration();
+        Songs music = musicInfo.get(position);
+        long id = music.getId();
+        String title = music.getName();
+        String album = music.getAlbum().getName();
+        String artist = music.getArtists().get(0).getName();
+        long duration = music.getDuration();
         Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
-        long albumId = musicInfo.get(position).getAlbum().getId();
+        long albumId = music.getAlbum().getId();
         getAlbumCover(id, title, album, artist, duration, uri, albumId);
     }
     private void getAlbumCover(long id, String title, String album, String artist, long duration, Uri uri, long albumId){

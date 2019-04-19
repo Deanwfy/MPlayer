@@ -1,5 +1,6 @@
 package com.dean.mplayer;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +11,7 @@ import java.util.List;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -156,5 +158,46 @@ public class MediaUtil {
 			throw new IllegalArgumentException("unsupported drawable type");
 		}
 	}
+
+	// Uri转真实路径
+	public static String getRealPathFromURI(Context context, Uri contentURI) {
+		String result;
+		Cursor cursor = null;
+		try {
+			cursor = context.getContentResolver().query(contentURI, null, null, null, null);
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+		if (cursor == null) {
+			result = contentURI.getPath();
+		} else {
+			cursor.moveToFirst();
+			int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+			result = cursor.getString(idx);
+			cursor.close();
+		}
+		return result;
+	}
+
+    // 删除
+    public static boolean deleteMusicFile(Context context,Uri uri){
+	    String filePath = getRealPathFromURI(context, uri);
+        File file = new File(filePath);
+        if (file.exists()){
+            if (file.isFile()){
+                if (file.delete()){
+                    scanFileAsync(context, filePath);
+                    return true;
+                }else return false;
+            }else return false;
+        }else return false;
+    }
+
+	// 更新媒体库
+    public static void scanFileAsync(Context context, String filePath) {
+        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        scanIntent.setData(Uri.fromFile(new File(filePath)));
+        context.sendBroadcast(scanIntent);
+    }
 
 }
