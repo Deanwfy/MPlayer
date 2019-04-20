@@ -24,6 +24,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/colorControlPanel"
+        android:elevation="5dp"
         toolbar:layout_constraintBottom_toBottomOf="parent"
         toolbar:layout_constraintEnd_toEndOf="parent"
         toolbar:layout_constraintStart_toStartOf="parent">

@@ -201,9 +201,6 @@ public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         musicCheckResult(true, false);
-        Intent playNowIntent = new Intent(this, ActivityNowPlay.class);
-        startActivity(playNowIntent);
-        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 加载动画

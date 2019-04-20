@@ -39,12 +39,13 @@
             android:launchMode="singleTask"
             android:parentActivityName=".ActivityMain"
             />
-
+        <!-- 播放服务 -->
         <service android:name=".PlayService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
+
     </application>
 
 </manifest>

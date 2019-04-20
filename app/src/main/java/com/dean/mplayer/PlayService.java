@@ -32,6 +32,8 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.graphics.Palette;
+import android.util.Log;
+import android.view.KeyEvent;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
@@ -97,6 +99,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			}
 		}
 	};
+
 
 
 	//extends MediaBrowserServiceCompat
@@ -271,11 +274,11 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	}
 
 	private void setUpMediaSessionCompat() {
-		//播放状态初始化
+		// 播放状态初始化
 		playbackStateCompat = new PlaybackStateCompat.Builder()
 				.setState(PlaybackStateCompat.STATE_NONE, 0, 0.0f)
 				.build();
-		//MediaSession初始化
+		// MediaSession初始化
 		mediaSessionCompat = new MediaSessionCompat(this, "MPlayer");
 		setSessionToken(mediaSessionCompat.getSessionToken());
 		try {
@@ -287,14 +290,14 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		mediaSessionCompat.setActive(true);
 		mediaSessionCompat.setFlags(MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS
 				| MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS);
-		//设置播放状态
+		// 设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
-		//加载播放列表
+		// 加载播放列表
 		playLists = ActivityMain.playList;
 
-		//回调播放控制
+		// 回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
-			//播放
+			// 播放
 			@Override
 			public void onPlayFromUri(Uri uri, Bundle position) {
 				if (playLists != null && playLists.size() != 0) {
@@ -312,9 +315,9 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						case PlaybackStateCompat.STATE_PAUSED:
 						case PlaybackStateCompat.STATE_NONE:
 							mediaPlayer.reset();
-							//设置播放地址
+							// 设置播放地址
 							mediaPlayer.setDataSource(PlayService.this, uri);
-							//异步进行播放
+							// 异步进行播放
 							mediaPlayer.prepareAsync();
 							break;
 						case PlaybackStateCompat.STATE_BUFFERING:
@@ -332,7 +335,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					onStop();
 				}
 			}
-			//停止
+			// 停止
 			@Override
 			public void onStop(){
 				if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
@@ -347,7 +350,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					notificationManager.cancel(notificationId);
 				}
 			}
-			//暂停
+			// 暂停
 			@Override
 			public void onPause() {
 				mediaPlayer.pause();
@@ -355,10 +358,10 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						.setState(PlaybackStateCompat.STATE_PAUSED, 0, 0.0f)
 						.build();
 				mediaSessionCompat.setPlaybackState(playbackStateCompat);
-				//更新通知栏
+				// 更新通知栏
 				sendNotification();
 			}
-			//继续
+			// 继续
 			@Override
 			public void onPlay() {
 				mediaPlayer.start();
@@ -366,10 +369,10 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 						.setState(PlaybackStateCompat.STATE_PLAYING, 0, 1.0f)
 						.build();
 				mediaSessionCompat.setPlaybackState(playbackStateCompat);
-				//开启／更新通知栏
+				// 开启／更新通知栏
 				sendNotification();
 			}
-			//上一曲
+			// 上一曲
 			@Override
 			public void onSkipToPrevious() {
 				if (playLists != null && playLists.size() != 0) {
@@ -381,7 +384,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					onPlayFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 				}
 			}
-			//下一曲
+			// 下一曲
 			@Override
 			public void onSkipToNext() {
 				if (playLists != null && playLists.size() != 0) {
@@ -393,12 +396,53 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 					onPlayFromUri(playLists.get(ActivityMain.listPosition).getUri(), null);
 				}
 			}
-			//跳转播放
+			// 跳转播放
 			@Override
 			public void onSeekTo(long pos) {
 				mediaPlayer.seekTo((int)pos);
 			}
-		});
+			// 线控
+            @Override
+            public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
+			    if (mediaControllerCompat.getPlaybackState().getState() != PlaybackStateCompat.STATE_NONE) {
+                    KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
+                    int keyCode = keyEvent.getKeyCode();
+                    switch (keyCode) {
+                        case KeyEvent.KEYCODE_HEADSETHOOK:
+                        case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
+                            if (keyEvent.getRepeatCount() == 0) {
+                                if (mediaPlayer.isPlaying()) {
+                                    this.onPause();
+                                } else this.onPlay();
+                            }else if (keyEvent.getRepeatCount() == 1){
+                                this.onSkipToNext();
+                            }else if (keyEvent.getRepeatCount() == 2){
+                                this.onSkipToPrevious();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PLAY:
+                            if (!mediaPlayer.isPlaying()) {
+                                this.onPlay();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PAUSE:
+                            if (mediaPlayer.isPlaying()) {
+                                this.onPause();
+                            }
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_NEXT:
+                            this.onSkipToNext();
+                            break;
+                        case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
+                            this.onSkipToPrevious();
+                            break;
+                        default:
+                            return super.onMediaButtonEvent(mediaButtonEvent);
+                    }
+                    return super.onMediaButtonEvent(mediaButtonEvent);
+                }else return super.onMediaButtonEvent(mediaButtonEvent);
+            }
+        });
 	}
 
 	//当音乐准备好的时候开始播放
