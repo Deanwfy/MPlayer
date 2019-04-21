@@ -13,6 +13,7 @@
     <string name="searchNoticeLocal">搜索本地歌曲</string>
     <string name="play_list_close">关闭</string>
     <string name="activity_music_local">本地音乐</string>
+    <string name="activity_music_artist">音乐人</string>
     <string name="activity_music_online_top_billboard">美国Billboard周榜</string>
     <string name="menu_clock_checkBox">当前歌曲结束后再停止</string>
 </resources>

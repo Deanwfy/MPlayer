@@ -28,9 +28,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ActivityMusicOnline"
+            />
         <activity android:name=".ActivityMusicLocal"
             />
-        <activity android:name=".ActivityMusicOnline"
+        <activity android:name=".ActivityMusicArtist"
+            />
+        <activity android:name=".ActivityMusicArtistMusic"
             />
         <activity android:name=".ActivityMusicOnlineTopBillboard"
             />

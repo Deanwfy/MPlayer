@@ -58,6 +58,7 @@ public class FragmentMainCategory extends Fragment {
     public void setListAdapter() {
         List<String> category = new ArrayList<>();
         category.add("本地音乐");
+        category.add("音乐人");
         category.add("美国Billboard周榜");
         LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(activityMain);
         mainCategoryRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
@@ -71,6 +72,10 @@ public class FragmentMainCategory extends Fragment {
                     startActivity(intentMusicLocal, optionsCompat.toBundle());
                     break;
                 case 1:
+                    Intent intentMusicArtist = new Intent(activityMain, ActivityMusicArtist.class);
+                    startActivity(intentMusicArtist, optionsCompat.toBundle());
+                    break;
+                case 2:
                     Intent intentMusicOnlineTopBillboard = new Intent(activityMain, ActivityMusicOnlineTopBillboard.class);
                     startActivity(intentMusicOnlineTopBillboard, optionsCompat.toBundle());
                     break;

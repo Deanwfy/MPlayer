@@ -1,20 +1,10 @@
 package com.dean.mplayer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
-import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -25,7 +15,15 @@ import android.provider.MediaStore;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.dean.mplayer.onlineSearch.Album;
+import com.dean.mplayer.onlineSearch.Artists;
 import com.squareup.picasso.Picasso;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class MediaUtil {
 
@@ -41,11 +39,11 @@ public class MediaUtil {
 	}
 
 	//本地歌曲信息获取
+    private static List<MusicInfo> musicInfoLocal;
 	public static List<MusicInfo> getMusicLocal(Context context) {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
 				MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
 		List<MusicInfo> musicInfos = new ArrayList<>();
 		if(cursor != null) {
 			while (cursor.moveToNext()) {
@@ -54,8 +52,10 @@ public class MediaUtil {
 						.getColumnIndex(MediaStore.Audio.Media._ID));
 				String title = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.TITLE));
-				String artist = cursor.getString(cursor
+                String artist = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                long artistId = cursor.getLong(cursor
+                        .getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
 				String album = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.ALBUM));
 				String displayName = cursor.getString(cursor
@@ -75,6 +75,7 @@ public class MediaUtil {
 					musicInfo.setId(id);
 					musicInfo.setTitle(title);
 					musicInfo.setArtist(artist);
+					musicInfo.setArtistId(artistId);
 					musicInfo.setAlbum(album);
 					musicInfo.setDisplayName(displayName);
 					musicInfo.setAlbumId(albumId);
@@ -87,30 +88,45 @@ public class MediaUtil {
 				}
 			}
 			cursor.close();
+			musicInfoLocal = musicInfos;
 			return musicInfos;
 		}else {
 			return null;
 		}
 	}
 
-	public static List<HashMap<String, String>> getMusicMaps(
-			List<MusicInfo> musicInfos) {
-		List<HashMap<String, String>> musiclist = new ArrayList<>();
-		for (MusicInfo musicInfo : musicInfos) {
-			HashMap<String, String> map = new HashMap<>();
-			map.put("title", musicInfo.getTitle());
-			map.put("artist", musicInfo.getArtist());
-			map.put("album", musicInfo.getAlbum());
-			map.put("displayName", musicInfo.getDisplayName());
-			map.put("albumId", String.valueOf(musicInfo.getAlbumId()));
-			map.put("duration", formatTime(musicInfo.getDuration()));
-			map.put("size", String.valueOf(musicInfo.getSize()));
-			map.put("url", musicInfo.getUrl());
-			map.put("uri", String.valueOf(musicInfo.getUri()));
-			musiclist.add(map);
-		}
-		return musiclist;
-	}
+	// 本地音乐人获取
+    public static List<Artists> getArtistsLocal() {
+	    List<Artists> artistsLocal = new ArrayList<>();
+        for (int i = 0; i < musicInfoLocal.size() - 1; i++) {
+            boolean repeat = false;
+            List<MusicInfo> musicInfos = new ArrayList<>();
+            MusicInfo musicInfo = musicInfoLocal.get(i);
+            musicInfos.add(musicInfo);
+            List<Album> artistAlbums = new ArrayList<>();
+            Album artistAlbum = new Album(musicInfo.getAlbumId(), musicInfo.getAlbum());
+            artistAlbums.add(artistAlbum);
+            for (int j = 0; j < artistsLocal.size(); j++) {
+                Artists artist = artistsLocal.get(j);
+                if (artist.getId() == musicInfo.getArtistId()) {
+                    artist.getMusicInfos().add(musicInfo);
+                    artist.getAlbums().add(artistAlbum);
+                    repeat = true;
+                    break;
+                }
+            }
+            if (!repeat){
+                artistsLocal.add(new Artists(
+                        musicInfo.getArtistId(),
+                        musicInfo.getArtist(),
+                        musicInfos,
+                        artistAlbums
+                ));
+            }
+        }
+        Collections.sort(artistsLocal, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+	    return artistsLocal;
+    }
 
 	//时间显示格式
 	public static String formatTime(long time) {

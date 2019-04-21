@@ -421,7 +421,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
                                 double onceTimeDifference = thisUpTime - lastUpTime;
                                 double twiceTimeDifference = thisUpTime - beforeLastUpTime;
                                 Log.i(TAG, "onMediaButtonEvent: "+thisUpTime+"---"+onceTimeDifference+"---"+twiceTimeDifference);
-                                if (twiceTimeDifference  < 0.50){   // 三击
+                                if (twiceTimeDifference  < 0.50){   // 三击 TODO BUG
                                     this.onSkipToPrevious();
                                 }else if (onceTimeDifference < 0.30){   // 双击
                                     this.onSkipToNext();
