@@ -1,10 +1,5 @@
 package com.dean.mplayer;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-
 import android.annotation.SuppressLint;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -35,6 +30,11 @@ import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
 	private List<PlayList> playLists; // 播放列表
@@ -42,13 +42,17 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	public static String mode = AppConstant.PlayMode.MODE_ORDER;	// 播放状态，默认为顺序播放
 	public static int current = 0;	// 播放进度
 
-	private int notificationId = 1;	//通知Id
-	private NotificationManager notificationManager;	//通知管理器
+	private int notificationId = 1;	// 通知Id
+	private NotificationManager notificationManager;	// 通知管理器
 
-	private MediaSessionCompat mediaSessionCompat;	//mediaSession
-	private PlaybackStateCompat playbackStateCompat;	//播放状态
-	private MediaControllerCompat mediaControllerCompat;	//播放控制
+	private MediaSessionCompat mediaSessionCompat;	// mediaSession
+	private PlaybackStateCompat playbackStateCompat;	// 播放状态
+	private MediaControllerCompat mediaControllerCompat;	// 播放控制
 	private Timer timer = new Timer();
+
+	private double lastUpTime = 0; // 上次抬起线控的时间，用于判断线控双击
+	private double beforeLastUpTime = 0; // 上次抬起线控的时间，用于判断线控三击
+
 	// 音频焦点标志-是否是由失焦导致的暂停
 	boolean pausedByLossTransient = false;
 	// 耳机拔出监听
@@ -387,6 +391,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			// 下一曲
 			@Override
 			public void onSkipToNext() {
+                Log.i(TAG, "onSkipToNext: ");
 				if (playLists != null && playLists.size() != 0) {
 					if (ActivityMain.listPosition < playLists.size() - 1) {
 						ActivityMain.listPosition++;
@@ -404,47 +409,66 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			// 线控
             @Override
             public boolean onMediaButtonEvent(Intent mediaButtonEvent) {
-			    if (mediaControllerCompat.getPlaybackState().getState() != PlaybackStateCompat.STATE_NONE) {
+			    if (playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE) {
                     KeyEvent keyEvent = mediaButtonEvent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
                     int keyCode = keyEvent.getKeyCode();
+                    int keyAction = keyEvent.getAction();
                     switch (keyCode) {
                         case KeyEvent.KEYCODE_HEADSETHOOK:
                         case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-                            if (keyEvent.getRepeatCount() == 0) {
-                                if (mediaPlayer.isPlaying()) {
+                            if (keyAction == KeyEvent.ACTION_UP) {
+                                double thisUpTime = keyEvent.getEventTime() / 1000.00;
+                                double onceTimeDifference = thisUpTime - lastUpTime;
+                                double twiceTimeDifference = thisUpTime - beforeLastUpTime;
+                                Log.i(TAG, "onMediaButtonEvent: "+thisUpTime+"---"+onceTimeDifference+"---"+twiceTimeDifference);
+                                if (twiceTimeDifference  < 0.50){   // 三击
+                                    this.onSkipToPrevious();
+                                }else if (onceTimeDifference < 0.30){   // 双击
+                                    this.onSkipToNext();
+                                }else if (mediaPlayer.isPlaying()) {
                                     this.onPause();
                                 } else this.onPlay();
-                            }else if (keyEvent.getRepeatCount() == 1){
-                                this.onSkipToNext();
-                            }else if (keyEvent.getRepeatCount() == 2){
-                                this.onSkipToPrevious();
+                                beforeLastUpTime = lastUpTime;
+                                lastUpTime = thisUpTime;
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PLAY:
-                            if (!mediaPlayer.isPlaying()) {
-                                this.onPlay();
+                            if (keyAction == KeyEvent.ACTION_UP) {
+                                if (!mediaPlayer.isPlaying()) {
+                                    this.onPlay();
+                                }
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PAUSE:
-                            if (mediaPlayer.isPlaying()) {
-                                this.onPause();
+                            if (keyAction == KeyEvent.ACTION_UP) {
+                                if (mediaPlayer.isPlaying()) {
+                                    this.onPause();
+                                }
                             }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_NEXT:
-                            this.onSkipToNext();
+                            if (keyAction == KeyEvent.ACTION_UP) {
+                                this.onSkipToNext();
+                            }
                             break;
                         case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-                            this.onSkipToPrevious();
+                            if (keyAction == KeyEvent.ACTION_UP) {
+                                this.onSkipToPrevious();
+                            }
                             break;
                         default:
                             return super.onMediaButtonEvent(mediaButtonEvent);
                     }
+                    return false;
+                }else {
                     return super.onMediaButtonEvent(mediaButtonEvent);
-                }else return super.onMediaButtonEvent(mediaButtonEvent);
+                }
             }
         });
 	}
 
+    private static final String TAG = "PlayService";
+	
 	//当音乐准备好的时候开始播放
 	@Override
 	public void onPrepared(MediaPlayer mp) {
