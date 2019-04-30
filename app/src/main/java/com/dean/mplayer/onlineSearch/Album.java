@@ -7,12 +7,7 @@ public class Album {
     private long publishTime;
     private int size;
 
-    public Album(long id, String name) {
-        super();
-        this.id = id;
-        this.name = name;
-    }
-
+    //
     public void setId(long id) {
          this.id = id;
      }
