@@ -8,9 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
-
-import com.dean.mplayer.onlineSearch.Artists;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,10 +22,10 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
         }
     }
 
-    private List<Artists> musicListArtistAlbumFilter;
-    private List<Artists> musicListArtistAlbum;
+    private List<Arts> musicListArtistAlbumFilter;
+    private List<Arts> musicListArtistAlbum;
     private OnItemClickListener onItemClickListener = null;
-    MusicListArtistAlbumRecyclerAdapter(List<Artists> musicListArtistAlbum){
+    MusicListArtistAlbumRecyclerAdapter(List<Arts> musicListArtistAlbum){
         this.musicListArtistAlbum = musicListArtistAlbum;
         this.musicListArtistAlbumFilter = this.musicListArtistAlbum;    // 初始化时默认填充全部歌曲
     }
@@ -62,8 +59,8 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
                 if (searchKey.isEmpty()) {
                     musicListArtistAlbumFilter = musicListArtistAlbum;
                 } else {
-                    List<Artists> filteredList = new ArrayList<>();
-                    for (Artists artist: musicListArtistAlbum) {
+                    List<Arts> filteredList = new ArrayList<>();
+                    for (Arts artist: musicListArtistAlbum) {
                         // 匹配规则
                         if (artist.contains(searchKey)) {
                             filteredList.add(artist);
@@ -79,14 +76,14 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                musicListArtistAlbumFilter = (List<Artists>) filterResults.values;
+                musicListArtistAlbumFilter = (List<Arts>) filterResults.values;
                 //刷新数据
                 notifyDataSetChanged();
             }
         };
     }
     // 获取搜索结果
-    List<Artists> getMusicListArtistAlbumFilter(){
+    List<Arts> getMusicListArtistAlbumFilter(){
         return musicListArtistAlbumFilter;
     }
 

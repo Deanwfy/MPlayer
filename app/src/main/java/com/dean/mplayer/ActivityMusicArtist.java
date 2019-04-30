@@ -41,7 +41,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.dean.mplayer.onlineSearch.Artists;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import java.io.Serializable;
@@ -57,7 +56,7 @@ public class ActivityMusicArtist extends AppCompatActivity {
     private RecyclerView musicListArtistAlbumRecyclerView;
     private MusicListArtistAlbumRecyclerAdapter musicListArtistAlbumRecyclerAdapter;
     private List<MusicInfo> musicInfo = new ArrayList<>();
-    private List<Artists> artists = new ArrayList<>();
+    private List<Arts> arts = new ArrayList<>();
 
     // 媒体信息
     private TextView PlayingTitle;
@@ -72,7 +71,7 @@ public class ActivityMusicArtist extends AppCompatActivity {
     // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
-    
+
     // Toolbar本地搜索
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -178,7 +177,7 @@ public class ActivityMusicArtist extends AppCompatActivity {
     private void initPlayList(){
         new Thread(() -> {
             musicInfo = MediaUtil.getMusicLocal(this);
-            artists = MediaUtil.getArtistsLocal();
+            arts = MediaUtil.getArtistsLocal();
             runOnUiThread(() -> {
                 if (musicInfo != null && musicInfo.size() != 0) {
                     setListAdapter();   // 显示歌曲列表
@@ -192,17 +191,17 @@ public class ActivityMusicArtist extends AppCompatActivity {
     public void setListAdapter() {
         LinearLayoutManager musicListArtistAlbumRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListArtistAlbumRecyclerView.setLayoutManager(musicListArtistAlbumRecyclerLayoutManager);
-        musicListArtistAlbumRecyclerAdapter = new MusicListArtistAlbumRecyclerAdapter(artists){
+        musicListArtistAlbumRecyclerAdapter = new MusicListArtistAlbumRecyclerAdapter(arts){
             @Override
             public void onBindViewHolder(@NonNull MusicListArtistAlbumRecyclerAdapterHolder musicListArtistAlbumRecyclerAdapterHolder, int position) {
                 super.onBindViewHolder(musicListArtistAlbumRecyclerAdapterHolder, position);
-                Artists artist = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter().get(position);
-                musicListArtistAlbumRecyclerAdapterHolder.musicInfoName.setText(artist.getName());
+                Arts art = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter().get(position);
+                musicListArtistAlbumRecyclerAdapterHolder.musicInfoName.setText(art.getName());
             }
         };
         musicListArtistAlbumRecyclerAdapter.setOnItemClickListener(((view, position) -> {
-            artists = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter();
-            List<MusicInfo> musicInfos = artists.get(position).getMusicInfos();
+            arts = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter();
+            List<MusicInfo> musicInfos = arts.get(position).getMusicInfos();
             Intent intentMusicArtistMusic = new Intent(this, ActivityMusicArtistMusic.class);
             intentMusicArtistMusic.putExtra("artistMusicInfos", (Serializable)musicInfos);
             startActivity(intentMusicArtistMusic);

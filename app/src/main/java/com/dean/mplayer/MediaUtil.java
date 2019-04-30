@@ -39,7 +39,7 @@ public class MediaUtil {
 	}
 
 	//本地歌曲信息获取
-    private static List<MusicInfo> musicInfoLocal;
+	private static List<MusicInfo> musicInfoLocal;
 	public static List<MusicInfo> getMusicLocal(Context context) {
 		Cursor cursor = context.getContentResolver().query(
 				MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, null, null, null,
@@ -52,10 +52,10 @@ public class MediaUtil {
 						.getColumnIndex(MediaStore.Audio.Media._ID));
 				String title = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String artist = cursor.getString(cursor
+				String artist = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.ARTIST));
-                long artistId = cursor.getLong(cursor
-                        .getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
+				long artistId = cursor.getLong(cursor
+						.getColumnIndex(MediaStore.Audio.Media.ARTIST_ID));
 				String album = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.ALBUM));
 				String displayName = cursor.getString(cursor
@@ -96,37 +96,37 @@ public class MediaUtil {
 	}
 
 	// 本地音乐人获取
-    public static List<Artists> getArtistsLocal() {
-	    List<Artists> artistsLocal = new ArrayList<>();
-        for (int i = 0; i < musicInfoLocal.size() - 1; i++) {
-            boolean repeat = false;
-            List<MusicInfo> musicInfos = new ArrayList<>();
-            MusicInfo musicInfo = musicInfoLocal.get(i);
-            musicInfos.add(musicInfo);
-            List<Album> artistAlbums = new ArrayList<>();
-            Album artistAlbum = new Album(musicInfo.getAlbumId(), musicInfo.getAlbum());
-            artistAlbums.add(artistAlbum);
-            for (int j = 0; j < artistsLocal.size(); j++) {
-                Artists artist = artistsLocal.get(j);
-                if (artist.getId() == musicInfo.getArtistId()) {
-                    artist.getMusicInfos().add(musicInfo);
-                    artist.getAlbums().add(artistAlbum);
-                    repeat = true;
-                    break;
-                }
-            }
-            if (!repeat){
-                artistsLocal.add(new Artists(
-                        musicInfo.getArtistId(),
-                        musicInfo.getArtist(),
-                        musicInfos,
-                        artistAlbums
-                ));
-            }
-        }
-        Collections.sort(artistsLocal, (o1, o2) -> o1.getName().compareTo(o2.getName()));
-	    return artistsLocal;
-    }
+	public static List<Arts> getArtistsLocal() {
+		List<Arts> artistsLocal = new ArrayList<>();
+		for (int i = 0; i < musicInfoLocal.size() - 1; i++) {
+			boolean repeat = false;
+			List<MusicInfo> musicInfos = new ArrayList<>();
+			MusicInfo musicInfo = musicInfoLocal.get(i);
+			musicInfos.add(musicInfo);
+			List<Albm> artistAlbms = new ArrayList<>();
+			Albm artistAlbm = new Albm(musicInfo.getAlbumId(), musicInfo.getAlbum());
+			artistAlbms.add(artistAlbm);
+			for (int j = 0; j < artistsLocal.size(); j++) {
+				Arts arts = artistsLocal.get(j);
+				if (arts.getId() == musicInfo.getArtistId()) {
+					arts.getMusicInfos().add(musicInfo);
+					arts.getAlbums().add(artistAlbm);
+					repeat = true;
+					break;
+				}
+			}
+			if (!repeat){
+				artistsLocal.add(new Arts(
+						musicInfo.getArtistId(),
+						musicInfo.getArtist(),
+						musicInfos,
+						artistAlbms
+				));
+			}
+		}
+		Collections.sort(artistsLocal, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+		return artistsLocal;
+	}
 
 	//时间显示格式
 	public static String formatTime(long time) {
@@ -151,7 +151,7 @@ public class MediaUtil {
 
 	//获取专辑封面位图对象
 	public static Bitmap getArtwork(Context context, long album_id) {
-			Uri uri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), album_id);
+		Uri uri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), album_id);
 		try {
 			return Picasso.get().load(uri).error(R.drawable.ic_cover).get();
 		} catch (IOException e) {
@@ -195,25 +195,25 @@ public class MediaUtil {
 		return result;
 	}
 
-    // 删除
-    public static boolean deleteMusicFile(Context context,Uri uri){
-	    String filePath = getRealPathFromURI(context, uri);
-        File file = new File(filePath);
-        if (file.exists()){
-            if (file.isFile()){
-                if (file.delete()){
-                    scanFileAsync(context, filePath);
-                    return true;
-                }else return false;
-            }else return false;
-        }else return false;
-    }
+	// 删除
+	public static boolean deleteMusicFile(Context context,Uri uri){
+		String filePath = getRealPathFromURI(context, uri);
+		File file = new File(filePath);
+		if (file.exists()){
+			if (file.isFile()){
+				if (file.delete()){
+					scanFileAsync(context, filePath);
+					return true;
+				}else return false;
+			}else return false;
+		}else return false;
+	}
 
 	// 更新媒体库
-    public static void scanFileAsync(Context context, String filePath) {
-        Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        scanIntent.setData(Uri.fromFile(new File(filePath)));
-        context.sendBroadcast(scanIntent);
-    }
+	public static void scanFileAsync(Context context, String filePath) {
+		Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+		scanIntent.setData(Uri.fromFile(new File(filePath)));
+		context.sendBroadcast(scanIntent);
+	}
 
 }

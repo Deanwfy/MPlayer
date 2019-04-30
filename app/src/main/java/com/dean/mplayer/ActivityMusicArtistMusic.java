@@ -72,7 +72,7 @@ public class ActivityMusicArtistMusic extends AppCompatActivity {
     // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
-    
+
     // Toolbar本地搜索
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -224,13 +224,13 @@ public class ActivityMusicArtistMusic extends AppCompatActivity {
             for (int musicCountLocal = 0; musicCountLocal < artistMusicInfos.size(); musicCountLocal++) {
                 MusicInfo itemMusicInfo = artistMusicInfos.get(musicCountLocal);
                 ActivityMain.playList.add(new PlayList(
-                        itemMusicInfo.getId(),
-                        itemMusicInfo.getTitle(),
-                        itemMusicInfo.getAlbum(),
-                        itemMusicInfo.getArtist(),
-                        itemMusicInfo.getDuration(),
-                        itemMusicInfo.getUri(),
-                        itemMusicInfo.getAlbumBitmap()
+                                itemMusicInfo.getId(),
+                                itemMusicInfo.getTitle(),
+                                itemMusicInfo.getAlbum(),
+                                itemMusicInfo.getArtist(),
+                                itemMusicInfo.getDuration(),
+                                itemMusicInfo.getUri(),
+                                itemMusicInfo.getAlbumBitmap()
                         )
                 );
             }
