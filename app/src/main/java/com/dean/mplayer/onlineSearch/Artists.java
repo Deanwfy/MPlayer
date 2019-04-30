@@ -2,7 +2,6 @@ package com.dean.mplayer.onlineSearch;
 
 public class Artists {
 
-    //
     private long id;
     private String name;
 

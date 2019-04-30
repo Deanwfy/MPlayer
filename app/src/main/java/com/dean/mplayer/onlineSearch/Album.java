@@ -7,7 +7,6 @@ public class Album {
     private long publishTime;
     private int size;
 
-    //
     public void setId(long id) {
          this.id = id;
      }
