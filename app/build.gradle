@@ -32,6 +32,7 @@ dependencies {
     })
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     //noinspection GradleCompatible
+    implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-media-compat:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
@@ -45,4 +46,5 @@ dependencies {
     implementation 'com.github.ForgetAll:LoadingDialog:v1.1.0-alpha'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.r0adkll:slidableactivity:2.0.6'
+    implementation 'me.wcy:lrcview:2.0.1'
 }

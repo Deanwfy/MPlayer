@@ -2,6 +2,7 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
@@ -73,7 +74,7 @@ public class ActivityNowPlay extends AppCompatActivity {
                 .position(SlidrPosition.TOP)
                 .build();
         Slidr.attach(this, slidrConfig);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);   // FLAG_TRANSLUCENT_STATUS 状态栏透明
         findControlBtnById();
         setPlayNowMode();
         setControlBtnOnClickListener();
@@ -112,6 +113,7 @@ public class ActivityNowPlay extends AppCompatActivity {
     private void setControlBtnOnClickListener() {
         ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
         ControlSeekBarOnChangeListener controlSeekBarOnChangeListener = new ControlSeekBarOnChangeListener();
+        playNowCover.setOnClickListener(controlBtnOnClickListener);
         playNowMode.setOnClickListener(controlBtnOnClickListener);
         playNowPrev.setOnClickListener(controlBtnOnClickListener);
         playNowPlay.setOnClickListener(controlBtnOnClickListener);
@@ -159,6 +161,10 @@ public class ActivityNowPlay extends AppCompatActivity {
 //                            Toast.makeText(getApplicationContext(),"顺序播放", Toast.LENGTH_SHORT).show();
                             break;
                     }
+                    break;
+                case R.id.playNowCover:
+                    Intent intent = new Intent(ActivityNowPlay.this, TestActivity.class);
+                    startActivity(intent);
                     break;
                 case R.id.playNowPlay:
                     if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {

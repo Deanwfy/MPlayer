@@ -19,8 +19,11 @@ import com.dean.mplayer.onlineSearch.Album;
 import com.dean.mplayer.onlineSearch.Artists;
 import com.squareup.picasso.Picasso;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -175,9 +178,28 @@ public class MediaUtil {
 		}
 	}
 
+	// 获取歌词文件
+    public static String getLrc(String filePath){
+        try {
+            String path = filePath.substring(0, filePath.lastIndexOf(".")) + ".lrc";
+            InputStreamReader inputReader = new InputStreamReader(new FileInputStream(new File(path)));
+            BufferedReader bufReader = new BufferedReader(inputReader);
+            String line;
+            StringBuilder result= new StringBuilder();
+            while((line = bufReader.readLine()) != null){
+                if(line.trim().equals(""))
+                    continue;
+                result.append(line).append("\r\n");
+            }
+            return result.toString();
+        } catch (Exception e) {
+            return "暂无歌词";
+        }
+    }
+
 	// Uri转真实路径
 	public static String getRealPathFromURI(Context context, Uri contentURI) {
-		String result;
+		String path;
 		Cursor cursor = null;
 		try {
 			cursor = context.getContentResolver().query(contentURI, null, null, null, null);
@@ -185,14 +207,14 @@ public class MediaUtil {
 			e.printStackTrace();
 		}
 		if (cursor == null) {
-			result = contentURI.getPath();
+			path = contentURI.getPath();
 		} else {
 			cursor.moveToFirst();
 			int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-			result = cursor.getString(idx);
+			path = cursor.getString(idx);
 			cursor.close();
 		}
-		return result;
+		return path;
 	}
 
 	// 删除

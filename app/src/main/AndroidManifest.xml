@@ -11,12 +11,12 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:networkSecurityConfig="@xml/network_security_config"
         tools:ignore="UnusedAttribute">
-
+        <activity android:name=".TestActivity"></activity>
         <activity
             android:name=".ActivityMain"
             android:label="@string/app_name"
@@ -25,31 +25,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityMusicOnline"
-            />
-        <activity android:name=".ActivityMusicLocal"
-            />
-        <activity android:name=".ActivityMusicArtist"
-            />
-        <activity android:name=".ActivityMusicArtistMusic"
-            />
-        <activity android:name=".ActivityMusicOnlineTopBillboard"
-            />
+        <activity android:name=".ActivityMusicOnline" />
+        <activity android:name=".ActivityMusicLocal" />
+        <activity android:name=".ActivityMusicArtist" />
+        <activity android:name=".ActivityMusicArtistMusic" />
+        <activity android:name=".ActivityMusicOnlineTopBillboard" />
         <activity
             android:name=".ActivityNowPlay"
             android:launchMode="singleTask"
-            android:parentActivityName=".ActivityMain"
-            />
-        <!-- 播放服务 -->
+            android:parentActivityName=".ActivityMain" /> <!-- 播放服务 -->
         <service android:name=".PlayService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-
     </application>
 
 </manifest>

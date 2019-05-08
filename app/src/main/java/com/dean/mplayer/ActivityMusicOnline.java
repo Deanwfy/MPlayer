@@ -17,6 +17,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
@@ -198,11 +199,11 @@ public class ActivityMusicOnline extends AppCompatActivity {
     }
     private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
         if (ActivityMain.playList.size() != 0) {
-            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　播放列表为空的情况（直接播放网络音乐）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap));
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         musicCheckResult(true, false);

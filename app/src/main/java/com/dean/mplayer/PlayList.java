@@ -11,12 +11,13 @@ public class PlayList {
     private long duration;
     private Uri uri;
     private Bitmap albumBitmap;
+    private String source;
 
     public PlayList() {
         super();
     }
 
-    public PlayList(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap) {
+    public PlayList(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap, String source) {
         super();
         this.id = id;
         this.title = title;
@@ -25,6 +26,7 @@ public class PlayList {
         this.duration = duration;
         this.uri = uri;
         this.albumBitmap = albumBitmap;
+        this.source = source;
     }
 
     public void setId(long id) {
@@ -75,6 +77,14 @@ public class PlayList {
      public void setAlbumBitmap(Bitmap albumBitmap) {
         this.albumBitmap = albumBitmap;
     }
+
+    public String getSource() {
+        return source;
+    }
+    public void setSource(String source) {
+        this.source = source;
+    }
+
 
     @Override
     public String toString() {

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="#aa000000"
+    tools:context=".FragmentLrc">
+
+    <me.wcy.lrcview.LrcView
+        android:id="@+id/lrcView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:lrcAnimationDuration="1000"
+        app:lrcTimelineTextColor="@color/drawerArrowStyle"
+        app:lrcCurrentTextColor="@color/colorPlayNowMusicTitleText"
+        app:lrcTextSize="18sp"
+        app:lrcLabel="找不到歌词(@_@)"
+        />
+
+</LinearLayout>

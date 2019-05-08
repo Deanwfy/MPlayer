@@ -233,7 +233,8 @@ public class ActivityMusicLocal extends AppCompatActivity {
                         itemMusicInfo.getArtist(),
                         itemMusicInfo.getDuration(),
                         itemMusicInfo.getUri(),
-                        itemMusicInfo.getAlbumBitmap()
+                        itemMusicInfo.getAlbumBitmap(),
+                        "Local"
                         )
                 );
             }
@@ -469,7 +470,7 @@ public class ActivityMusicLocal extends AppCompatActivity {
             for (playListPosition = 0; playListPosition < ActivityMain.playList.size(); playListPosition++) {
                 playListMusicInfo = ActivityMain.playList.get(playListPosition);
                 if (playListMusicInfo.getId() == id) {
-                    ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover));
+                    ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
                     playListRecyclerAdapter.notifyItemInserted(ActivityMain.listPosition + 1);
                     ActivityMain.playList.remove(playListPosition);
                     playListRecyclerAdapter.notifyItemRemoved(playListPosition);
@@ -483,13 +484,13 @@ public class ActivityMusicLocal extends AppCompatActivity {
                 }
             }
             if (playListPosition == ActivityMain.playList.size()) {
-                ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover));
+                ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
                 playListRecyclerAdapter.notifyItemInserted(ActivityMain.listPosition + 1);
                 playListRecyclerAdapter.notifyItemRangeChanged(ActivityMain.listPosition + 1, ActivityMain.playList.size() - ActivityMain.listPosition + 1);
             }
         }else {
             //　播放列表为空的情况（直接播放）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover));
+            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
         }
     }
 

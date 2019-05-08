@@ -30,10 +30,17 @@ import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.KeyEvent;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class PlayService extends MediaBrowserServiceCompat implements OnPreparedListener {
 	private MediaPlayer mediaPlayer; // 媒体播放器对象
@@ -52,6 +59,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 
 	private double lastUpTime = 0; // 上次抬起线控的时间，用于判断线控双击
 	private double beforeLastUpTime = 0; // 上次抬起线控的时间，用于判断线控三击
+
+    public static String lrcString;
 
 	// 音频焦点标志-是否是由失焦导致的暂停
 	boolean pausedByLossTransient = false;
@@ -312,6 +321,30 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 							.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, playList.getDuration())
 							.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, playList.getAlbumBitmap());
 					mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
+					switch (playList.getSource()){
+                        case "Netease":
+                            String urlLrc = "http://39.108.4.217:8888/lyric?id=" + playList.getId();
+                            new Thread(() -> {
+                                try {
+                                    OkHttpClient okHttpClient = new OkHttpClient();
+                                    Request requestLrc = new Request.Builder()
+                                            .url(urlLrc)
+                                            .build();
+                                    Response responseLrc = okHttpClient.newCall(requestLrc).execute();
+                                    assert responseLrc.body() != null;
+                                    String responseDataLrc = responseLrc.body().string();
+                                    JSONObject jsonObjectLrc = JSON.parseObject(responseDataLrc);
+                                    lrcString = jsonObjectLrc.getJSONObject("lrc").getString("lyric");
+                                }catch (Exception e){
+                                    e.printStackTrace();
+                                }
+                            }).start();
+                            break;
+                        case "Local":
+                            default:
+                                lrcString = MediaUtil.getLrc(MediaUtil.getRealPathFromURI(PlayService.this, playList.getUri()));
+                                break;
+                    }
 				}
 				try {
 					switch (playbackStateCompat.getState()) {
@@ -492,10 +525,13 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			public void run() {
 				if(playbackStateCompat.getState() != PlaybackStateCompat.STATE_NONE && mediaPlayer.isPlaying()){
 					current = mediaPlayer.getCurrentPosition();
+					if (FragmentLrc.lrcView != null){
+					    FragmentLrc.lrcView.updateTime(PlayService.current);
+                    }
 				}
 			}
 		};
-		timer.schedule(timerTask, 0 ,1000);
+		timer.schedule(timerTask, 0 ,300);
 	}
 
 }

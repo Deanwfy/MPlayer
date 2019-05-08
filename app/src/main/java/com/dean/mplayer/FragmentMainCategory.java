@@ -75,6 +75,7 @@ public class FragmentMainCategory extends Fragment {
                     Intent intentMusicArtist = new Intent(activityMain, ActivityMusicArtist.class);
                     startActivity(intentMusicArtist, optionsCompat.toBundle());
                     break;
+                    // TODO
                 case 2:
                     Intent intentMusicOnlineTopBillboard = new Intent(activityMain, ActivityMusicOnlineTopBillboard.class);
                     startActivity(intentMusicOnlineTopBillboard, optionsCompat.toBundle());
