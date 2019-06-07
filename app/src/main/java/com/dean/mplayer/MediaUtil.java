@@ -14,6 +14,8 @@ import android.os.Build;
 import android.provider.MediaStore;
 import android.support.graphics.drawable.VectorDrawableCompat;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.dean.mplayer.onlineSearch.Album;
 import com.dean.mplayer.onlineSearch.Artists;
@@ -27,6 +29,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import static com.google.android.exoplayer2.mediacodec.MediaCodecInfo.TAG;
 
 public class MediaUtil {
 
@@ -101,7 +105,7 @@ public class MediaUtil {
 	// 本地音乐人获取
 	public static List<Arts> getArtistsLocal() {
 		List<Arts> artistsLocal = new ArrayList<>();
-		for (int i = 0; i < musicInfoLocal.size() - 1; i++) {
+		for (int i = 0; i < musicInfoLocal.size(); i++) {
 			boolean repeat = false;
 			List<MusicInfo> musicInfos = new ArrayList<>();
 			MusicInfo musicInfo = musicInfoLocal.get(i);
@@ -129,6 +133,34 @@ public class MediaUtil {
 		}
 		Collections.sort(artistsLocal, (o1, o2) -> o1.getName().compareTo(o2.getName()));
 		return artistsLocal;
+	}
+
+	// 本地专辑获取
+	public static List<LocalAlbm> getAlbmLocal() {
+		List<LocalAlbm> albmLocal = new ArrayList<>();
+		for (int i = 0; i < musicInfoLocal.size(); i++) {
+			boolean repeat = false;
+            List<MusicInfo> musicInfos = new ArrayList<>();
+            MusicInfo musicInfo = musicInfoLocal.get(i);
+            musicInfos.add(musicInfo);
+			for (int j = 0; j < albmLocal.size(); j++) {
+				LocalAlbm localAlbm = albmLocal.get(j);
+				if (localAlbm.getName().equals(musicInfo.getTitle())) {
+					localAlbm.getMusicInfos().add(musicInfo);
+					repeat = true;
+					break;
+				}
+			}
+			if (!repeat){
+				albmLocal.add(new LocalAlbm(
+						musicInfo.getAlbumId(),
+						musicInfo.getAlbum(),
+						musicInfos
+				));
+			}
+		}
+		Collections.sort(albmLocal, (o1, o2) -> o1.getName().compareTo(o2.getName()));
+		return albmLocal;
 	}
 
 	//时间显示格式

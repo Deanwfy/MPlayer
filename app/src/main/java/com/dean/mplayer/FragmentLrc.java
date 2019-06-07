@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,7 +55,11 @@ public class FragmentLrc extends Fragment {
 
     private void setLrcView(){
         lrcView.loadLrc(PlayService.lrcString);
-        lrcView.setOnPlayClickListener(time -> true);
+        lrcView.setOnPlayClickListener(time -> {
+            MediaControllerCompat mediaControllerCompat = MediaControllerCompat.getMediaController(testActivity);
+            mediaControllerCompat.getTransportControls().seekTo(time);
+            return true;
+        });
     }
 
 }

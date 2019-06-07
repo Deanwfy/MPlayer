@@ -21,10 +21,11 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
-            android:transitionName="CategoryName"
+
             app:navigationIcon="@drawable/ic_back"
             app:contentInsetStart="0dp"
             app:contentInsetStartWithNavigation="0dp" />
+        <!--android:transitionName="CategoryName"-->
     </android.support.design.widget.AppBarLayout>
 
     <android.support.v4.widget.SwipeRefreshLayout

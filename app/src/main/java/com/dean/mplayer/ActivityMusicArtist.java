@@ -40,6 +40,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
@@ -71,6 +72,9 @@ public class ActivityMusicArtist extends AppCompatActivity {
     // 媒体播放服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
+
+    // 专辑子页面传值
+    public static List<MusicInfo> musicArtistMusicList;
 
     // Toolbar本地搜索
     @Override
@@ -120,6 +124,14 @@ public class ActivityMusicArtist extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
         toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()){
+                case R.id.action_setting:
+                    Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return true;
+        });
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
@@ -203,7 +215,7 @@ public class ActivityMusicArtist extends AppCompatActivity {
             arts = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter();
             List<MusicInfo> musicInfos = arts.get(position).getMusicInfos();
             Intent intentMusicArtistMusic = new Intent(this, ActivityMusicArtistMusic.class);
-            intentMusicArtistMusic.putExtra("artistMusicInfos", (Serializable)musicInfos);
+            musicArtistMusicList = musicInfos;
             startActivity(intentMusicArtistMusic);
         }));
         musicListArtistAlbumRecyclerView.setAdapter(musicListArtistAlbumRecyclerAdapter);

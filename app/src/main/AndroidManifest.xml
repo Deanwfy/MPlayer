@@ -16,7 +16,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
-        <activity android:name=".TestActivity"></activity>
         <activity
             android:name=".ActivityMain"
             android:label="@string/app_name"
@@ -25,7 +24,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -33,11 +31,15 @@
         <activity android:name=".ActivityMusicLocal" />
         <activity android:name=".ActivityMusicArtist" />
         <activity android:name=".ActivityMusicArtistMusic" />
+        <activity android:name=".ActivityMusicAlbum" />
+        <activity android:name=".ActivityMusicAlbumMusic" />
         <activity android:name=".ActivityMusicOnlineTopBillboard" />
         <activity
             android:name=".ActivityNowPlay"
             android:launchMode="singleTask"
-            android:parentActivityName=".ActivityMain" /> <!-- 播放服务 -->
+            android:parentActivityName=".ActivityMain" />
+        <activity android:name=".TestActivity" />
+        <!-- 播放服务 -->
         <service android:name=".PlayService">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />

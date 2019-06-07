@@ -38,7 +38,7 @@ public class BaseRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerAdapte
     public void onBindViewHolder(@NonNull BaseRecyclerAdapterHolder baseRecyclerAdapterHolder, int position) {
         baseRecyclerAdapterHolder.category.setText(items.get(position));
         baseRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
-        ViewCompat.setTransitionName(baseRecyclerAdapterHolder.category, "CategoryName");
+//        ViewCompat.setTransitionName(baseRecyclerAdapterHolder.category, "CategoryName");
     }
 
     @Override

@@ -59,6 +59,7 @@ public class FragmentMainCategory extends Fragment {
         List<String> category = new ArrayList<>();
         category.add("本地音乐");
         category.add("音乐人");
+        category.add("专辑");
         category.add("美国Billboard周榜");
         LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(activityMain);
         mainCategoryRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
@@ -69,16 +70,23 @@ public class FragmentMainCategory extends Fragment {
             switch (position){
                 case 0:
                     Intent intentMusicLocal = new Intent(activityMain, ActivityMusicLocal.class);
-                    startActivity(intentMusicLocal, optionsCompat.toBundle());
+//                    startActivity(intentMusicLocal, optionsCompat.toBundle());
+                    startActivity(intentMusicLocal);
                     break;
                 case 1:
                     Intent intentMusicArtist = new Intent(activityMain, ActivityMusicArtist.class);
-                    startActivity(intentMusicArtist, optionsCompat.toBundle());
+//                    startActivity(intentMusicArtist, optionsCompat.toBundle());
+                    startActivity(intentMusicArtist);
                     break;
-                    // TODO
                 case 2:
+                    Intent intentMusicAlbum = new Intent(activityMain, ActivityMusicAlbum.class);
+//                    startActivity(intentMusicAlbum, optionsCompat.toBundle());
+                    startActivity(intentMusicAlbum);
+                    break;
+                case 3:
                     Intent intentMusicOnlineTopBillboard = new Intent(activityMain, ActivityMusicOnlineTopBillboard.class);
-                    startActivity(intentMusicOnlineTopBillboard, optionsCompat.toBundle());
+//                    startActivity(intentMusicOnlineTopBillboard, optionsCompat.toBundle());
+                    startActivity(intentMusicOnlineTopBillboard);
                     break;
             }
         }));

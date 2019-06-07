@@ -114,7 +114,7 @@ public class ActivityMusicArtistMusic extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        artistMusicInfos = (List<MusicInfo>) getIntent().getSerializableExtra("artistMusicInfos");
+        artistMusicInfos = ActivityMusicArtist.musicArtistMusicList;
 
         setContentView(R.layout.activity_music_base);
 
@@ -123,6 +123,14 @@ public class ActivityMusicArtistMusic extends AppCompatActivity {
         setSupportActionBar(toolbar);
         toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
         toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
+        toolbar.setOnMenuItemClickListener(menuItem -> {
+            switch (menuItem.getItemId()){
+                case R.id.action_setting:
+                    Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+            return true;
+        });
 
         swipeRefreshLayout = findViewById(R.id.swipe_refresh);
         swipeRefreshLayout.setOnRefreshListener(this::requestPermission);
