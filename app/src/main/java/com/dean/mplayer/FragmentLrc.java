@@ -37,7 +37,6 @@ public class FragmentLrc extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
         lrcView = fragmentLrc.findViewById(R.id.lrcView);
         setLrcView();
     }
