@@ -2,18 +2,14 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.graphics.Color;
-import android.os.Handler;
-import android.os.Message;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.graphics.Palette;
 import android.view.WindowManager;
 
 import java.util.List;

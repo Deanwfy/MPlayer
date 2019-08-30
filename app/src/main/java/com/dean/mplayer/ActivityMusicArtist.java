@@ -7,21 +7,21 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
-import android.support.constraint.ConstraintLayout;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -44,9 +44,7 @@ import android.widget.Toast;
 
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ActivityMusicArtist extends AppCompatActivity {
@@ -89,7 +87,7 @@ public class ActivityMusicArtist extends AppCompatActivity {
 //        ImageView iconClose = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
 //        iconClose.setColorFilter(ContextCompat.getColor(this, R.color.drawerArrowStyle));
         // 搜索框样式
-        EditText editText = searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
+        EditText editText = searchView.findViewById(R.id.search_src_text);
         editText.setTextColor(ContextCompat.getColor(this, R.color.drawerArrowStyle));
         editText.setHintTextColor(ContextCompat.getColor(this, R.color.editNoticeText));
         // 控件间隔

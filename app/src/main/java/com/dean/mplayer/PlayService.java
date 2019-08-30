@@ -1,7 +1,6 @@
 package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -17,18 +16,19 @@ import android.media.MediaPlayer.OnPreparedListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
 import android.support.v4.media.MediaBrowserCompat;
-import android.support.v4.media.MediaBrowserServiceCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.support.v7.graphics.Palette;
 import android.util.Log;
 import android.view.KeyEvent;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.app.NotificationCompat;
+import androidx.media.MediaBrowserServiceCompat;
+import androidx.palette.graphics.Palette;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -249,8 +249,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 
 			//版本兼容
 			if (MediaUtil.isLollipop()) {
-				notificationCompat.setVisibility(Notification.VISIBILITY_PUBLIC);    //锁屏显示
-				android.support.v4.media.app.NotificationCompat.MediaStyle mediaStyle = new android.support.v4.media.app.NotificationCompat.MediaStyle()    //通知类型为"多媒体"
+				notificationCompat.setVisibility(NotificationCompat.VISIBILITY_PUBLIC);    //锁屏显示
+				androidx.media.app.NotificationCompat.MediaStyle mediaStyle = new androidx.media.app.NotificationCompat.MediaStyle()    //通知类型为"多媒体"
 						.setMediaSession(mediaSessionCompat.getSessionToken())
 						.setShowActionsInCompactView(0, 1, 2);    //通知栏折叠状态下保持按键显示
 				notificationCompat.setStyle(mediaStyle);
