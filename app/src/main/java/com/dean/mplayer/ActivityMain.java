@@ -12,6 +12,10 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
+
+import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.search.ActivityMusicOnline;
+import com.dean.mplayer.util.AppConstant;
 import com.google.android.material.navigation.NavigationView;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
@@ -22,7 +26,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.customview.widget.ViewDragHelper;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -53,10 +56,10 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ActivityMain extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class ActivityMain extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
-    static List<PlayList> playList = new ArrayList<>();
+    public static List<PlayList> playList = new ArrayList<>();
     public static int listPosition = 0;
 
     // 媒体信息

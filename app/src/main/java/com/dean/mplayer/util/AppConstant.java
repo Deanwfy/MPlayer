@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.util;
 
 public class AppConstant {
 	public class PlayAction {

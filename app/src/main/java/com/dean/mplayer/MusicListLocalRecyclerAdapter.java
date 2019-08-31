@@ -10,6 +10,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.dean.mplayer.util.MediaUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 

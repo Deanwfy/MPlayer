@@ -15,7 +15,6 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
@@ -37,7 +36,9 @@ import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.onlineTopBillboard.Tracks;
+import com.dean.mplayer.util.AppConstant;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
@@ -48,7 +49,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class ActivityMusicOnlineTopBillboard extends AppCompatActivity {
+public class ActivityMusicOnlineTopBillboard extends BaseActivity {
 
     // 列表显示
     private LoadingDialog loadingDialog;

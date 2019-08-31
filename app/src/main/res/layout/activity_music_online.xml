@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/colorControlPanel"
-    tools:context=".ActivityMusicOnline"
+    tools:context=".search.ActivityMusicOnline"
     tools:ignore="Autofill">
 
     <com.google.android.material.appbar.AppBarLayout

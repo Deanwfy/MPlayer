@@ -18,7 +18,7 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.appcompat.app.AppCompatActivity;
+
 import androidx.palette.graphics.Palette;
 import android.view.View;
 import android.view.WindowManager;
@@ -27,6 +27,9 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.util.AppConstant;
+import com.dean.mplayer.util.MediaUtil;
 import com.r0adkll.slidr.Slidr;
 import com.r0adkll.slidr.model.SlidrConfig;
 import com.r0adkll.slidr.model.SlidrPosition;
@@ -35,7 +38,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class ActivityNowPlay extends AppCompatActivity {
+public class ActivityNowPlay extends BaseActivity {
 
     // 播放控制显示
     private TextView playNowTitle;
@@ -87,7 +90,7 @@ public class ActivityNowPlay extends AppCompatActivity {
     }
 
     @Override
-    public void onBackPressed() {
+    public void onBackPressedSupport() {
         super.onBackPressed();
         finish();
         overridePendingTransition(0, R.anim.activity_playnow_exit);

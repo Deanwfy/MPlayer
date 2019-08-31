@@ -8,13 +8,15 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.WindowManager;
 
+import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.util.AppConstant;
+
 import java.util.List;
 
-public class TestActivity extends AppCompatActivity {
+public class TestActivity extends BaseActivity {
 
     //获取服务
     private MediaControllerCompat mediaController;

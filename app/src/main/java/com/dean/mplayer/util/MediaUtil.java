@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.util;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -15,6 +15,11 @@ import android.provider.MediaStore;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.content.ContextCompat;
 
+import com.dean.mplayer.Albm;
+import com.dean.mplayer.Arts;
+import com.dean.mplayer.LocalAlbm;
+import com.dean.mplayer.MusicInfo;
+import com.dean.mplayer.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.BufferedReader;

@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.search;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.dean.mplayer.R;
 import com.dean.mplayer.onlineSearch.Songs;
+import com.dean.mplayer.util.MediaUtil;
 
 import java.util.List;
 

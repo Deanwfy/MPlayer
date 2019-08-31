@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.search;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -11,7 +11,6 @@ import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -25,6 +24,13 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.ActivityMain;
+import com.dean.mplayer.ActivityNowPlay;
+import com.dean.mplayer.util.AppConstant;
+import com.dean.mplayer.PlayList;
+import com.dean.mplayer.PlayService;
+import com.dean.mplayer.R;
+import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.onlineSearch.Songs;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
@@ -35,7 +41,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
-public class ActivityMusicOnline extends AppCompatActivity {
+public class ActivityMusicOnline extends BaseActivity {
 
     MusicListRecyclerAdapter musicListRecyclerAdapter;
     RecyclerView musicListOnlineRecycler;

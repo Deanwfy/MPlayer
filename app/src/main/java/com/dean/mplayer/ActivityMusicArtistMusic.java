@@ -19,7 +19,6 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
@@ -44,12 +43,16 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.search.ActivityMusicOnline;
+import com.dean.mplayer.util.AppConstant;
+import com.dean.mplayer.util.MediaUtil;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActivityMusicArtistMusic extends AppCompatActivity {
+public class ActivityMusicArtistMusic extends BaseActivity {
 
     // 列表显示
     private LoadingDialog loadingDialog;

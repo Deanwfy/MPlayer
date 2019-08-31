@@ -6,15 +6,17 @@ import android.content.Context;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
+
 import android.support.v4.media.session.MediaControllerCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dean.mplayer.base.BaseFragment;
+
 import me.wcy.lrcview.LrcView;
 
-public class FragmentLrc extends Fragment {
+public class FragmentLrc extends BaseFragment {
     
     public FragmentLrc() {
         // Required empty public constructor
