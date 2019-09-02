@@ -409,7 +409,6 @@ public class ActivityMusicAlbum extends BaseActivity {
     private void startActivityPlayNow(){
         Intent intentPlayNow = new Intent(ActivityMusicAlbum.this, ActivityNowPlay.class);
         startActivity(intentPlayNow);
-        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 退出时断开媒体中心连接

@@ -341,7 +341,6 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
     private void startActivityPlayNow(){
         Intent intentPlayNow = new Intent(ActivityMain.this, ActivityNowPlay.class);
         startActivity(intentPlayNow);
-        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 退出同时结束后台服务

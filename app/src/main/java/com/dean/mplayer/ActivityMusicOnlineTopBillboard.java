@@ -409,7 +409,6 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
     private void startActivityPlayNow(){
         Intent intentPlayNow = new Intent(ActivityMusicOnlineTopBillboard.this, ActivityNowPlay.class);
         startActivity(intentPlayNow);
-        overridePendingTransition(R.anim.activity_playnow_enter, 0);
     }
 
     // 列表长按菜单

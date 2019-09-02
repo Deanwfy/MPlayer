@@ -93,7 +93,6 @@ public class ActivityNowPlay extends BaseActivity {
     public void onBackPressedSupport() {
         super.onBackPressed();
         finish();
-        overridePendingTransition(0, R.anim.activity_playnow_exit);
     }
 
     // 统一获取播放控制面板控件id
