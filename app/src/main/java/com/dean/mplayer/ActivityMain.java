@@ -50,12 +50,15 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.androidannotations.annotations.EActivity;
+
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+@EActivity
 public class ActivityMain extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // 列表显示
