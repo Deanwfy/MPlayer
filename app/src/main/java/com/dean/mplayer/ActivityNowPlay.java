@@ -2,58 +2,84 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-
-import androidx.palette.graphics.Palette;
-import android.view.View;
-import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.palette.graphics.Palette;
 
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
-import com.r0adkll.slidr.Slidr;
-import com.r0adkll.slidr.model.SlidrConfig;
-import com.r0adkll.slidr.model.SlidrPosition;
+import com.dean.mplayer.view.common.MToolbar;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Click;
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.SeekBarProgressChange;
+import org.androidannotations.annotations.SeekBarTouchStop;
+import org.androidannotations.annotations.ViewById;
 
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+@EActivity(R.layout.play_now)
 public class ActivityNowPlay extends BaseActivity {
 
-    // 播放控制显示
-    private TextView playNowTitle;
-    private TextView playNowArtist;
-    private TextView seekBarStart;
-    private TextView seekBarEnd;
-    private ImageView playNowCover;
-    private SeekBar playNowCurrent;
-    private ConstraintLayout playNowLayout;
+    @ViewById(R.id.play_now_toolbar)
+    MToolbar toolbar;
 
-    // 播放控制按钮
-    private ImageButton playNowMode;
-    private ImageButton playNowPrev;
-    private ImageButton playNowPlay;
-    private ImageButton playNowNext;
+    // 展示
+    @ViewById(R.id.playNowTitle)
+    TextView playNowTitle;
+
+    @ViewById(R.id.playNowArtist)
+    TextView playNowArtist;
+
+    @ViewById(R.id.seekBarStart)
+    TextView seekBarStart;
+
+    @ViewById(R.id.seekBarEnd)
+    TextView seekBarEnd;
+
+    @ViewById(R.id.playNowCover)
+    ImageView playNowCover;
+
+    @ViewById(R.id.playNowCurrent)
+    SeekBar playNowCurrent;
+
+    @ViewById(R.id.play_now)
+    ConstraintLayout playNowLayout;
+
+    // 控制
+    @ViewById(R.id.playNowMode)
+    ImageButton playNowMode;
+
+    @ViewById(R.id.playNowPrev)
+    ImageButton playNowPrev;
+
+    @ViewById(R.id.playNowPlay)
+    ImageButton playNowPlay;
+
+    @ViewById(R.id.playNowNext)
+    ImageButton playNowNext;
 
     //获取服务
     private MediaControllerCompat mediaController;
@@ -67,22 +93,15 @@ public class ActivityNowPlay extends BaseActivity {
     private Handler handler;
     private MediaMetadataCompat metadata;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.play_now);
-        SlidrConfig slidrConfig = new SlidrConfig.Builder()
-                .primaryColor(getResources().getColor(R.color.colorPrimaryDark))
-                .secondaryColor(getResources().getColor(R.color.drawerArrowStyle))
-                .position(SlidrPosition.TOP)
+    @AfterViews
+    void initViews() {
+        toolbar.setLeftItem(R.drawable.ic_back, view -> onBackPressedSupport())
                 .build();
-        Slidr.attach(this, slidrConfig);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);   // FLAG_TRANSLUCENT_STATUS 状态栏透明
-        findControlBtnById();
+
         setPlayNowMode();
-        setControlBtnOnClickListener();
         initMediaBrowser();
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -95,121 +114,87 @@ public class ActivityNowPlay extends BaseActivity {
         finish();
     }
 
-    // 统一获取播放控制面板控件id
-    private void findControlBtnById() {
-        playNowTitle = findViewById(R.id.playNowTitle);
-        playNowArtist = findViewById(R.id.playNowArtist);
-        seekBarStart = findViewById(R.id.seekBarStart);
-        seekBarEnd = findViewById(R.id.seekBarEnd);
-        playNowCover = findViewById(R.id.playNowCover);
-        playNowCurrent = findViewById(R.id.playNowCurrent);
-        playNowLayout = findViewById(R.id.play_now);
-
-        playNowMode = findViewById(R.id.playNowMode);
-        playNowPrev = findViewById(R.id.playNowPrev);
-        playNowPlay = findViewById(R.id.playNowPlay);
-        playNowNext = findViewById(R.id.playNowNext);
+    @Click(R.id.playNowCover)
+    void clickCover() {
+        ActivityLrc_.intent(this).start();
     }
 
-    // 将监听器设置到播放控制面板控件
-    private void setControlBtnOnClickListener() {
-        ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
-        ControlSeekBarOnChangeListener controlSeekBarOnChangeListener = new ControlSeekBarOnChangeListener();
-        playNowCover.setOnClickListener(controlBtnOnClickListener);
-        playNowMode.setOnClickListener(controlBtnOnClickListener);
-        playNowPrev.setOnClickListener(controlBtnOnClickListener);
-        playNowPlay.setOnClickListener(controlBtnOnClickListener);
-        playNowNext.setOnClickListener(controlBtnOnClickListener);
-        playNowCurrent.setOnSeekBarChangeListener(controlSeekBarOnChangeListener);
+    @Click(R.id.playNowPrev)
+    void clickPlayPrev() {
+        mediaController.getTransportControls().skipToPrevious();
     }
 
-    // 命名播放控制面板按键监听器类，实现点击事件监听
-    private class ControlBtnOnClickListener implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()) {
-                case R.id.playNowMode:
-                    switch (PlayService.mode) {
-                        case AppConstant.PlayMode.MODE_ORDER:
-                            playNowMode.setImageResource(R.drawable.ic_now_loop);
-                            if(cover != null) {
-                                playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                            }
-                            PlayService.mode = AppConstant.PlayMode.MODE_LOOP;
-//                            Toast.makeText(getApplicationContext(),"列表循环", Toast.LENGTH_SHORT).show();
-                            break;
-                        case AppConstant.PlayMode.MODE_LOOP:
-                            playNowMode.setImageResource(R.drawable.ic_now_single);
-                            if(cover != null) {
-                                playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                            }
-                            PlayService.mode = AppConstant.PlayMode.MODE_SINGLE;
-//                            Toast.makeText(getApplicationContext(),"单曲循环", Toast.LENGTH_SHORT).show();
-                            break;
-                        case AppConstant.PlayMode.MODE_SINGLE:
-                            playNowMode.setImageResource(R.drawable.ic_now_random);
-                            if(cover != null) {
-                                playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                            }
-                            PlayService.mode = AppConstant.PlayMode.MODE_RANDOM;
-//                            Toast.makeText(getApplicationContext(),"随机播放", Toast.LENGTH_SHORT).show();
-                            break;
-                        case AppConstant.PlayMode.MODE_RANDOM:
-                            playNowMode.setImageResource(R.drawable.ic_now_order);
-                            if(cover != null) {
-                                playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
-                            }
-                            PlayService.mode = AppConstant.PlayMode.MODE_ORDER;
-//                            Toast.makeText(getApplicationContext(),"顺序播放", Toast.LENGTH_SHORT).show();
-                            break;
-                    }
-                    break;
-                case R.id.playNowCover:
-                    Intent intent = new Intent(ActivityNowPlay.this, TestActivity.class);
-                    startActivity(intent);
-                    break;
-                case R.id.playNowPlay:
-                    if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
-                        if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
-                            mediaController.getTransportControls().pause();
-                        } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
-                            mediaController.getTransportControls().play();
-                        } else {
-                            mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(0).getUri(), null);
-                        }
-                    }
-                    break;
-                case R.id.playNowPrev:
-                    mediaController.getTransportControls().skipToPrevious();
-                    break;
-                case R.id.playNowNext:
-                    mediaController.getTransportControls().skipToNext();
-                    break;
+    @Click(R.id.playNowNext)
+    void clickPlayNext() {
+        mediaController.getTransportControls().skipToNext();
+
+    }
+
+    @Click(R.id.playNowPlay)
+    void clickPlayButton() {
+        if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
+            if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                mediaController.getTransportControls().pause();
+            } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
+                mediaController.getTransportControls().play();
+            } else {
+                mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(0).getUri(), null);
             }
         }
     }
-    // 命名播放控制面板进度条监听器类，实现拖动事件监听
-    private class ControlSeekBarOnChangeListener implements SeekBar.OnSeekBarChangeListener {
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress,
-                                      boolean fromUser) {
-            seekBarStart.setText(MediaUtil.formatTime(progress));
-            // 进度变化
-        }
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            // 开始拖动
-        }
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            mediaController.getTransportControls().seekTo(seekBar.getProgress());
-            // 拖动结束
+
+    @Click(R.id.playNowMode)
+    void clickPlayMode() {
+        switch (PlayService.mode) {
+            case AppConstant.PlayMode.MODE_ORDER:
+                playNowMode.setImageResource(R.drawable.ic_now_loop);
+                if (cover != null) {
+                    playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                }
+                PlayService.mode = AppConstant.PlayMode.MODE_LOOP;
+                Toast.makeText(getApplicationContext(), "列表循环", Toast.LENGTH_SHORT).show();
+                break;
+            case AppConstant.PlayMode.MODE_LOOP:
+                playNowMode.setImageResource(R.drawable.ic_now_single);
+                if (cover != null) {
+                    playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                }
+                PlayService.mode = AppConstant.PlayMode.MODE_SINGLE;
+                Toast.makeText(getApplicationContext(), "单曲循环", Toast.LENGTH_SHORT).show();
+                break;
+            case AppConstant.PlayMode.MODE_SINGLE:
+                playNowMode.setImageResource(R.drawable.ic_now_random);
+                if (cover != null) {
+                    playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                }
+                PlayService.mode = AppConstant.PlayMode.MODE_RANDOM;
+                Toast.makeText(getApplicationContext(), "随机播放", Toast.LENGTH_SHORT).show();
+                break;
+            case AppConstant.PlayMode.MODE_RANDOM:
+                playNowMode.setImageResource(R.drawable.ic_now_order);
+                if (cover != null) {
+                    playNowMode.getDrawable().setTint(Palette.from(cover).generate().getVibrantColor(Color.parseColor("#005b52")));
+                }
+                PlayService.mode = AppConstant.PlayMode.MODE_ORDER;
+                Toast.makeText(getApplicationContext(), "顺序播放", Toast.LENGTH_SHORT).show();
+                break;
         }
     }
 
+    // 进度变化
+    @SeekBarProgressChange(R.id.playNowCurrent)
+    void changeSeekBarText(SeekBar seekBar, int progress, boolean fromUser) {
+        seekBarStart.setText(MediaUtil.formatTime(progress));
+    }
+
+    // 拖动结束
+    @SeekBarTouchStop(R.id.playNowCurrent)
+    void changeMusicPosition(SeekBar seekBar) {
+        mediaController.getTransportControls().seekTo(seekBar.getProgress());
+    }
+
     private void setPlayNowMode() {
-        switch(PlayService.mode)
-        {
+        switch (PlayService.mode) {
             case AppConstant.PlayMode.MODE_ORDER:
                 playNowMode.setImageResource(R.drawable.ic_now_order);
                 break;
@@ -241,21 +226,21 @@ public class ActivityNowPlay extends BaseActivity {
         }
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
         // 连接成功
         @SuppressLint("HandlerLeak")
         @Override
         public void onConnected() {
             try {
                 //SeekBar更新
-                handler = new Handler(){
+                handler = new Handler() {
                     @Override
                     public void handleMessage(Message msg) {
                         super.handleMessage(msg);
                         switch (msg.what) {
                             case 0:
                                 playNowCurrent.setMax((int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION));
-                                seekBarEnd.setText(MediaUtil.formatTime((int)metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)));
+                                seekBarEnd.setText(MediaUtil.formatTime((int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION)));
                                 break;
                             case 1:
                                 playNowCurrent.setProgress(PlayService.current);
@@ -289,7 +274,7 @@ public class ActivityNowPlay extends BaseActivity {
         }
     };
 
-    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback(){
+    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
             switch (state.getState()) {
@@ -324,6 +309,7 @@ public class ActivityNowPlay extends BaseActivity {
                     break;
             }
         }
+
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
@@ -349,25 +335,25 @@ public class ActivityNowPlay extends BaseActivity {
         }
 
         //SeekBar变色
-        private void setSeekBarColor(SeekBar seekBar, int color){
-            LayerDrawable layerDrawable = (LayerDrawable)seekBar.getProgressDrawable();
-            Drawable drawable=layerDrawable.getDrawable(2);
+        private void setSeekBarColor(SeekBar seekBar, int color) {
+            LayerDrawable layerDrawable = (LayerDrawable) seekBar.getProgressDrawable();
+            Drawable drawable = layerDrawable.getDrawable(2);
             drawable.setColorFilter(color, PorterDuff.Mode.SRC);
             seekBar.getThumb().setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
             seekBar.invalidate();
         }
 
         // SeekBar更新计时器
-        private void updateSeekBar(){
+        private void updateSeekBar() {
             TimerTask timerTask = new TimerTask() {
                 @Override
                 public void run() {
-                    if(mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING && !playNowCurrent.isPressed()){
+                    if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING && !playNowCurrent.isPressed()) {
                         handler.sendEmptyMessage(1);
                     }
                 }
             };
-            timer.schedule(timerTask, 0 ,1000);
+            timer.schedule(timerTask, 0, 1000);
         }
 
     };

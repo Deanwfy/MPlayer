@@ -3,30 +3,30 @@ package com.dean.mplayer;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import android.os.Bundle;
-import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
 
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.EActivity;
+
 import java.util.List;
 
-public class TestActivity extends BaseActivity {
+@EActivity(R.layout.activity_test)
+public class ActivityLrc extends BaseActivity {
 
     //获取服务
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_test);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    @AfterViews
+    void initViews() {
         initMediaBrowser();
     }
 
@@ -54,9 +54,9 @@ public class TestActivity extends BaseActivity {
             try {
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
-                        TestActivity.this,
+                        ActivityLrc.this,
                         mediaBrowserCompat.getSessionToken());
-                MediaControllerCompat.setMediaController(TestActivity.this, mediaController);
+                MediaControllerCompat.setMediaController(ActivityLrc.this, mediaController);
                 mediaController.registerCallback(mediaControllerCompatCallback);
                 //设置当前数据
                 mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());

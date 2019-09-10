@@ -21,4 +21,6 @@
 
     <color name="colorButton">#757575</color>
 
+    <color name="rippleEffect">#E0E0E0</color>
+
 </resources>

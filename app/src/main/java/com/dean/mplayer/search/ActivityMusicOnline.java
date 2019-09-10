@@ -35,12 +35,15 @@ import com.dean.mplayer.onlineSearch.Songs;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
+import org.androidannotations.annotations.EActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+@EActivity
 public class ActivityMusicOnline extends BaseActivity {
 
     MusicListRecyclerAdapter musicListRecyclerAdapter;

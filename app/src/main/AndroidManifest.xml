@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".application.MApplication_"
         android:allowBackup="false"
         tools:replace="android:allowBackup"
         android:icon="@mipmap/ic_launcher"
@@ -28,20 +29,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".search.ActivityMusicOnline" />
-        <activity android:name=".ActivityMusicLocal" />
-        <activity android:name=".ActivityMusicArtist" />
-        <activity android:name=".ActivityMusicArtistMusic" />
-        <activity android:name=".ActivityMusicAlbum" />
-        <activity android:name=".ActivityMusicAlbumMusic" />
-        <activity android:name=".ActivityMusicOnlineTopBillboard" />
+        <activity android:name=".search.ActivityMusicOnline_" />
+        <activity android:name=".ActivityMusicLocal_" />
+        <activity android:name=".ActivityMusicArtist_" />
+        <activity android:name=".ActivityMusicArtistMusic_" />
+        <activity android:name=".ActivityMusicAlbum_" />
+        <activity android:name=".ActivityMusicAlbumMusic_" />
+        <activity android:name=".ActivityMusicOnlineTopBillboard_" />
         <activity
-            android:name=".ActivityNowPlay"
+            android:name=".ActivityNowPlay_"
             android:launchMode="singleTask"
             android:parentActivityName=".ActivityMain" />
-        <activity android:name=".TestActivity" />
+        <activity android:name=".ActivityLrc_" />
         <!-- 播放服务 -->
-        <service android:name=".PlayService">
+        <service
+            android:name=".PlayService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

@@ -2,22 +2,14 @@ package com.dean.mplayer;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.ContextMenu;
 import android.view.GestureDetector;
@@ -34,6 +26,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dean.mplayer.base.BaseActivity;
@@ -42,6 +42,8 @@ import com.dean.mplayer.util.AppConstant;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
+import org.androidannotations.annotations.EActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +51,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+@EActivity
 public class ActivityMusicOnlineTopBillboard extends BaseActivity {
 
     // 列表显示
@@ -407,8 +410,7 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
         }
     }
     private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMusicOnlineTopBillboard.this, ActivityNowPlay.class);
-        startActivity(intentPlayNow);
+        ActivityNowPlay_.intent(this).start();
     }
 
     // 列表长按菜单

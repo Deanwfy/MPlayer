@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="ContentDescription"
     android:background="@color/colorControlPanel"
@@ -18,24 +17,13 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <com.google.android.material.appbar.AppBarLayout
-                android:id="@+id/activity_main_appbar"
+            <com.dean.mplayer.view.common.MToolbar_
+                android:id="@+id/main_toolbar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-                <androidx.appcompat.widget.Toolbar
-                    android:id="@+id/main_toolbar"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="?attr/colorPrimary"
-                    android:fitsSystemWindows="true"
-                    app:layout_scrollFlags="scroll|enterAlways"
-                    toolbar:layout_constraintEnd_toEndOf="parent"
-                    toolbar:layout_constraintStart_toStartOf="parent"
-                    toolbar:layout_constraintTop_toTopOf="parent" />
-            </com.google.android.material.appbar.AppBarLayout>
+                app:layout_constraintTop_toTopOf="parent" />
 
             <include
                 android:id="@+id/activity_main_viewpager"
@@ -45,7 +33,7 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/activity_main_appbar" />
+                app:layout_constraintTop_toBottomOf="@id/main_toolbar" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.coordinatorlayout.widget.CoordinatorLayout>

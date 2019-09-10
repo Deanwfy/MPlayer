@@ -45,7 +45,6 @@ dependencies {
     implementation "org.androidannotations:androidannotations-api:$androidAnnotationsVersion"
     // fragmentationX
     implementation 'me.yokeyword:fragmentationx:1.0.1'
-    implementation 'me.yokeyword:fragmentationx-swipeback:1.0.1'
     implementation 'me.yokeyword:eventbus-activity-scope:1.1.0'
     // eventBus
     implementation 'org.greenrobot:eventbus:3.1.1'
@@ -65,6 +64,4 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     // lrcView
     implementation 'me.wcy:lrcview:2.0.1'
-    // swipeActivity
-    implementation 'com.r0adkll:slidableactivity:2.0.6'
 }

@@ -10,35 +10,16 @@ import android.graphics.Color;
 import android.graphics.Point;
 import android.os.Bundle;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-
-import com.dean.mplayer.base.BaseActivity;
-import com.dean.mplayer.search.ActivityMusicOnline;
-import com.dean.mplayer.util.AppConstant;
-import com.google.android.material.navigation.NavigationView;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.core.view.GravityCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.customview.widget.ViewDragHelper;
-import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatDelegate;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -50,7 +31,28 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.view.GravityCompat;
+import androidx.customview.widget.ViewDragHelper;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.search.ActivityMusicOnline_;
+import com.dean.mplayer.util.AppConstant;
+import com.dean.mplayer.util.LogUtils;
+import com.dean.mplayer.view.common.MToolbar;
+import com.google.android.material.navigation.NavigationView;
+
+import org.androidannotations.annotations.AfterViews;
+import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ViewById;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -58,22 +60,35 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-@EActivity
+@EActivity(R.layout.activity_main)
 public class ActivityMain extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    @ViewById(R.id.main_toolbar)
+    MToolbar toolbar;
+
+    // 播放控制按钮
+    @ViewById(R.id.music_control_panel)
+    ConstraintLayout musicControlPanel;
+
+    @ViewById(R.id.playing_play)
+    ImageButton PlayBtn;
+
+    @ViewById(R.id.playing_list)
+    ImageButton ListBtn;
+
+    // 媒体信息
+    @ViewById(R.id.playing_title)
+    TextView PlayingTitle;
+
+    @ViewById(R.id.playing_artist)
+    TextView PlayingArtist;
+
+    @ViewById(R.id.music_cover)
+    ImageView PlayingCover;
 
     // 列表显示
     public static List<PlayList> playList = new ArrayList<>();
     public static int listPosition = 0;
-
-    // 媒体信息
-    private TextView PlayingTitle;
-    private TextView PlayingArtist;
-    private ImageView PlayingCover;
-
-    // 播放控制按钮
-    private ConstraintLayout musicControlPanel;
-    private ImageButton PlayBtn;
-    private ImageButton ListBtn;
 
     //睡眠定时计时器
     private Timer clockTimer;
@@ -92,24 +107,20 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         int nightMode = sharedPreferences.getInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO);
         AppCompatDelegate.setDefaultNightMode(nightMode);
         playFull = sharedPreferences.getBoolean("playFull", false);
+    }
 
-        setContentView(R.layout.activity_main);
-
+    @AfterViews
+    void initViews(){
         // 状态栏透明
         Window window = getWindow();
         window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
         window.setStatusBarColor(Color.TRANSPARENT);
 
-        Toolbar toolbar = findViewById(R.id.main_toolbar);   // 标题栏实现
-        toolbar.inflateMenu(R.menu.toolbar_custom_menu);
-//        setSupportActionBar(toolbar);   // ToolBar替换ActionBar，使用该方法自定义布局inflateMenu不生效
-        findViewById(R.id.search_entry).setOnClickListener(new ControlBtnOnClickListener());
-
         // 抽屉
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle actionBarDrawertoggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(actionBarDrawertoggle);
         actionBarDrawertoggle.syncState();
         // 抽屉菜单
@@ -117,8 +128,9 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         navigationView.setNavigationItemSelectedListener(this);
         setDrawerLeftEdgeSize(this, drawer);
 
-        findControlBtnById(); // 获取播放控制面板控件
-        setControlBtnOnClickListener(); // 为播放控制面板控件设置监听器
+        toolbar.setLeftItem(R.drawable.ic_drawer, view -> drawer.openDrawer(GravityCompat.START))
+                .setRightItem(R.drawable.ic_search, view -> ActivityMusicOnline_.intent(this).start())
+                .build();
 
         initMediaBrowser();
 
@@ -137,6 +149,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
             ViewDragHelper leftDragger = (ViewDragHelper) leftDraggerField.get(drawerLayout);
 
             // 找到 edgeSizeField 并设置 Accessible 为true
+            assert leftDragger != null;
             Field edgeSizeField = leftDragger.getClass().getDeclaredField("mEdgeSize");
             edgeSizeField.setAccessible(true);
             int edgeSize = edgeSizeField.getInt(leftDragger);
@@ -146,12 +159,8 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
             activity.getWindowManager().getDefaultDisplay().getSize(displaySize);
             edgeSizeField.setInt(leftDragger, Math.max(edgeSize, (int) (displaySize.x *
                     (float) 0.1))); /*在这里调整*/
-        } catch (NoSuchFieldException e) {
-            //ignore
-        } catch (IllegalArgumentException e) {
-            //ignore
-        } catch (IllegalAccessException e) {
-            //ignore
+        } catch (NoSuchFieldException | IllegalAccessException | IllegalArgumentException e) {
+            LogUtils.e("ActivityMain", e);
         }
     }
 
@@ -171,7 +180,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
         // 连接成功
         @Override
         public void onConnected() {
@@ -202,7 +211,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         }
     };
 
-    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback(){
+    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
             switch (state.getState()) {
@@ -228,6 +237,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                     break;
             }
         }
+
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
@@ -238,112 +248,65 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         }
     };
 
-
-    // 统一获取播放控制面板控件id
-    private void findControlBtnById(){
-        musicControlPanel = findViewById(R.id.music_control_panel);
-        PlayBtn = findViewById(R.id.playing_play);
-        ListBtn = findViewById(R.id.playing_list);
-        PlayingTitle = findViewById(R.id.playing_title);
-        PlayingArtist = findViewById(R.id.playing_artist);
-        PlayingCover = findViewById(R.id.music_cover);
+    @Click(R.id.music_control_panel)
+    void clickPlayPanel() {
+        ActivityNowPlay_.intent(this).start();
     }
 
-    // 将监听器设置到播放控制面板控件
-    @SuppressLint("ClickableViewAccessibility")
-    private void setControlBtnOnClickListener(){
-        ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
-        PlayBtn.setOnClickListener(controlBtnOnClickListener);
-        ListBtn.setOnClickListener(controlBtnOnClickListener);
-        GestureDetector gestureDetector = new GestureDetector(this, new ControlPanelOnGestureListener());
-        musicControlPanel.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
-    }
-
-    // 命名播放控制面板监听器类，实现监听事件
-    private class ControlBtnOnClickListener implements OnClickListener {
-        @Override
-        public void onClick(View v) {
-            switch (v.getId()){
-                case R.id.playing_play:
-                    if (playList != null && playList.size() != 0) {
-                        if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
-                            mediaController.getTransportControls().pause();
-                        } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
-                            mediaController.getTransportControls().play();
-                        } else {
-                            mediaController.getTransportControls().playFromUri(playList.get(listPosition).getUri(), null);
-                        }
-                    }
-                    break;
-                case R.id.playing_list:
-                    AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this, R.style.DialogPlayList);
-                    // 自定义布局
-                    @SuppressLint("InflateParams")
-                    View playListView = LayoutInflater.from(ActivityMain.this).inflate(R.layout.play_list,null);
-                    // 设置AlertDialog参数，加载自定义布局
-                    builder.setView(playListView);
-                    // AlertDialog对象
-                    AlertDialog alertDialogMusicList = builder.create();
-                    // 自定义布局RecyclerLayout适配实现
-                    RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
-                    LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMain.this);
-                    playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
-                    playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
-                        listPosition = --position;
-                        mediaController.getTransportControls().skipToNext();
-                    });
-                    playListRecycler.setAdapter(playListRecyclerAdapter);
-                    // 关闭按钮
-                    Button buttonClose = playListView.findViewById(R.id.play_list_close);
-                    buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
-                    // 显示
-                    alertDialogMusicList.show();
-                    // 获取屏幕
-                    DisplayMetrics displayMetrics = new DisplayMetrics();
-                    getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-                    // 获取列表dialog
-                    Window windowDialog = alertDialogMusicList.getWindow();
-                    assert windowDialog != null;
-                    //去掉dialog默认的padding
-                    windowDialog.getDecorView().setPadding(0, 0, 0, 0);
-                    windowDialog.getDecorView().setBackgroundColor(ActivityMain.this.getResources().getColor(R.color.colorControlPanel));
-                    // 设置大小
-                    WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
-                    layoutParams.width = displayMetrics.widthPixels;
-//                    layoutParams.height = (int)(displayMetrics.heightPixels * 0.6);
-                    // 设置位置为底部
-                    layoutParams.gravity = Gravity.BOTTOM;
-                    windowDialog.setAttributes(layoutParams);
-                    break;
-                case R.id.search_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMain.this, ActivityMusicOnline.class);
-                    startActivity(intentSearchOnline);
-                    break;
+    @Click(R.id.playing_play)
+    void clickPlayButton() {
+        if (playList != null && playList.size() != 0) {
+            if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
+                mediaController.getTransportControls().pause();
+            } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
+                mediaController.getTransportControls().play();
+            } else {
+                mediaController.getTransportControls().playFromUri(playList.get(listPosition).getUri(), null);
             }
         }
     }
-    private class ControlPanelOnGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return true;
-        }
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (e1.getRawY() - e2.getRawY() > 50) {
-                startActivityPlayNow();
-            }
-            return true;
-        }
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            startActivityPlayNow();
-            return false;
-        }
-    }
-    private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMain.this, ActivityNowPlay.class);
-        startActivity(intentPlayNow);
+
+    @Click(R.id.playing_list)
+    void clickPlayList() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this, R.style.DialogPlayList);
+        // 自定义布局
+        @SuppressLint("InflateParams")
+        View playListView = LayoutInflater.from(ActivityMain.this).inflate(R.layout.play_list, null);
+        // 设置AlertDialog参数，加载自定义布局
+        builder.setView(playListView);
+        // AlertDialog对象
+        AlertDialog alertDialogMusicList = builder.create();
+        // 自定义布局RecyclerLayout适配实现
+        RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
+        LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMain.this);
+        playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
+        PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
+        playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
+            listPosition = --position;
+            mediaController.getTransportControls().skipToNext();
+        });
+        playListRecycler.setAdapter(playListRecyclerAdapter);
+        // 关闭按钮
+        Button buttonClose = playListView.findViewById(R.id.play_list_close);
+        buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
+        // 显示
+        alertDialogMusicList.show();
+        // 获取屏幕
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // 获取列表dialog
+        Window windowDialog = alertDialogMusicList.getWindow();
+        assert windowDialog != null;
+        //去掉dialog默认的padding
+        windowDialog.getDecorView().setPadding(0, 0, 0, 0);
+        windowDialog.getDecorView().setBackgroundColor(ActivityMain.this.getResources().getColor(R.color.colorControlPanel));
+        // 设置大小
+        WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
+        layoutParams.width = displayMetrics.widthPixels;
+//        layoutParams.height = (int)(displayMetrics.heightPixels * 0.6);
+        // 设置位置为底部
+        layoutParams.gravity = Gravity.BOTTOM;
+        windowDialog.setAttributes(layoutParams);
     }
 
     // 退出同时结束后台服务
@@ -386,7 +349,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                     AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
             AppCompatDelegate.setDefaultNightMode(nightMode);
             SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
-            editor.putInt("nightMode",nightMode);
+            editor.putInt("nightMode", nightMode);
             editor.apply();
             recreate();
         } else if (id == R.id.ic_menu_settings) {
@@ -413,14 +376,14 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         items.add("60分钟");
         items.add("自定义");
         // 自定义布局
-        View menuClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock,null);
+        View menuClock = LayoutInflater.from(ActivityMain.this).inflate(R.layout.drawer_menu_clock, null);
         // 设置AlertDialog参数，加载自定义布局
         builder.setTitle("睡眠定时").setView(menuClock);
         // AlertDialog对象
         final AlertDialog alertDialog = builder.create();
         // 自定义布局RecyclerLayout适配实现
         RecyclerView menuClockRecycler = menuClock.findViewById(R.id.menuClockRecycler);
-        LinearLayoutManager menuClockRecyclerLayoutManager = new LinearLayoutManager(this){
+        LinearLayoutManager menuClockRecyclerLayoutManager = new LinearLayoutManager(this) {
             @Override
             public boolean canScrollVertically() {
                 return false;   //不允许滑动
@@ -463,7 +426,8 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                     customNumberPickerMin.setWrapSelectorWheel(false);    //不循环
                     customBuilder.setTitle("自定义睡眠定时").setView(customClock)
                             .setPositiveButton("确定", (dialog, which) -> runClock(customNumberPickerHour.getValue() * 3600000 + customNumberPickerMin.getValue() * 60000))
-                            .setNegativeButton("取消", (dialog, which) -> {});
+                            .setNegativeButton("取消", (dialog, which) -> {
+                            });
                     customBuilder.create().show();
                     break;
             }
@@ -472,7 +436,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         });
         menuClockRecycler.setAdapter(menuClockRecyclerAdapter);
         // 当前歌曲结束后再停止
-        CheckBox playFullCheckBox  = menuClock.findViewById(R.id.playFull);
+        CheckBox playFullCheckBox = menuClock.findViewById(R.id.playFull);
         playFullCheckBox.setChecked(playFull);
         playFullCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             playFull = isChecked;
@@ -485,13 +449,13 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
     }
 
     //睡眠定时计时器
-    private void runClock(long clockTime){
+    private void runClock(long clockTime) {
         cancelClock();
-        if (clockTime/3600000 > 0){
+        if (clockTime / 3600000 > 0) {
             long hour = clockTime / 3600000;
             long min = (clockTime % 3600000) / 60000;
-            Toast.makeText(this, "已设置"+hour+"小时"+min+"分钟后停止播放", Toast.LENGTH_SHORT).show();
-        }else {
+            Toast.makeText(this, "已设置" + hour + "小时" + min + "分钟后停止播放", Toast.LENGTH_SHORT).show();
+        } else {
             Toast.makeText(this, "已设置" + clockTime / 60000 + "分钟后停止播放", Toast.LENGTH_SHORT).show();
         }
         clockTimer = new Timer();
@@ -502,7 +466,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                     if (playBackState == PlaybackStateCompat.STATE_PLAYING || playBackState == PlaybackStateCompat.STATE_PAUSED) {
                         mediaController.getTransportControls().stop();
                     }
-                }else {
+                } else {
                     if (playBackState == PlaybackStateCompat.STATE_PAUSED) {
                         mediaController.getTransportControls().stop();
                     } else if (playBackState == PlaybackStateCompat.STATE_PLAYING) {
@@ -512,8 +476,9 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
             }
         }, clockTime);
     }
-    private void cancelClock(){
-        if (clockTimer != null){
+
+    private void cancelClock() {
+        if (clockTimer != null) {
             clockTimer.cancel();
             needToStop = false;
         }

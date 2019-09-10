@@ -3,31 +3,18 @@ package com.dean.mplayer;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -41,15 +28,29 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.dean.mplayer.base.BaseActivity;
-import com.dean.mplayer.search.ActivityMusicOnline;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
+import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.ViewById;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@EActivity
 public class ActivityMusicAlbum extends BaseActivity {
 
     // 列表显示
@@ -106,6 +107,7 @@ public class ActivityMusicAlbum extends BaseActivity {
                 musicListAlbumRecyclerAdapter.getFilter().filter(s);
                 return true;
             }
+
             @Override
             public boolean onQueryTextSubmit(String s) {
                 return false;
@@ -126,7 +128,7 @@ public class ActivityMusicAlbum extends BaseActivity {
         toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
         toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
         toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()){
+            switch (menuItem.getItemId()) {
                 case R.id.action_setting:
                     Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
                     break;
@@ -164,14 +166,17 @@ public class ActivityMusicAlbum extends BaseActivity {
             initPlayList();
         }
     }
+
     private void showWaringDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("权限申请")
                 .setMessage("请前往设置->应用->MPlayer->权限中打开相关权限，否则部分功能无法正常使用")
-                .setNegativeButton("确定", (dialog, which) -> {})
+                .setNegativeButton("确定", (dialog, which) -> {
+                })
                 .show();
         loadingDialog.close();
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -187,7 +192,7 @@ public class ActivityMusicAlbum extends BaseActivity {
     }
 
     // 加载本地音乐人
-    private void initPlayList(){
+    private void initPlayList() {
         new Thread(() -> {
             musicInfo = MediaUtil.getMusicLocal(this);
             localAlbm = MediaUtil.getAlbmLocal();
@@ -200,11 +205,12 @@ public class ActivityMusicAlbum extends BaseActivity {
             });
         }).start();
     }
+
     // 歌曲列表显示适配器
     public void setListAdapter() {
         LinearLayoutManager musicListArtistAlbumRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListArtistAlbumRecyclerView.setLayoutManager(musicListArtistAlbumRecyclerLayoutManager);
-        musicListAlbumRecyclerAdapter = new MusicListAlbumRecyclerAdapter(localAlbm){
+        musicListAlbumRecyclerAdapter = new MusicListAlbumRecyclerAdapter(localAlbm) {
             @Override
             public void onBindViewHolder(@NonNull MusicListAlbumRecyclerAdapterHolder musicListAlbumRecyclerAdapterHolder, int position) {
                 super.onBindViewHolder(musicListAlbumRecyclerAdapterHolder, position);
@@ -214,10 +220,8 @@ public class ActivityMusicAlbum extends BaseActivity {
         };
         musicListAlbumRecyclerAdapter.setOnItemClickListener(((view, position) -> {
             localAlbm = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter();
-            List<MusicInfo> musicInfos = localAlbm.get(position).getMusicInfos();
-            Intent intentMusicAlbumMusic = new Intent(this, ActivityMusicAlbumMusic.class);
-            musicAlbumMusicList = musicInfos;
-            startActivity(intentMusicAlbumMusic);
+            musicAlbumMusicList = localAlbm.get(position).getMusicInfos();
+            ActivityMusicAlbumMusic_.intent(this).start();
         }));
         musicListArtistAlbumRecyclerView.setAdapter(musicListAlbumRecyclerAdapter);
         musicListAlbumRecyclerAdapter.notifyDataSetChanged();
@@ -239,7 +243,7 @@ public class ActivityMusicAlbum extends BaseActivity {
         }
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
         // 连接成功
         @Override
         public void onConnected() {
@@ -270,7 +274,7 @@ public class ActivityMusicAlbum extends BaseActivity {
         }
     };
 
-    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback(){
+    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
             switch (state.getState()) {
@@ -295,6 +299,7 @@ public class ActivityMusicAlbum extends BaseActivity {
                     break;
             }
         }
+
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
@@ -306,7 +311,7 @@ public class ActivityMusicAlbum extends BaseActivity {
     };
 
     // 统一获取播放控制面板控件id
-    private void findControlBtnById(){
+    private void findControlBtnById() {
         musicControlPanel = findViewById(R.id.music_control_panel);
         PlayBtn = findViewById(R.id.playing_play);
         ListBtn = findViewById(R.id.playing_list);
@@ -317,18 +322,18 @@ public class ActivityMusicAlbum extends BaseActivity {
 
     // 将监听器设置到播放控制面板控件
     @SuppressLint("ClickableViewAccessibility")
-    private void setControlBtnOnClickListener(){
+    private void setControlBtnOnClickListener() {
         ControlBtnOnClickListener controlBtnOnClickListener = new ControlBtnOnClickListener();
         PlayBtn.setOnClickListener(controlBtnOnClickListener);
         ListBtn.setOnClickListener(controlBtnOnClickListener);
-        GestureDetector gestureDetector = new GestureDetector(this, new ControlPanelOnGestureListener());
-        musicControlPanel.setOnTouchListener((v, event) -> gestureDetector.onTouchEvent(event));
+        musicControlPanel.setOnClickListener(controlBtnOnClickListener);
     }
+
     // 命名播放控制面板监听器类，实现监听事件
     private class ControlBtnOnClickListener implements OnClickListener {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.playing_play:
                     if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
@@ -344,7 +349,7 @@ public class ActivityMusicAlbum extends BaseActivity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMusicAlbum.this, R.style.DialogPlayList);
                     // 自定义布局
                     @SuppressLint("InflateParams")
-                    View playListView = LayoutInflater.from(ActivityMusicAlbum.this).inflate(R.layout.play_list,null);
+                    View playListView = LayoutInflater.from(ActivityMusicAlbum.this).inflate(R.layout.play_list, null);
                     // 设置AlertDialog参数，加载自定义布局
                     builder.setView(playListView);
                     // AlertDialog对象
@@ -381,34 +386,11 @@ public class ActivityMusicAlbum extends BaseActivity {
                     layoutParams.gravity = Gravity.BOTTOM;
                     windowDialog.setAttributes(layoutParams);
                     break;
-                case R.id.search_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMusicAlbum.this, ActivityMusicOnline.class);
-                    startActivity(intentSearchOnline);
+                case R.id.music_control_panel:
+                    ActivityNowPlay_.intent(ActivityMusicAlbum.this).start();
                     break;
             }
         }
-    }
-    private class ControlPanelOnGestureListener extends GestureDetector.SimpleOnGestureListener {
-        @Override
-        public boolean onDown(MotionEvent e) {
-            return true;
-        }
-        @Override
-        public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (e1.getRawY() - e2.getRawY() > 50) {
-                startActivityPlayNow();
-            }
-            return true;
-        }
-        @Override
-        public boolean onSingleTapUp(MotionEvent e) {
-            startActivityPlayNow();
-            return false;
-        }
-    }
-    private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMusicAlbum.this, ActivityNowPlay.class);
-        startActivity(intentPlayNow);
     }
 
     // 退出时断开媒体中心连接

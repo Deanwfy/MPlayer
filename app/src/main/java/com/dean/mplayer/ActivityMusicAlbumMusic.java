@@ -3,26 +3,15 @@ package com.dean.mplayer;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.RemoteException;
-import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
-import androidx.appcompat.app.AlertDialog;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -43,15 +32,28 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import com.dean.mplayer.base.BaseActivity;
-import com.dean.mplayer.search.ActivityMusicOnline;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
+import org.androidannotations.annotations.EActivity;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@EActivity
 public class ActivityMusicAlbumMusic extends BaseActivity {
 
     // 列表显示
@@ -407,10 +409,6 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
                     layoutParams.gravity = Gravity.BOTTOM;
                     windowDialog.setAttributes(layoutParams);
                     break;
-                case R.id.search_entry:
-                    Intent intentSearchOnline = new Intent(ActivityMusicAlbumMusic.this, ActivityMusicOnline.class);
-                    startActivity(intentSearchOnline);
-                    break;
             }
         }
     }
@@ -433,8 +431,7 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
         }
     }
     private void startActivityPlayNow(){
-        Intent intentPlayNow = new Intent(ActivityMusicAlbumMusic.this, ActivityNowPlay.class);
-        startActivity(intentPlayNow);
+        ActivityNowPlay_.intent(this).start();
     }
 
     // 列表长按菜单点击事件
