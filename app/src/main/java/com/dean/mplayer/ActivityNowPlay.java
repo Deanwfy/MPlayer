@@ -132,13 +132,13 @@ public class ActivityNowPlay extends BaseActivity {
 
     @Click(R.id.playNowPlay)
     void clickPlayButton() {
-        if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
+        if (playList != null && playList.size() != 0) {
             if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                 mediaController.getTransportControls().pause();
             } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                 mediaController.getTransportControls().play();
             } else {
-                mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(0).getUri(), null);
+                mediaController.getTransportControls().playFromUri(playList.get(0).getUri(), null);
             }
         }
     }

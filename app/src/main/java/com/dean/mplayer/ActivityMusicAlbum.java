@@ -335,13 +335,13 @@ public class ActivityMusicAlbum extends BaseActivity {
         public void onClick(View v) {
             switch (v.getId()) {
                 case R.id.playing_play:
-                    if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
+                    if (playList != null && playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                             mediaController.getTransportControls().pause();
                         } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                             mediaController.getTransportControls().play();
                         } else {
-                            mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(ActivityMain.listPosition).getUri(), null);
+                            mediaController.getTransportControls().playFromUri(playList.get(ActivityMain.listPosition).getUri(), null);
                         }
                     }
                     break;
@@ -358,7 +358,7 @@ public class ActivityMusicAlbum extends BaseActivity {
                     RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
                     LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMusicAlbum.this);
                     playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(ActivityMain.playList);
+                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
                     playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
                         ActivityMain.listPosition = --position;
                         mediaController.getTransportControls().skipToNext();

@@ -204,18 +204,18 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
         musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(albumMusicInfos);
         musicListLocalRecyclerAdapter.setOnItemClickListener(((view, position) -> {
             albumMusicInfos = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
-            if (ActivityMain.playList.size() != 0) {
+            if (playList.size() != 0) {
                 PlayList playListMusicInfo;
                 int playListPosition;
-                for (playListPosition = 0; playListPosition < ActivityMain.playList.size(); playListPosition++) {
-                    playListMusicInfo = ActivityMain.playList.get(playListPosition);
+                for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
+                    playListMusicInfo = playList.get(playListPosition);
                     if (playListMusicInfo.getId() == albumMusicInfos.get(position).getId()) {
                         ActivityMain.listPosition = --playListPosition;
                         ActivityMain.mediaController.getTransportControls().skipToNext();
                         break;
                     }
                 }
-                if (playListPosition == ActivityMain.playList.size()) {
+                if (playListPosition == playList.size()) {
                     refreshPlayList();
                     ActivityMain.listPosition = --position;
                     ActivityMain.mediaController.getTransportControls().skipToNext();
@@ -231,12 +231,12 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
     }
     // 刷新播放列表
     private void refreshPlayList(){
-        ActivityMain.playList.clear();
+        playList.clear();
         albumMusicInfos = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
         if (albumMusicInfos != null && albumMusicInfos.size() != 0) {
             for (int musicCountLocal = 0; musicCountLocal < albumMusicInfos.size(); musicCountLocal++) {
                 MusicInfo itemMusicInfo = albumMusicInfos.get(musicCountLocal);
-                ActivityMain.playList.add(new PlayList(
+                playList.add(new PlayList(
                                 itemMusicInfo.getId(),
                                 itemMusicInfo.getTitle(),
                                 itemMusicInfo.getAlbum(),
@@ -358,13 +358,13 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.playing_play:
-                    if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
+                    if (playList != null && playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                             mediaController.getTransportControls().pause();
                         } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                             mediaController.getTransportControls().play();
                         } else {
-                            mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(ActivityMain.listPosition).getUri(), null);
+                            mediaController.getTransportControls().playFromUri(playList.get(ActivityMain.listPosition).getUri(), null);
                         }
                     }
                     break;
@@ -381,7 +381,7 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
                     RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
                     LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMusicAlbumMusic.this);
                     playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-                    playListRecyclerAdapter = new PlayListRecyclerAdapter(ActivityMain.playList);
+                    playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
                     playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
                         ActivityMain.listPosition = --position;
                         mediaController.getTransportControls().skipToNext();
@@ -469,32 +469,32 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
         long duration = itemMusicInfo.getDuration();
         Uri uri = itemMusicInfo.getUri();
         Bitmap albumCover = itemMusicInfo.getAlbumBitmap();
-        if (ActivityMain.playList.size() != 0){
+        if (playList.size() != 0){
             int playListPosition;
-            for (playListPosition = 0; playListPosition < ActivityMain.playList.size(); playListPosition++) {
-                playListMusicInfo = ActivityMain.playList.get(playListPosition);
+            for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
+                playListMusicInfo = playList.get(playListPosition);
                 if (playListMusicInfo.getId() == id) {
-                    ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+                    playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
                     playListRecyclerAdapter.notifyItemInserted(ActivityMain.listPosition + 1);
-                    ActivityMain.playList.remove(playListPosition);
+                    playList.remove(playListPosition);
                     playListRecyclerAdapter.notifyItemRemoved(playListPosition);
                     if (playListPosition < ActivityMain.listPosition) {
-                        playListRecyclerAdapter.notifyItemRangeChanged(playListPosition, ActivityMain.playList.size() - playListPosition);
+                        playListRecyclerAdapter.notifyItemRangeChanged(playListPosition, playList.size() - playListPosition);
                         --ActivityMain.listPosition;
                     } else {
-                        playListRecyclerAdapter.notifyItemRangeChanged(ActivityMain.listPosition, ActivityMain.playList.size() - ActivityMain.listPosition);
+                        playListRecyclerAdapter.notifyItemRangeChanged(ActivityMain.listPosition, playList.size() - ActivityMain.listPosition);
                     }
                     break;
                 }
             }
-            if (playListPosition == ActivityMain.playList.size()) {
-                ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+            if (playListPosition == playList.size()) {
+                playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
                 playListRecyclerAdapter.notifyItemInserted(ActivityMain.listPosition + 1);
-                playListRecyclerAdapter.notifyItemRangeChanged(ActivityMain.listPosition + 1, ActivityMain.playList.size() - ActivityMain.listPosition + 1);
+                playListRecyclerAdapter.notifyItemRangeChanged(ActivityMain.listPosition + 1, playList.size() - ActivityMain.listPosition + 1);
             }
         }else {
             //　播放列表为空的情况（直接播放）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
         }
     }
 

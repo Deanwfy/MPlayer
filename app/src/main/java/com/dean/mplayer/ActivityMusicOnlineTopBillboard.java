@@ -196,12 +196,12 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
     }
 
     private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
-        if (ActivityMain.playList.size() != 0) {
-            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+        if (playList.size() != 0) {
+            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　播放列表为空的情况（直接播放网络音乐）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         musicCheckResult(true, false);
@@ -337,13 +337,13 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
         public void onClick(View v) {
             switch (v.getId()){
                 case R.id.playing_play:
-                    if (ActivityMain.playList != null && ActivityMain.playList.size() != 0) {
+                    if (playList != null && playList.size() != 0) {
                         if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
                             mediaController.getTransportControls().pause();
                         } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
                             mediaController.getTransportControls().play();
                         } else {
-                            mediaController.getTransportControls().playFromUri(ActivityMain.playList.get(ActivityMain.listPosition).getUri(), null);
+                            mediaController.getTransportControls().playFromUri(playList.get(ActivityMain.listPosition).getUri(), null);
                         }
                     }
                     break;
@@ -360,7 +360,7 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
                     RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
                     LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMusicOnlineTopBillboard.this);
                     playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(ActivityMain.playList);
+                    PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
                     playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
                         ActivityMain.listPosition = --position;
                         mediaController.getTransportControls().skipToNext();

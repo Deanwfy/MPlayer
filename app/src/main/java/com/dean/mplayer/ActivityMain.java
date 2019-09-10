@@ -86,17 +86,12 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
     @ViewById(R.id.music_cover)
     ImageView PlayingCover;
 
-    // 列表显示
-    public static List<PlayList> playList = new ArrayList<>();
-    public static int listPosition = 0;
-
     //睡眠定时计时器
     private Timer clockTimer;
     private boolean playFull;
     public static boolean needToStop;
 
     // 媒体播放服务
-    public static MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
     @Override

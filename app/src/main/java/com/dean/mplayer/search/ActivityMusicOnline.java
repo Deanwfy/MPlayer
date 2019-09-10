@@ -206,12 +206,12 @@ public class ActivityMusicOnline extends BaseActivity {
         }).start();
     }
     private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
-        if (ActivityMain.playList.size() != 0) {
-            ActivityMain.playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+        if (playList.size() != 0) {
+            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　播放列表为空的情况（直接播放网络音乐）
-            ActivityMain.playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
         musicCheckResult(true, false);

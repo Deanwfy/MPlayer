@@ -32,6 +32,7 @@ import androidx.palette.graphics.Palette;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 
@@ -308,7 +309,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		// 设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
 		// 加载播放列表
-		playLists = ActivityMain.playList;
+		playLists = BaseActivity.playList;
 
 		// 回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
