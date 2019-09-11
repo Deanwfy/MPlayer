@@ -13,7 +13,7 @@ import com.dean.mplayer.R;
 
 import java.util.List;
 
-public class PlayListRecyclerAdapterrrr extends RecyclerView.Adapter<PlayListRecyclerAdapterrrr.PlayListRecyclerAdapterHolder> implements View.OnClickListener{
+public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecyclerAdapter.PlayListRecyclerAdapterHolder> implements View.OnClickListener{
 
     class PlayListRecyclerAdapterHolder extends RecyclerView.ViewHolder{
         TextView musicInfo;
@@ -25,7 +25,7 @@ public class PlayListRecyclerAdapterrrr extends RecyclerView.Adapter<PlayListRec
 
     private List<PlayList> playList;
     private OnItemClickListener onItemClickListener = null;
-    PlayListRecyclerAdapterrrr(List<PlayList> playList){
+    PlayListRecyclerAdapter(List<PlayList> playList){
         this.playList = playList;
     }
 

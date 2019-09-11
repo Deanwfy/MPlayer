@@ -18,7 +18,7 @@ import org.androidannotations.annotations.EActivity;
 
 import java.util.List;
 
-@EActivity(R.layout.activity_test)
+@EActivity(R.layout.activity_lrc)
 public class ActivityLrc extends BaseActivity {
 
     //获取服务

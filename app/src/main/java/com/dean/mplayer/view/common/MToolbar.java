@@ -3,15 +3,18 @@ package com.dean.mplayer.view.common;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.widget.EditText;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.util.Utils;
 import com.google.android.material.appbar.AppBarLayout;
 
 import org.androidannotations.annotations.EViewGroup;
@@ -26,14 +29,16 @@ public class MToolbar extends AppBarLayout {
     @ViewById(R.id.title)
     AppCompatTextView titleTextView;
 
-    @ViewById(R.id.image_view_title)
-    AppCompatImageView titleImageView;
-
     @ViewById(R.id.image_button_left)
     AppCompatImageButton leftImageButton;
 
     @ViewById(R.id.image_button_right)
     AppCompatImageButton rightImageButton;
+
+    @ViewById(R.id.search_view)
+    SearchView searchView;
+
+    private Context context;
 
     public MToolbar(Context context) {
         super(context);
@@ -41,17 +46,20 @@ public class MToolbar extends AppBarLayout {
 
     public MToolbar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        this.context = context;
     }
 
     private static final int NONE = 0;
     private int backgroundColor;
     private int titleRes;
-    private int titleImageRes;
+    private String title;
     private int leftImageRes;
     private OnClickListener leftClickListener;
     private int rightImageRes;
     private OnClickListener rightClickListener;
     private boolean hasBack;
+    private String queryHint;
+    private SearchView.OnQueryTextListener queryTextListener;
 
     public MToolbar setBackgroundcolor(int color) {
         this.backgroundColor = color;
@@ -63,8 +71,8 @@ public class MToolbar extends AppBarLayout {
         return this;
     }
 
-    public MToolbar setTitleImage(int titleImageRes) {
-        this.titleImageRes = titleImageRes;
+    public MToolbar setTitle(String title) {
+        this.title = title;
         return this;
     }
 
@@ -85,6 +93,12 @@ public class MToolbar extends AppBarLayout {
         return this;
     }
 
+    public MToolbar setSearchView(String queryHint, SearchView.OnQueryTextListener queryTextListener) {
+        this.queryHint = queryHint;
+        this.queryTextListener = queryTextListener;
+        return this;
+    }
+
     public void build() {
         // update backgroundColor
         if (backgroundColor == NONE) {
@@ -96,19 +110,12 @@ public class MToolbar extends AppBarLayout {
         toolbar.setBackgroundColor(getContext().getResources().getColor(backgroundColor));
 
         // update title
-        if (titleRes == NONE) {
+        if (titleRes == NONE && title == null) {
             titleTextView.setVisibility(GONE);
         } else {
             titleTextView.setVisibility(VISIBLE);
-            titleTextView.setText(titleRes);
-        }
-
-        // update title image
-        if (titleImageRes == NONE) {
-            titleImageView.setVisibility(GONE);
-        } else {
-            titleImageView.setVisibility(VISIBLE);
-            titleImageView.setImageResource(titleImageRes);
+            if (titleRes != NONE) titleTextView.setText(titleRes);
+            if (title != null) titleTextView.setText(title);
         }
 
         // update left item
@@ -116,6 +123,13 @@ public class MToolbar extends AppBarLayout {
             leftImageRes = R.drawable.ic_back;
             leftClickListener = view -> ((BaseActivity) getContext()).onBackPressed();
         }
+
+        if (queryHint == null) {
+            searchView.setVisibility(GONE);
+        } else {
+            updateSearchView(queryHint, queryTextListener);
+        }
+
         if (leftImageRes == NONE) {
             hiddenLeftItem();
         } else {
@@ -168,6 +182,23 @@ public class MToolbar extends AppBarLayout {
 
     public void hiddenLeftItem() {
         leftImageButton.setVisibility(GONE);
+    }
+
+    public void updateSearchView(String queryHint, SearchView.OnQueryTextListener queryTextListener) {
+        searchView.setQueryHint(queryHint);
+        searchView.setOnQueryTextListener(queryTextListener);
+        searchView.setVisibility(VISIBLE);
+        searchView.setMaxWidth(Utils.dp2px(context, Utils.px2dp(context, Utils.screenSize(context).getWidth()) - 32));
+        if (titleRes != NONE || title != null) {
+            searchView.setOnSearchClickListener(view -> titleTextView.setVisibility(GONE));
+            searchView.setOnCloseListener(() -> {
+                titleTextView.setVisibility(VISIBLE);
+                return false;
+            });
+        }
+        EditText editText = searchView.findViewById(R.id.search_src_text);
+        editText.setTextColor(ContextCompat.getColor(context, R.color.drawerArrowStyle));
+        editText.setHintTextColor(ContextCompat.getColor(context, R.color.editNoticeText));
     }
 
 }

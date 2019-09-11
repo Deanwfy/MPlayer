@@ -2,17 +2,12 @@ package com.dean.mplayer;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -23,6 +18,7 @@ import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.common.ControlPanel;
+import com.dean.mplayer.view.common.MToolbar;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.AfterViews;
@@ -34,6 +30,9 @@ import java.util.List;
 
 @EActivity(R.layout.activity_music_base)
 public class ActivityMusicAlbumMusic extends BaseActivity {
+
+    @ViewById(R.id.base_toolbar)
+    MToolbar toolbar;
 
     @ViewById(R.id.music_control_panel)
     ControlPanel controlPanel;
@@ -49,60 +48,24 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
     private MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter;
     private List<MusicInfo> albumMusicInfos = new ArrayList<>();
 
-    // Toolbar本地搜索
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.toolbar_search_menu, menu);
-        MenuItem searchItem = menu.findItem(R.id.toolbar_search_menu);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(getResources().getString(R.string.searchNoticeLocal));
-        // 图标样式，通过Style中的colorControlNormal进行了设置
-//        ImageView iconSearch = searchView.findViewById(android.support.v7.appcompat.R.id.search_button);
-//        iconSearch.setColorFilter(ContextCompat.getColor(this, R.color.drawerArrowStyle));
-//        ImageView iconClose = searchView.findViewById(android.support.v7.appcompat.R.id.search_close_btn);
-//        iconClose.setColorFilter(ContextCompat.getColor(this, R.color.drawerArrowStyle));
-        // 搜索框样式
-        EditText editText = searchView.findViewById(R.id.search_src_text);
-        editText.setTextColor(ContextCompat.getColor(this, R.color.drawerArrowStyle));
-        editText.setHintTextColor(ContextCompat.getColor(this, R.color.editNoticeText));
-        // 控件间隔
-        LinearLayout search_edit_frame = searchView.findViewById(R.id.search_edit_frame);
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) search_edit_frame.getLayoutParams();
-        params.leftMargin = 0;
-        params.rightMargin = 0;
-        search_edit_frame.setLayoutParams(params);
-        // 搜索框监听
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextChange(String s) {
-                musicListLocalRecyclerAdapter.getFilter().filter(s);
-                return true;
-            }
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                return false;
-            }
-        });
-        return super.onCreateOptionsMenu(menu);
-    }
-
     @AfterViews
     void initViews() {
         albumMusicInfos = ActivityMusicAlbum.musicAlbumMusicList;
 
-        Toolbar toolbar = findViewById(R.id.activity_music_base_toolbar);   // 标题栏实现
-        toolbar.setTitle(albumMusicInfos.get(0).getAlbum()); // 必须放在setSupportActionBar前面
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
-        toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
-        toolbar.setOnMenuItemClickListener(menuItem -> {
-            switch (menuItem.getItemId()){
-                case R.id.action_setting:
-                    Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
-                    break;
-            }
-            return true;
-        });
+        toolbar.setTitle(albumMusicInfos.get(0).getAlbum())
+                .setHasBack(true)
+                .setSearchView(getResources().getString(R.string.searchNoticeLocal), new SearchView.OnQueryTextListener() {
+                    @Override
+                    public boolean onQueryTextChange(String s) {
+                        musicListLocalRecyclerAdapter.getFilter().filter(s);
+                        return true;
+                    }
+                    @Override
+                    public boolean onQueryTextSubmit(String s) {
+                        return false;
+                    }
+                })
+                .build();
 
         controlPanel.build(this);
 

@@ -9,24 +9,13 @@
     tools:context=".ActivityMusicLocal"
     tools:ignore="ContentDescription">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/activity_music_base_appbar"
+    <com.dean.mplayer.view.common.MToolbar_
+        android:id="@+id/base_toolbar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/activity_music_base_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-
-            app:navigationIcon="@drawable/ic_back"
-            app:contentInsetStart="0dp"
-            app:contentInsetStartWithNavigation="0dp" />
-        <!--android:transitionName="CategoryName"-->
-    </com.google.android.material.appbar.AppBarLayout>
+        app:layout_constraintTop_toTopOf="parent" />
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
@@ -35,7 +24,7 @@
         app:layout_constraintBottom_toTopOf="@id/music_control_panel"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/activity_music_base_appbar">
+        app:layout_constraintTop_toBottomOf="@id/base_toolbar">
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/activity_music_base_list"
             android:layout_width="match_parent"

@@ -71,7 +71,7 @@ public class ControlPanel extends ConstraintLayout {
     private Activity activity;
     private List<PlayList> playList;
     private int listPosition;
-    private PlayListRecyclerAdapterrrr playListRecyclerAdapterrrr;
+    private PlayListRecyclerAdapter playListRecyclerAdapter;
 
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
@@ -89,7 +89,7 @@ public class ControlPanel extends ConstraintLayout {
         this.activity = activity;
         this.playList = BaseActivity.playList;
         this.listPosition = BaseActivity.listPosition;
-        playListRecyclerAdapterrrr = new PlayListRecyclerAdapterrrr(playList);
+        playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
         initMediaBrowser();
     }
 
@@ -208,11 +208,11 @@ public class ControlPanel extends ConstraintLayout {
         RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
         LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(context);
         playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-        playListRecyclerAdapterrrr.setOnItemClickListener((view, position) -> {
+        playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
             listPosition = --position;
             mediaController.getTransportControls().skipToNext();
         });
-        playListRecycler.setAdapter(playListRecyclerAdapterrrr);
+        playListRecycler.setAdapter(playListRecyclerAdapter);
         // 关闭按钮
         Button buttonClose = playListView.findViewById(R.id.play_list_close);
         buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
@@ -252,22 +252,22 @@ public class ControlPanel extends ConstraintLayout {
                 playListMusicInfo = playList.get(playListPosition);
                 if (playListMusicInfo.getId() == id) {
                     playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
-                    playListRecyclerAdapterrrr.notifyItemInserted(listPosition + 1);
+                    playListRecyclerAdapter.notifyItemInserted(listPosition + 1);
                     playList.remove(playListPosition);
-                    playListRecyclerAdapterrrr.notifyItemRemoved(playListPosition);
+                    playListRecyclerAdapter.notifyItemRemoved(playListPosition);
                     if (playListPosition < listPosition) {
-                        playListRecyclerAdapterrrr.notifyItemRangeChanged(playListPosition, playList.size() - playListPosition);
+                        playListRecyclerAdapter.notifyItemRangeChanged(playListPosition, playList.size() - playListPosition);
                         --listPosition;
                     } else {
-                        playListRecyclerAdapterrrr.notifyItemRangeChanged(listPosition, playList.size() - listPosition);
+                        playListRecyclerAdapter.notifyItemRangeChanged(listPosition, playList.size() - listPosition);
                     }
                     break;
                 }
             }
             if (playListPosition == playList.size()) {
                 playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
-                playListRecyclerAdapterrrr.notifyItemInserted(listPosition + 1);
-                playListRecyclerAdapterrrr.notifyItemRangeChanged(listPosition + 1, playList.size() - listPosition + 1);
+                playListRecyclerAdapter.notifyItemInserted(listPosition + 1);
+                playListRecyclerAdapter.notifyItemRangeChanged(listPosition + 1, playList.size() - listPosition + 1);
             }
         } else {
             //　播放列表为空的情况（直接播放）

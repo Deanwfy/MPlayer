@@ -6,7 +6,6 @@ import android.view.ContextMenu;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
@@ -16,6 +15,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.onlineTopBillboard.Tracks;
 import com.dean.mplayer.view.common.ControlPanel;
+import com.dean.mplayer.view.common.MToolbar;
 import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
@@ -33,6 +33,9 @@ import okhttp3.Response;
 @EActivity(R.layout.activity_music_base)
 public class ActivityMusicOnlineTopBillboard extends BaseActivity {
 
+    @ViewById(R.id.base_toolbar)
+    MToolbar toolbar;
+
     @ViewById(R.id.music_control_panel)
     ControlPanel controlPanel;
 
@@ -49,11 +52,10 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
 
     @AfterViews
     void initViews() {
-        Toolbar toolbar = findViewById(R.id.activity_music_base_toolbar);   // 标题栏实现
-        toolbar.setTitle(R.string.activity_music_online_top_billboard); // 必须放在setSupportActionBar前面
-        setSupportActionBar(toolbar);
-        toolbar.setNavigationOnClickListener(v -> finish());    // 必须放在setSupportActionBar后面
-        toolbar.setTitleTextColor(getResources().getColor(R.color.drawerArrowStyle));
+
+        toolbar.setTitle(R.string.activity_music_online_top_billboard)
+                .setHasBack(true)
+                .build();
 
         controlPanel.build(this);
 
