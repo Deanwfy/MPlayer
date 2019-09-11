@@ -46,6 +46,7 @@ import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.search.ActivityMusicOnline_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.LogUtils;
+import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;
 import com.google.android.material.navigation.NavigationView;
 
@@ -66,33 +67,13 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
     @ViewById(R.id.main_toolbar)
     MToolbar toolbar;
 
-    // 播放控制按钮
     @ViewById(R.id.music_control_panel)
-    ConstraintLayout musicControlPanel;
-
-    @ViewById(R.id.playing_play)
-    ImageButton PlayBtn;
-
-    @ViewById(R.id.playing_list)
-    ImageButton ListBtn;
-
-    // 媒体信息
-    @ViewById(R.id.playing_title)
-    TextView PlayingTitle;
-
-    @ViewById(R.id.playing_artist)
-    TextView PlayingArtist;
-
-    @ViewById(R.id.music_cover)
-    ImageView PlayingCover;
+    ControlPanel controlPanel;
 
     //睡眠定时计时器
     private Timer clockTimer;
     private boolean playFull;
     public static boolean needToStop;
-
-    // 媒体播放服务
-    private MediaBrowserCompat mediaBrowserCompat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,7 +108,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                 .setRightItem(R.drawable.ic_search, view -> ActivityMusicOnline_.intent(this).start())
                 .build();
 
-        initMediaBrowser();
+        controlPanel.build(this);
 
         Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);
@@ -159,155 +140,10 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         }
     }
 
-    private void initMediaBrowser() {
-        if (mediaBrowserCompat == null) {
-            // 创建MediaBrowserCompat
-            mediaBrowserCompat = new MediaBrowserCompat(
-                    this,
-                    // 创建ComponentName 连接 MusicService
-                    new ComponentName(this, PlayService.class),
-                    // 创建callback
-                    mediaBrowserConnectionCallback,
-                    //
-                    null);
-            // 链接service
-            mediaBrowserCompat.connect();
-        }
-    }
-
-    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
-        // 连接成功
-        @Override
-        public void onConnected() {
-            try {
-                // 获取MediaControllerCompat
-                mediaController = new MediaControllerCompat(
-                        ActivityMain.this,
-                        mediaBrowserCompat.getSessionToken());
-                MediaControllerCompat.setMediaController(ActivityMain.this, mediaController);
-                mediaController.registerCallback(mediaControllerCompatCallback);
-                //设置当前数据
-                mediaControllerCompatCallback.onMetadataChanged(mediaController.getMetadata());
-                mediaControllerCompatCallback.onPlaybackStateChanged(mediaController.getPlaybackState());
-                String mediaId = AppConstant.MediaIdInfo.MEDIA_ID_NORMAL;
-                mediaBrowserCompat.unsubscribe(mediaId);
-                mediaBrowserCompat.subscribe(mediaId, mediaBrowserSubscriptionCallback);
-            } catch (RemoteException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    };
-
-    private final MediaBrowserCompat.SubscriptionCallback mediaBrowserSubscriptionCallback = new MediaBrowserCompat.SubscriptionCallback() {
-        @Override
-        public void onChildrenLoaded(@NonNull String parentId, @NonNull List<MediaBrowserCompat.MediaItem> children) {
-            super.onChildrenLoaded(parentId, children);
-
-        }
-    };
-
-    private final MediaControllerCompat.Callback mediaControllerCompatCallback = new MediaControllerCompat.Callback() {
-        @Override
-        public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
-            switch (state.getState()) {
-                case PlaybackStateCompat.STATE_NONE://默认状态
-                    cancelClock();
-                    PlayBtn.setImageResource(R.drawable.ic_play);
-                    break;
-                case PlaybackStateCompat.STATE_PLAYING:
-                    PlayBtn.setImageResource(R.drawable.ic_pause);
-                    break;
-                case PlaybackStateCompat.STATE_PAUSED:
-                    PlayBtn.setImageResource(R.drawable.ic_play);
-                    break;
-                case PlaybackStateCompat.STATE_SKIPPING_TO_NEXT://下一首
-                case PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS://上一首
-                case PlaybackStateCompat.STATE_BUFFERING:
-                case PlaybackStateCompat.STATE_CONNECTING:
-                case PlaybackStateCompat.STATE_ERROR:
-                case PlaybackStateCompat.STATE_FAST_FORWARDING:
-                case PlaybackStateCompat.STATE_REWINDING:
-                case PlaybackStateCompat.STATE_SKIPPING_TO_QUEUE_ITEM:
-                case PlaybackStateCompat.STATE_STOPPED:
-                    break;
-            }
-        }
-
-        @Override
-        public void onMetadataChanged(MediaMetadataCompat metadata) {
-            if (metadata != null) {
-                PlayingTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
-                PlayingArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
-                PlayingCover.setImageBitmap(metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART));
-            }
-        }
-    };
-
-    @Click(R.id.music_control_panel)
-    void clickPlayPanel() {
-        ActivityNowPlay_.intent(this).start();
-    }
-
-    @Click(R.id.playing_play)
-    void clickPlayButton() {
-        if (playList != null && playList.size() != 0) {
-            if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING) {
-                mediaController.getTransportControls().pause();
-            } else if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PAUSED) {
-                mediaController.getTransportControls().play();
-            } else {
-                mediaController.getTransportControls().playFromUri(playList.get(listPosition).getUri(), null);
-            }
-        }
-    }
-
-    @Click(R.id.playing_list)
-    void clickPlayList() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(ActivityMain.this, R.style.DialogPlayList);
-        // 自定义布局
-        @SuppressLint("InflateParams")
-        View playListView = LayoutInflater.from(ActivityMain.this).inflate(R.layout.play_list, null);
-        // 设置AlertDialog参数，加载自定义布局
-        builder.setView(playListView);
-        // AlertDialog对象
-        AlertDialog alertDialogMusicList = builder.create();
-        // 自定义布局RecyclerLayout适配实现
-        RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
-        LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(ActivityMain.this);
-        playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-        PlayListRecyclerAdapter playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
-        playListRecyclerAdapter.setOnItemClickListener((view, position) -> {
-            listPosition = --position;
-            mediaController.getTransportControls().skipToNext();
-        });
-        playListRecycler.setAdapter(playListRecyclerAdapter);
-        // 关闭按钮
-        Button buttonClose = playListView.findViewById(R.id.play_list_close);
-        buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
-        // 显示
-        alertDialogMusicList.show();
-        // 获取屏幕
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        // 获取列表dialog
-        Window windowDialog = alertDialogMusicList.getWindow();
-        assert windowDialog != null;
-        //去掉dialog默认的padding
-        windowDialog.getDecorView().setPadding(0, 0, 0, 0);
-        windowDialog.getDecorView().setBackgroundColor(ActivityMain.this.getResources().getColor(R.color.colorControlPanel));
-        // 设置大小
-        WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
-        layoutParams.width = displayMetrics.widthPixels;
-//        layoutParams.height = (int)(displayMetrics.heightPixels * 0.6);
-        // 设置位置为底部
-        layoutParams.gravity = Gravity.BOTTOM;
-        windowDialog.setAttributes(layoutParams);
-    }
-
     // 退出同时结束后台服务
     @Override
     protected void onDestroy() {
-        mediaBrowserCompat.disconnect();
+        controlPanel.stopConnection();
         Intent intentPlayService = new Intent(this, PlayService.class);
         stopService(intentPlayService);
         super.onDestroy();

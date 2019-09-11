@@ -3,11 +3,15 @@ package com.dean.mplayer.view.common;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -25,8 +29,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dean.mplayer.ActivityMain;
 import com.dean.mplayer.ActivityNowPlay_;
+import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.PlayList;
 import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
@@ -62,23 +66,30 @@ public class ControlPanel extends ConstraintLayout {
     @ViewById(R.id.playing_list)
     ImageButton ListBtn;
 
-    private Activity activity;
+    private Context context;
 
+    private Activity activity;
     private List<PlayList> playList;
     private int listPosition;
+    private PlayListRecyclerAdapterrrr playListRecyclerAdapterrrr;
 
     private MediaControllerCompat mediaController;
     private MediaBrowserCompat mediaBrowserCompat;
 
-    public ControlPanel(Activity activity) {
-        super(activity);
+    public ControlPanel(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        this.context = context;
+    }
+
+    public void stopConnection() {
+        mediaBrowserCompat.disconnect();
+    }
+
+    public void build(Activity activity) {
         this.activity = activity;
         this.playList = BaseActivity.playList;
         this.listPosition = BaseActivity.listPosition;
-        this.mediaController = BaseActivity.mediaController;
-    }
-
-    public void build(){
+        playListRecyclerAdapterrrr = new PlayListRecyclerAdapterrrr(playList);
         initMediaBrowser();
     }
 
@@ -86,9 +97,9 @@ public class ControlPanel extends ConstraintLayout {
         if (mediaBrowserCompat == null) {
             // 创建MediaBrowserCompat
             mediaBrowserCompat = new MediaBrowserCompat(
-                    activity,
+                    context,
                     // 创建ComponentName 连接 MusicService
-                    new ComponentName(activity, PlayService.class),
+                    new ComponentName(context, PlayService.class),
                     // 创建callback
                     mediaBrowserConnectionCallback,
                     //
@@ -105,7 +116,7 @@ public class ControlPanel extends ConstraintLayout {
             try {
                 // 获取MediaControllerCompat
                 mediaController = new MediaControllerCompat(
-                        activity,
+                        context,
                         mediaBrowserCompat.getSessionToken());
                 MediaControllerCompat.setMediaController(activity, mediaController);
                 mediaController.registerCallback(mediaControllerCompatCallback);
@@ -115,6 +126,8 @@ public class ControlPanel extends ConstraintLayout {
                 String mediaId = AppConstant.MediaIdInfo.MEDIA_ID_NORMAL;
                 mediaBrowserCompat.unsubscribe(mediaId);
                 mediaBrowserCompat.subscribe(mediaId, mediaBrowserSubscriptionCallback);
+
+                BaseActivity.mediaController = mediaController;
             } catch (RemoteException e) {
                 throw new RuntimeException(e);
             }
@@ -165,7 +178,7 @@ public class ControlPanel extends ConstraintLayout {
 
     @Click(R.id.music_control_panel)
     void clickPlayPanel() {
-        ActivityNowPlay_.intent(activity).start();
+        ActivityNowPlay_.intent(context).start();
     }
 
     @Click(R.id.playing_play)
@@ -183,19 +196,18 @@ public class ControlPanel extends ConstraintLayout {
 
     @Click(R.id.playing_list)
     void clickPlayList() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(activity, R.style.DialogPlayList);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogPlayList);
         // 自定义布局
         @SuppressLint("InflateParams")
-        View playListView = LayoutInflater.from(activity).inflate(R.layout.play_list, null);
+        View playListView = LayoutInflater.from(context).inflate(R.layout.play_list, null);
         // 设置AlertDialog参数，加载自定义布局
         builder.setView(playListView);
         // AlertDialog对象
         AlertDialog alertDialogMusicList = builder.create();
         // 自定义布局RecyclerLayout适配实现
         RecyclerView playListRecycler = playListView.findViewById(R.id.play_list);
-        LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(activity);
+        LinearLayoutManager playListRecyclerLayoutManager = new LinearLayoutManager(context);
         playListRecycler.setLayoutManager(playListRecyclerLayoutManager);
-        PlayListRecyclerAdapterrrr playListRecyclerAdapterrrr = new PlayListRecyclerAdapterrrr(playList);
         playListRecyclerAdapterrrr.setOnItemClickListener((view, position) -> {
             listPosition = --position;
             mediaController.getTransportControls().skipToNext();
@@ -214,7 +226,7 @@ public class ControlPanel extends ConstraintLayout {
         assert windowDialog != null;
         //去掉dialog默认的padding
         windowDialog.getDecorView().setPadding(0, 0, 0, 0);
-        windowDialog.getDecorView().setBackgroundColor(activity.getResources().getColor(R.color.colorControlPanel));
+        windowDialog.getDecorView().setBackgroundColor(context.getResources().getColor(R.color.colorControlPanel));
         // 设置大小
         WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
         layoutParams.width = displayMetrics.widthPixels;
@@ -222,5 +234,44 @@ public class ControlPanel extends ConstraintLayout {
         // 设置位置为底部
         layoutParams.gravity = Gravity.BOTTOM;
         windowDialog.setAttributes(layoutParams);
+    }
+
+    // 添加下一首播放
+    public void addToNext(MusicInfo itemMusicInfo) {
+        PlayList playListMusicInfo;
+        long id = itemMusicInfo.getId();
+        String title = itemMusicInfo.getTitle();
+        String album = itemMusicInfo.getAlbum();
+        String artist = itemMusicInfo.getArtist();
+        long duration = itemMusicInfo.getDuration();
+        Uri uri = itemMusicInfo.getUri();
+        Bitmap albumCover = itemMusicInfo.getAlbumBitmap();
+        if (playList.size() != 0) {
+            int playListPosition;
+            for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
+                playListMusicInfo = playList.get(playListPosition);
+                if (playListMusicInfo.getId() == id) {
+                    playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+                    playListRecyclerAdapterrrr.notifyItemInserted(listPosition + 1);
+                    playList.remove(playListPosition);
+                    playListRecyclerAdapterrrr.notifyItemRemoved(playListPosition);
+                    if (playListPosition < listPosition) {
+                        playListRecyclerAdapterrrr.notifyItemRangeChanged(playListPosition, playList.size() - playListPosition);
+                        --listPosition;
+                    } else {
+                        playListRecyclerAdapterrrr.notifyItemRangeChanged(listPosition, playList.size() - listPosition);
+                    }
+                    break;
+                }
+            }
+            if (playListPosition == playList.size()) {
+                playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+                playListRecyclerAdapterrrr.notifyItemInserted(listPosition + 1);
+                playListRecyclerAdapterrrr.notifyItemRangeChanged(listPosition + 1, playList.size() - listPosition + 1);
+            }
+        } else {
+            //　播放列表为空的情况（直接播放）
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+        }
     }
 }

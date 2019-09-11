@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorControlPanel"
-    xmlns:toolbar="http://schemas.android.com/apk/res-auto"
     tools:ignore="ContentDescription"
     android:id="@+id/activity_viewpager">
 
@@ -14,92 +13,17 @@
         android:name="com.dean.mplayer.FragmentMainCategory_"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        toolbar:layout_constraintBottom_toTopOf="@id/music_control_panel"
-        toolbar:layout_constraintEnd_toEndOf="parent"
-        toolbar:layout_constraintStart_toStartOf="parent"
-        toolbar:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toTopOf="@id/music_control_panel"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.dean.mplayer.view.common.ControlPanel_
         android:id="@+id/music_control_panel"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="@color/colorControlPanel"
-        android:elevation="5dp"
-        toolbar:layout_constraintBottom_toBottomOf="parent"
-        toolbar:layout_constraintEnd_toEndOf="parent"
-        toolbar:layout_constraintStart_toStartOf="parent">
-
-        <ImageView
-            android:id="@+id/music_cover"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginStart="3dp"
-            android:src="@drawable/ic_cover"
-            toolbar:layout_constraintBottom_toBottomOf="parent"
-            toolbar:layout_constraintStart_toStartOf="parent"
-            toolbar:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/playing_title"
-            android:layout_width="0dp"
-            android:layout_height="25dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="8dp"
-            android:ellipsize="marquee"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:singleLine="true"
-            android:text="@string/music_title"
-            android:textColor="@color/colorMusicTitleText"
-            android:textSize="18sp"
-            toolbar:layout_constraintEnd_toStartOf="@id/playing_play"
-            toolbar:layout_constraintBottom_toTopOf="@id/guideline"
-            toolbar:layout_constraintStart_toEndOf="@id/music_cover" />
-
-        <TextView
-            android:id="@+id/playing_artist"
-            android:layout_width="0dp"
-            android:layout_height="20dp"
-            android:ellipsize="end"
-            android:singleLine="true"
-            android:text="@string/music_artist"
-            android:textColor="@color/colorMusicArtistText"
-            android:textSize="14sp"
-            toolbar:layout_constraintEnd_toEndOf="@id/playing_title"
-            toolbar:layout_constraintStart_toStartOf="@id/playing_title"
-            toolbar:layout_constraintTop_toTopOf="@id/guideline" />
-
-        <ImageButton
-            android:id="@+id/playing_play"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_play"
-            toolbar:layout_constraintBottom_toBottomOf="@id/playing_list"
-            toolbar:layout_constraintEnd_toStartOf="@id/playing_list"
-            toolbar:layout_constraintTop_toTopOf="@id/playing_list" />
-
-        <ImageButton
-            android:id="@+id/playing_list"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginTop="3dp"
-            android:layout_marginEnd="3dp"
-            android:layout_marginBottom="3dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:scaleType="centerCrop"
-            android:src="@drawable/ic_playlist"
-            toolbar:layout_constraintBottom_toBottomOf="parent"
-            toolbar:layout_constraintEnd_toEndOf="parent"
-            toolbar:layout_constraintTop_toTopOf="parent" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/guideline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            toolbar:layout_constraintGuide_begin="30dp" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
