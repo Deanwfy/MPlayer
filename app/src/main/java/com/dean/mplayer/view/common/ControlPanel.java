@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.support.v4.media.MediaBrowserCompat;
@@ -35,16 +34,26 @@ import com.dean.mplayer.PlayList;
 import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.DataRepository_;
+import com.dean.mplayer.data.PrefDataSource_;
 import com.dean.mplayer.util.AppConstant;
+import com.dean.mplayer.util.MediaUtil;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EViewGroup;
 import org.androidannotations.annotations.ViewById;
+import org.androidannotations.annotations.sharedpreferences.Pref;
 
 import java.util.List;
 
+import static com.dean.mplayer.base.BaseActivity.listPosition;
+import static com.dean.mplayer.base.BaseActivity.playList;
+
 @EViewGroup(R.layout.control_panel)
 public class ControlPanel extends ConstraintLayout {
+
+    @Pref
+    PrefDataSource_ prefDataSource;
 
     // 信息
     @ViewById(R.id.playing_title)
@@ -69,8 +78,6 @@ public class ControlPanel extends ConstraintLayout {
     private Context context;
 
     private Activity activity;
-    private List<PlayList> playList;
-    private int listPosition;
     private PlayListRecyclerAdapter playListRecyclerAdapter;
 
     private MediaControllerCompat mediaController;
@@ -87,8 +94,6 @@ public class ControlPanel extends ConstraintLayout {
 
     public void build(Activity activity) {
         this.activity = activity;
-        this.playList = BaseActivity.playList;
-        this.listPosition = BaseActivity.listPosition;
         playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
         initMediaBrowser();
     }
@@ -169,6 +174,7 @@ public class ControlPanel extends ConstraintLayout {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             if (metadata != null) {
+                prefDataSource.listPosition().put(listPosition);
                 PlayingTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
                 PlayingArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
                 PlayingCover.setImageBitmap(metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART));
@@ -196,6 +202,7 @@ public class ControlPanel extends ConstraintLayout {
 
     @Click(R.id.playing_list)
     void clickPlayList() {
+        playListRecyclerAdapter.notifyDataSetChanged();
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogPlayList);
         // 自定义布局
         @SuppressLint("InflateParams")
@@ -245,13 +252,13 @@ public class ControlPanel extends ConstraintLayout {
         String artist = itemMusicInfo.getArtist();
         long duration = itemMusicInfo.getDuration();
         Uri uri = itemMusicInfo.getUri();
-        Bitmap albumCover = itemMusicInfo.getAlbumBitmap();
+        long albumId = itemMusicInfo.getAlbumId();
         if (playList.size() != 0) {
             int playListPosition;
             for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
                 playListMusicInfo = playList.get(playListPosition);
-                if (playListMusicInfo.getId() == id) {
-                    playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+                if (playListMusicInfo.id == id) {
+                    playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, "Local", MediaUtil.albumIdToUrl(albumId)));
                     playListRecyclerAdapter.notifyItemInserted(listPosition + 1);
                     playList.remove(playListPosition);
                     playListRecyclerAdapter.notifyItemRemoved(playListPosition);
@@ -265,13 +272,14 @@ public class ControlPanel extends ConstraintLayout {
                 }
             }
             if (playListPosition == playList.size()) {
-                playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+                playList.add(listPosition + 1, new PlayList(id, title, album, artist, duration, uri, "Local", MediaUtil.albumIdToUrl(albumId)));
                 playListRecyclerAdapter.notifyItemInserted(listPosition + 1);
                 playListRecyclerAdapter.notifyItemRangeChanged(listPosition + 1, playList.size() - listPosition + 1);
             }
         } else {
             //　播放列表为空的情况（直接播放）
-            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumCover, "Local"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, "Local", MediaUtil.albumIdToUrl(albumId)));
         }
+        DataRepository_.getInstance_(context).updatePlayList(playList);
     }
 }

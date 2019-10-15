@@ -9,6 +9,11 @@ android {
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = ["room.schemaLocation": "$projectDir/schemas".toString()]   // create SQLite schemas
+            }
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -51,7 +56,7 @@ dependencies {
     // rxJava
     implementation "io.reactivex.rxjava3:rxjava:3.0.0-RC2"
     // room
-    def roomVersion = "2.2.0-beta01"
+    def roomVersion = "2.2.0"
     implementation "androidx.room:room-runtime:$roomVersion"
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
     // okHttp
@@ -62,6 +67,9 @@ dependencies {
     implementation 'com.github.ForgetAll:LoadingDialog:v1.1.0-alpha'
     // picasso
     implementation 'com.squareup.picasso:picasso:2.71828'
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.10.0'
     // lrcView
     implementation 'me.wcy:lrcview:2.0.1'
 }

@@ -13,6 +13,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.onlineTopBillboard.Tracks;
 import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;
@@ -147,29 +148,31 @@ public class ActivityMusicOnlineTopBillboard extends BaseActivity {
     }
     private void setOnlineMusicInfo(String response, int position){
         JSONObject jsonObject = JSON.parseObject(response);
-        long id = musicInfo.get(position).getId();
-        String title = musicInfo.get(position).getName();
-        String album = musicInfo.get(position).getAl().getName();
-        String artist = musicInfo.get(position).getAr().get(0).getName();
-        long duration = musicInfo.get(position).getDt();
         Uri uri = Uri.parse(jsonObject.getJSONArray("data").getJSONObject(0).getString("url"));
+        Tracks itemMusicInfo = musicInfo.get(position);
+        long id = itemMusicInfo.getId();
+        String title = itemMusicInfo.getName();
+        String album = itemMusicInfo.getAl().getName();
+        String artist = itemMusicInfo.getAr().get(0).getName();
+        long duration = itemMusicInfo.getDt();
+        String picUrl = itemMusicInfo.getAl().getPicUrl();
         try {
-            Bitmap albumBitmap = Picasso.get().load(musicInfo.get(position).getAl().getPicUrl()).get();
-            playOnlineMusic(id, title, album, artist, duration, uri, albumBitmap);
+            playOnlineMusic(id, title, album, artist, duration, uri, picUrl);
         } catch (Exception e){
             e.printStackTrace();
         }
     }
 
-    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
+    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, String picUrl){
         if (playList.size() != 0) {
-            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, "Netease", picUrl));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　播放列表为空的情况（直接播放网络音乐）
-            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, "Netease", picUrl));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
+        DataRepository_.getInstance_(this).updatePlayList(playList);
         musicCheckResult(true, false);
     }
 

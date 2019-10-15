@@ -26,6 +26,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.dean.mplayer.ActivityMain;
 import com.dean.mplayer.ActivityNowPlay;
+import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.PlayList;
 import com.dean.mplayer.PlayService;
@@ -198,22 +199,23 @@ public class ActivityMusicOnline extends BaseActivity {
                 assert response.body() != null;
                 String responseData = response.body().string();
                 JSONObject jsonObject = JSON.parseObject(responseData);
-                Bitmap albumCover = Picasso.get().load(jsonObject.getJSONArray("songs").getJSONObject(0).getJSONObject("al").getString("picUrl")).get();
-                playOnlineMusic(id, title, album, artist, duration, uri, albumCover);
+                String picUrl = jsonObject.getJSONArray("songs").getJSONObject(0).getJSONObject("al").getString("picUrl");
+                playOnlineMusic(id, title, album, artist, duration, uri, picUrl);
             }catch (Exception e){
                 e.printStackTrace();
             }
         }).start();
     }
-    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, Bitmap albumBitmap){
+    private void playOnlineMusic(long id, String title, String album, String artist, long duration, Uri uri, String picUrl){
         if (playList.size() != 0) {
-            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(ActivityMain.listPosition + 1, new PlayList(id, title, album, artist, duration, uri, "Netease", picUrl));
             mediaController.getTransportControls().skipToNext();
         }else {
             //　播放列表为空的情况（直接播放网络音乐）
-            playList.add(0, new PlayList(id, title, album, artist, duration, uri, albumBitmap, "Netease"));
+            playList.add(0, new PlayList(id, title, album, artist, duration, uri, "Netease", picUrl));
             mediaController.getTransportControls().playFromUri(uri, null);
         }
+        DataRepository_.getInstance_(this).updatePlayList(playList);
         musicCheckResult(true, false);
         Intent playNowIntent = new Intent(this, ActivityNowPlay.class);
         startActivity(playNowIntent);

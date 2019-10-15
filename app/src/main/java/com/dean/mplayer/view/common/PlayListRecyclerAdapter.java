@@ -40,7 +40,7 @@ public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecycl
     @Override
     public void onBindViewHolder(@NonNull PlayListRecyclerAdapterHolder playListRecyclerAdapterHolder, int position) {
         PlayList musicInfo = playList.get(position);
-        String infoText = musicInfo.getTitle() + "-" + musicInfo.getArtist();
+        String infoText = musicInfo.title + "-" + musicInfo.artist;
         playListRecyclerAdapterHolder.musicInfo.setText(infoText);
         playListRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
     }

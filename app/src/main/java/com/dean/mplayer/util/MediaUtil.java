@@ -12,20 +12,24 @@ import android.graphics.drawable.VectorDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
-import androidx.core.content.ContextCompat;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.dean.mplayer.Albm;
 import com.dean.mplayer.Arts;
 import com.dean.mplayer.LocalAlbm;
 import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.R;
-import com.squareup.picasso.Picasso;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,7 +71,6 @@ public class MediaUtil {
 				String displayName = cursor.getString(cursor
 						.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME));
 				long albumId = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
-				Bitmap albumBitmap = getArtwork(context, albumId);
 				long duration = cursor.getLong(cursor
 						.getColumnIndex(MediaStore.Audio.Media.DURATION));
 				long size = cursor.getLong(cursor
@@ -85,7 +88,6 @@ public class MediaUtil {
 					musicInfo.setAlbum(album);
 					musicInfo.setDisplayName(displayName);
 					musicInfo.setAlbumId(albumId);
-					musicInfo.setAlbumBitmap(albumBitmap);
 					musicInfo.setDuration(duration);
 					musicInfo.setSize(size);
 					musicInfo.setUrl(url);
@@ -184,17 +186,22 @@ public class MediaUtil {
 	}
 
 	//获取专辑封面位图对象
-	public static Bitmap getArtwork(Context context, long album_id) {
-		Uri uri = ContentUris.withAppendedId(Uri.parse("content://media/external/audio/albumart"), album_id);
-		try {
-			return Picasso.get().load(uri).error(R.drawable.ic_cover).get();
-		} catch (IOException e) {
-			return getDefaultArtwork(context);
-		}
-	}
+	public static Bitmap getArtwork(Context context, String picUrl) {
+		Uri uri = Uri.parse(picUrl);
+        final Bitmap[] bitmap = new Bitmap[1];
+        Glide.with(context).asBitmap().load(uri).placeholder(R.drawable.ic_cover).into(new CustomTarget<Bitmap>() {
+            @Override
+            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                bitmap[0] = resource;
+            }
+            @Override
+            public void onLoadCleared(@Nullable Drawable placeholder) {}
+        });
+        return bitmap[0];
+    }
 	//获取默认专辑图片
 	@SuppressWarnings("ResourceType")
-	private static Bitmap getDefaultArtwork(Context context) {
+	public static Bitmap getDefaultArtwork(Context context) {
 		Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_cover);
 		if (drawable instanceof BitmapDrawable) {
 			return ((BitmapDrawable) drawable).getBitmap();
@@ -267,6 +274,11 @@ public class MediaUtil {
 		Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
 		scanIntent.setData(Uri.fromFile(new File(filePath)));
 		context.sendBroadcast(scanIntent);
+	}
+
+	// albumId转Url
+	public static String albumIdToUrl(long albumId) {
+		return "content://media/external/audio/albumart/" + albumId;
 	}
 
 }

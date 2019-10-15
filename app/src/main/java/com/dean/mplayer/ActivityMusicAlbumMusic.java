@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.common.ControlPanel;
@@ -132,7 +133,7 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
                 int playListPosition;
                 for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
                     playListMusicInfo = playList.get(playListPosition);
-                    if (playListMusicInfo.getId() == albumMusicInfos.get(position).getId()) {
+                    if (playListMusicInfo.id == albumMusicInfos.get(position).getId()) {
                         ActivityMain.listPosition = --playListPosition;
                         ActivityMain.mediaController.getTransportControls().skipToNext();
                         break;
@@ -160,18 +161,19 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
             for (int musicCountLocal = 0; musicCountLocal < albumMusicInfos.size(); musicCountLocal++) {
                 MusicInfo itemMusicInfo = albumMusicInfos.get(musicCountLocal);
                 playList.add(new PlayList(
-                                itemMusicInfo.getId(),
-                                itemMusicInfo.getTitle(),
-                                itemMusicInfo.getAlbum(),
-                                itemMusicInfo.getArtist(),
-                                itemMusicInfo.getDuration(),
-                                itemMusicInfo.getUri(),
-                                itemMusicInfo.getAlbumBitmap(),
-                                "Local"
+                        itemMusicInfo.getId(),
+                        itemMusicInfo.getTitle(),
+                        itemMusicInfo.getAlbum(),
+                        itemMusicInfo.getArtist(),
+                        itemMusicInfo.getDuration(),
+                        itemMusicInfo.getUri(),
+                        "Local",
+                        MediaUtil.albumIdToUrl(itemMusicInfo.getAlbumId())
                         )
                 );
             }
         }
+        DataRepository_.getInstance_(this).updatePlayList(playList);
     }
 
     // 列表长按菜单点击事件

@@ -208,4 +208,15 @@ public class Utils {
         return null;
     }
 
+    public static Bitmap drawable2Bitmap(Drawable drawable) {
+        int h = drawable.getIntrinsicHeight() * 2;
+        int w = drawable.getIntrinsicWidth() * 2;
+        drawable.setBounds(0, 0, w, h);
+        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bm);
+        canvas.drawBitmap(bm , 0, 0, new Paint());
+        drawable.draw(canvas);
+        return bm;
+    }
+
 }
