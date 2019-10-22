@@ -225,22 +225,19 @@ public class ControlPanel extends ConstraintLayout {
         buttonClose.setOnClickListener((view) -> alertDialogMusicList.dismiss());
         // 显示
         alertDialogMusicList.show();
-        // 获取屏幕
-        DisplayMetrics displayMetrics = new DisplayMetrics();
-        activity.getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         // 获取列表dialog
         Window windowDialog = alertDialogMusicList.getWindow();
-        assert windowDialog != null;
-        //去掉dialog默认的padding
-        windowDialog.getDecorView().setPadding(0, 0, 0, 0);
-        windowDialog.getDecorView().setBackgroundColor(context.getResources().getColor(R.color.colorControlPanel));
-        // 设置大小
-        WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
-        layoutParams.width = displayMetrics.widthPixels;
-//        layoutParams.height = (int)(displayMetrics.heightPixels * 0.6);
-        // 设置位置为底部
-        layoutParams.gravity = Gravity.BOTTOM;
-        windowDialog.setAttributes(layoutParams);
+        if (windowDialog != null) {
+            //去掉dialog默认的padding
+            windowDialog.getDecorView().setBackgroundColor(context.getResources().getColor(R.color.colorControlPanel));
+            windowDialog.getDecorView().setPadding(0, 0, 0, 0);
+            // 设置大小和位置
+            WindowManager.LayoutParams layoutParams = windowDialog.getAttributes();
+            layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+            layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            layoutParams.gravity = Gravity.BOTTOM;
+            windowDialog.setAttributes(layoutParams);
+        }
     }
 
     // 添加下一首播放
