@@ -1,5 +1,6 @@
 package com.dean.mplayer.view.common;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,9 +24,12 @@ public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecycl
         }
     }
 
+    private Context context;
+    private int listPosition;
     private List<PlayList> playList;
     private OnItemClickListener onItemClickListener = null;
-    PlayListRecyclerAdapter(List<PlayList> playList){
+    PlayListRecyclerAdapter(Context context, List<PlayList> playList){
+        this.context = context;
         this.playList = playList;
     }
 
@@ -43,6 +47,10 @@ public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecycl
         String infoText = musicInfo.title + "-" + musicInfo.artist;
         playListRecyclerAdapterHolder.musicInfo.setText(infoText);
         playListRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
+        if (position == listPosition)
+            playListRecyclerAdapterHolder.musicInfo.setTextColor(context.getResources().getColor(R.color.colorPlayNowMusicTitleText));
+        else
+            playListRecyclerAdapterHolder.musicInfo.setTextColor(context.getResources().getColor(R.color.colorMusicTitleText));
     }
 
     @Override
@@ -60,6 +68,11 @@ public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecycl
     void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
+
+    public void setListPosition(int listPosition) {
+        this.listPosition = listPosition;
+    }
+
     //点击事件接口
     public interface OnItemClickListener {
         void onItemClick(View view, int position);

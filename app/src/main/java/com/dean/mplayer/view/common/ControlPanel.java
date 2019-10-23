@@ -94,7 +94,7 @@ public class ControlPanel extends ConstraintLayout {
 
     public void build(Activity activity) {
         this.activity = activity;
-        playListRecyclerAdapter = new PlayListRecyclerAdapter(playList);
+        playListRecyclerAdapter = new PlayListRecyclerAdapter(context, playList);
         initMediaBrowser();
     }
 
@@ -178,6 +178,8 @@ public class ControlPanel extends ConstraintLayout {
                 PlayingTitle.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_TITLE));
                 PlayingArtist.setText(metadata.getString(MediaMetadataCompat.METADATA_KEY_ARTIST));
                 PlayingCover.setImageBitmap(metadata.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART));
+                playListRecyclerAdapter.setListPosition(listPosition);
+                playListRecyclerAdapter.notifyDataSetChanged();
             }
         }
     };
@@ -202,7 +204,6 @@ public class ControlPanel extends ConstraintLayout {
 
     @Click(R.id.playing_list)
     void clickPlayList() {
-        playListRecyclerAdapter.notifyDataSetChanged();
         AlertDialog.Builder builder = new AlertDialog.Builder(context, R.style.DialogPlayList);
         // 自定义布局
         @SuppressLint("InflateParams")

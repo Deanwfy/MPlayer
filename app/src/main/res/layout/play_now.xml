@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    android:background="@color/colorControlPanel"
+    android:background="@color/colorBackground"
     tools:ignore="ContentDescription"
     tools:context="com.dean.mplayer.ActivityNowPlay">
 

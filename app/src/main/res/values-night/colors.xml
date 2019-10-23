@@ -9,7 +9,7 @@
     <color name="colorBarText">#a1a3a2</color>
     <color name="colorMusicTitleText">#a2a4a3</color>
     <color name="colorMusicArtistText">#5b5c5e</color>
-    <color name="colorMusicList">#111214</color>
+    <color name="colorBackground">#000000</color>
     <color name="colorControlPanel">#17181a</color>
     <color name="transparent">#00000000</color>
 
@@ -22,5 +22,6 @@
     <color name="colorButton">#c7c7c7</color>
 
     <color name="rippleEffect">#E0E0E0</color>
+    <color name="dividerLine">#17181a</color>
 
 </resources>
