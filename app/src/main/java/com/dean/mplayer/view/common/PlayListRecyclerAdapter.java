@@ -47,10 +47,13 @@ public class PlayListRecyclerAdapter extends RecyclerView.Adapter<PlayListRecycl
         String infoText = musicInfo.title + "-" + musicInfo.artist;
         playListRecyclerAdapterHolder.musicInfo.setText(infoText);
         playListRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
-        if (position == listPosition)
+        if (position == listPosition) {
+            playListRecyclerAdapterHolder.musicInfo.setCompoundDrawablesWithIntrinsicBounds(context.getDrawable(R.drawable.ic_playlist_position), null, null, null);
             playListRecyclerAdapterHolder.musicInfo.setTextColor(context.getResources().getColor(R.color.colorPlayNowMusicTitleText));
-        else
+        } else {
+            playListRecyclerAdapterHolder.musicInfo.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
             playListRecyclerAdapterHolder.musicInfo.setTextColor(context.getResources().getColor(R.color.colorMusicTitleText));
+        }
     }
 
     @Override
