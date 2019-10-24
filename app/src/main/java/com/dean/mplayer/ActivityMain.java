@@ -30,6 +30,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.PrefDataSource_;
 import com.dean.mplayer.search.ActivityMusicOnline_;
 import com.dean.mplayer.util.LogUtils;
 import com.dean.mplayer.view.common.ControlPanel;
@@ -39,6 +40,7 @@ import com.google.android.material.navigation.NavigationView;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.ViewById;
+import org.androidannotations.annotations.sharedpreferences.Pref;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -48,6 +50,9 @@ import java.util.TimerTask;
 
 @EActivity(R.layout.activity_main)
 public class ActivityMain extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    @Pref
+    PrefDataSource_ prefDataSource;
 
     @ViewById(R.id.main_toolbar)
     MToolbar toolbar;
@@ -64,10 +69,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // 读取配置文件
-        SharedPreferences sharedPreferences = getSharedPreferences("setting", MODE_PRIVATE);
-        int nightMode = sharedPreferences.getInt("nightMode", AppCompatDelegate.MODE_NIGHT_NO);
-        AppCompatDelegate.setDefaultNightMode(nightMode);
-        playFull = sharedPreferences.getBoolean("playFull", false);
+        playFull = prefDataSource.isPlayFull().get();
     }
 
     @AfterViews
@@ -161,12 +163,9 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
             setClock();
         } else if (id == R.id.ic_menu_theme) {
             int currentNightMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-            int nightMode = (currentNightMode == Configuration.UI_MODE_NIGHT_NO ?
-                    AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
-            AppCompatDelegate.setDefaultNightMode(nightMode);
-            SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
-            editor.putInt("nightMode", nightMode);
-            editor.apply();
+            boolean isNightMode = currentNightMode != Configuration.UI_MODE_NIGHT_YES;
+            prefDataSource.isNightMode().put(isNightMode);
+            AppCompatDelegate.setDefaultNightMode(isNightMode ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
             recreate();
         } else if (id == R.id.ic_menu_settings) {
             Toast.makeText(this, "开发中...", Toast.LENGTH_SHORT).show();
@@ -256,9 +255,7 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
         playFullCheckBox.setChecked(playFull);
         playFullCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
             playFull = isChecked;
-            SharedPreferences.Editor editor = getSharedPreferences("setting", MODE_PRIVATE).edit();
-            editor.putBoolean("playFull", playFull);
-            editor.apply();
+            prefDataSource.isPlayFull().put(playFull);
         });
         // 显示AlertDialog
         alertDialog.show();

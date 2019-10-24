@@ -25,6 +25,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.palette.graphics.Palette;
 
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.PrefDataSource_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.common.MToolbar;
@@ -35,6 +36,7 @@ import org.androidannotations.annotations.EActivity;
 import org.androidannotations.annotations.SeekBarProgressChange;
 import org.androidannotations.annotations.SeekBarTouchStop;
 import org.androidannotations.annotations.ViewById;
+import org.androidannotations.annotations.sharedpreferences.Pref;
 
 import java.util.List;
 import java.util.Timer;
@@ -42,6 +44,9 @@ import java.util.TimerTask;
 
 @EActivity(R.layout.play_now)
 public class ActivityNowPlay extends BaseActivity {
+
+    @Pref
+    PrefDataSource_ prefDataSource;
 
     @ViewById(R.id.play_now_toolbar)
     MToolbar toolbar;
@@ -179,6 +184,7 @@ public class ActivityNowPlay extends BaseActivity {
                 Toast.makeText(getApplicationContext(), "顺序播放", Toast.LENGTH_SHORT).show();
                 break;
         }
+        prefDataSource.playMode().put(PlayService.mode);
     }
 
     // 进度变化
