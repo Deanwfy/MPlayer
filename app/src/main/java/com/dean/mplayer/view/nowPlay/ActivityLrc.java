@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.nowPlay;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -10,6 +10,8 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 
+import com.dean.mplayer.PlayService;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 

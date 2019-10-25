@@ -20,7 +20,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
         <activity
-            android:name=".ActivityMain_"
+            android:name=".view.ActivityMain_"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar">
@@ -30,18 +30,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".search.ActivityMusicOnline_" />
-        <activity android:name=".ActivityMusicLocal_" />
-        <activity android:name=".ActivityMusicArtist_" />
-        <activity android:name=".ActivityMusicArtistMusic_" />
-        <activity android:name=".ActivityMusicAlbum_" />
-        <activity android:name=".ActivityMusicAlbumMusic_" />
-        <activity android:name=".ActivityMusicOnlineTopBillboard_" />
+        <activity android:name=".view.search.ActivityMusicOnline_" />
+        <activity android:name=".view.local.ActivityMusicLocal_" />
+        <activity android:name=".view.artist.ActivityMusicArtist_" />
+        <activity android:name=".view.artist.ActivityMusicArtistMusic_" />
+        <activity android:name=".view.album.ActivityMusicAlbum_" />
+        <activity android:name=".view.album.ActivityMusicAlbumMusic_" />
+        <activity android:name=".view.rankList.ActivityMusicOnlineTopBillboard_" />
         <activity
-            android:name=".ActivityNowPlay_"
+            android:name=".view.nowPlay.ActivityNowPlay_"
             android:launchMode="singleTask"
-            android:parentActivityName=".ActivityMain" />
-        <activity android:name=".ActivityLrc_" />
+            android:parentActivityName=".view.ActivityMain_" />
+        <activity android:name=".view.nowPlay.ActivityLrc_" />
         <!-- 播放服务 -->
         <service
             android:name=".PlayService"

@@ -43,6 +43,9 @@ import com.bumptech.glide.request.transition.Transition;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
+import com.dean.mplayer.view.ActivityMain;
+import com.dean.mplayer.view.nowPlay.ActivityNowPlay_;
+import com.dean.mplayer.view.nowPlay.FragmentLrc;
 
 import java.io.IOException;
 import java.util.List;

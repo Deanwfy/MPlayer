@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.dean.mplayer.R;
 import com.dean.mplayer.onlineTopBillboard.Tracks;
 import com.dean.mplayer.util.MediaUtil;
 
@@ -28,7 +29,7 @@ public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Ada
 
     private List<Tracks> musicList;
     private OnItemClickListener onItemClickListener = null;
-    MusicListOnlineTopBillboardRecyclerAdapter(List<Tracks> musicList){
+    public MusicListOnlineTopBillboardRecyclerAdapter(List<Tracks> musicList){
         this.musicList = musicList;
     }
 
@@ -62,7 +63,7 @@ public class MusicListOnlineTopBillboardRecyclerAdapter extends RecyclerView.Ada
         }
     }
 
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
 

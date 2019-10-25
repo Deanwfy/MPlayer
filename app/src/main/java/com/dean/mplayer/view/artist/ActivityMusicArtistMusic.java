@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.artist;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -14,10 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.dean.mplayer.MusicInfo;
+import com.dean.mplayer.PlayList;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
+import com.dean.mplayer.view.ActivityMain;
+import com.dean.mplayer.view.adapter.MusicListLocalRecyclerAdapter;
 import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
@@ -30,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @EActivity(R.layout.activity_music_base)
-public class ActivityMusicLocal extends BaseActivity {
+public class ActivityMusicArtistMusic extends BaseActivity {
 
     @ViewById(R.id.base_toolbar)
     MToolbar toolbar;
@@ -47,12 +52,13 @@ public class ActivityMusicLocal extends BaseActivity {
     // 列表显示
     private LoadingDialog loadingDialog;
     private MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter;
-    private List<MusicInfo> musicInfo = new ArrayList<>();
+    private List<MusicInfo> artistMusicInfos = new ArrayList<>();
 
     @AfterViews
     void initViews() {
+        artistMusicInfos = ActivityMusicArtist.musicArtistMusicList;
 
-        toolbar.setTitle(R.string.activity_music_local)
+        toolbar.setTitle(artistMusicInfos.get(0).getArtist())
                 .setHasBack(true)
                 .setSearchView(getResources().getString(R.string.searchNoticeLocal), new SearchView.OnQueryTextListener() {
                     @Override
@@ -112,33 +118,27 @@ public class ActivityMusicLocal extends BaseActivity {
         }
     }
 
-    // 加载本地音乐
+    // 加载本地音乐人
     private void initPlayList(){
-        new Thread(() -> {
-            musicInfo = MediaUtil.getMusicLocal(this);
-            runOnUiThread(() -> {
-                if (musicInfo != null && musicInfo.size() != 0) {
-                    setListAdapter();   // 显示歌曲列表
-                    swipeRefreshLayout.setRefreshing(false);
-                }
-                loadingDialog.close();
-            });
-        }).start();
+        if(artistMusicInfos != null && artistMusicInfos.size() != 0) {
+            setListAdapter();   // 显示歌曲列表
+            swipeRefreshLayout.setRefreshing(false);
+        }
+        loadingDialog.close();
     }
-
     // 歌曲列表显示适配器
     public void setListAdapter() {
         LinearLayoutManager musicListLocalRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListLocalRecyclerView.setLayoutManager(musicListLocalRecyclerLayoutManager);
-        musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(musicInfo);
+        musicListLocalRecyclerAdapter = new MusicListLocalRecyclerAdapter(artistMusicInfos);
         musicListLocalRecyclerAdapter.setOnItemClickListener(((view, position) -> {
-            musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
+            artistMusicInfos = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
             if (playList.size() != 0) {
                 PlayList playListMusicInfo;
                 int playListPosition;
                 for (playListPosition = 0; playListPosition < playList.size(); playListPosition++) {
                     playListMusicInfo = playList.get(playListPosition);
-                    if (playListMusicInfo.id == musicInfo.get(position).getId()) {
+                    if (playListMusicInfo.id == artistMusicInfos.get(position).getId()) {
                         ActivityMain.listPosition = --playListPosition;
                         ActivityMain.mediaController.getTransportControls().skipToNext();
                         break;
@@ -158,14 +158,13 @@ public class ActivityMusicLocal extends BaseActivity {
         musicListLocalRecyclerView.setAdapter(musicListLocalRecyclerAdapter);
         musicListLocalRecyclerAdapter.notifyDataSetChanged();
     }
-
     // 刷新播放列表
     private void refreshPlayList(){
         playList.clear();
-        musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
-        if (musicInfo != null && musicInfo.size() != 0) {
-            for (int musicCountLocal = 0; musicCountLocal < musicInfo.size(); musicCountLocal++) {
-                MusicInfo itemMusicInfo = musicInfo.get(musicCountLocal);
+        artistMusicInfos = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
+        if (artistMusicInfos != null && artistMusicInfos.size() != 0) {
+            for (int musicCountLocal = 0; musicCountLocal < artistMusicInfos.size(); musicCountLocal++) {
+                MusicInfo itemMusicInfo = artistMusicInfos.get(musicCountLocal);
                 playList.add(new PlayList(
                         itemMusicInfo.getId(),
                         itemMusicInfo.getTitle(),
@@ -185,9 +184,9 @@ public class ActivityMusicLocal extends BaseActivity {
     // 列表长按菜单点击事件
     @Override
     public boolean onContextItemSelected(MenuItem item) {
-        musicInfo = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
+        artistMusicInfos = musicListLocalRecyclerAdapter.getMusicListLocalFilter();
         int contextMenuPosition = musicListLocalRecyclerAdapter.getContextMenuPosition();
-        MusicInfo itemMusicInfo = musicInfo.get(contextMenuPosition);
+        MusicInfo itemMusicInfo = artistMusicInfos.get(contextMenuPosition);
         switch (item.getItemId()){
             case 0:
                 controlPanel.addToNext(itemMusicInfo);
@@ -195,9 +194,9 @@ public class ActivityMusicLocal extends BaseActivity {
             case 1:
                 if (MediaUtil.deleteMusicFile(this, itemMusicInfo.getUri())){
                     Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
-                    musicInfo.remove(contextMenuPosition);
+                    artistMusicInfos.remove(contextMenuPosition);
                     musicListLocalRecyclerAdapter.notifyItemRemoved(contextMenuPosition);
-                    musicListLocalRecyclerAdapter.notifyItemRangeChanged(contextMenuPosition,musicInfo.size() - contextMenuPosition);
+                    musicListLocalRecyclerAdapter.notifyItemRangeChanged(contextMenuPosition,artistMusicInfos.size() - contextMenuPosition);
                 }else {
                     Toast.makeText(this, "删除失败，文件不存在或权限丢失", Toast.LENGTH_SHORT).show();
                     requestPermission();

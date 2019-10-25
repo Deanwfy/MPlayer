@@ -10,7 +10,7 @@
 
     <fragment
         android:id="@+id/main_category"
-        android:name="com.dean.mplayer.FragmentMainCategory_"
+        android:name="com.dean.mplayer.view.FragmentMainCategory_"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toTopOf="@id/music_control_panel"

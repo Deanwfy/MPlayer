@@ -1,9 +1,15 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseFragment;
+import com.dean.mplayer.view.adapter.BaseRecyclerAdapter;
+import com.dean.mplayer.view.album.ActivityMusicAlbum_;
+import com.dean.mplayer.view.artist.ActivityMusicArtist_;
+import com.dean.mplayer.view.local.ActivityMusicLocal_;
+import com.dean.mplayer.view.rankList.ActivityMusicOnlineTopBillboard_;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;

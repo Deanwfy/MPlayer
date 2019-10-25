@@ -1,9 +1,8 @@
-package com.dean.mplayer.search;
+package com.dean.mplayer.view.search;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.RemoteException;
 import androidx.annotation.NonNull;
@@ -24,8 +23,9 @@ import android.widget.Toast;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.dean.mplayer.ActivityMain;
-import com.dean.mplayer.ActivityNowPlay;
+import com.dean.mplayer.view.ActivityMain;
+import com.dean.mplayer.view.adapter.MusicListRecyclerAdapter;
+import com.dean.mplayer.view.nowPlay.ActivityNowPlay;
 import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.PlayList;
@@ -33,7 +33,6 @@ import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.onlineSearch.Songs;
-import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.EActivity;

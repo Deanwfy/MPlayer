@@ -1,9 +1,8 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -29,9 +28,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.dean.mplayer.view.adapter.MenuClockRecyclerAdapter;
+import com.dean.mplayer.PlayService;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.PrefDataSource_;
-import com.dean.mplayer.search.ActivityMusicOnline_;
+import com.dean.mplayer.view.search.ActivityMusicOnline_;
 import com.dean.mplayer.util.LogUtils;
 import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;

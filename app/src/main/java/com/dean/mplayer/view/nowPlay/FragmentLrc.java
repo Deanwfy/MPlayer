@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.nowPlay;
 
 
 import android.app.Activity;
@@ -12,6 +12,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.dean.mplayer.PlayService;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseFragment;
 
 import me.wcy.lrcview.LrcView;

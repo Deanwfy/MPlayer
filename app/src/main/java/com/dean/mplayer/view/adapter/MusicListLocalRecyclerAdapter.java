@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -10,6 +10,8 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import com.dean.mplayer.MusicInfo;
+import com.dean.mplayer.R;
 import com.dean.mplayer.util.MediaUtil;
 
 import java.util.ArrayList;
@@ -48,7 +50,7 @@ public class MusicListLocalRecyclerAdapter extends RecyclerView.Adapter<MusicLis
     private List<MusicInfo> musicListLocalFilter;
     private List<MusicInfo> musicListLocal;
     private OnItemClickListener onItemClickListener = null;
-    MusicListLocalRecyclerAdapter(List<MusicInfo> musicListLocal){
+    public MusicListLocalRecyclerAdapter(List<MusicInfo> musicListLocal){
         this.musicListLocal = musicListLocal;
         this.musicListLocalFilter = this.musicListLocal;    // 初始化时默认填充全部歌曲
     }
@@ -113,7 +115,7 @@ public class MusicListLocalRecyclerAdapter extends RecyclerView.Adapter<MusicLis
         };
     }
     // 获取搜索结果
-    List<MusicInfo> getMusicListLocalFilter(){
+    public List<MusicInfo> getMusicListLocalFilter(){
         return musicListLocalFilter;
     }
 
@@ -125,7 +127,7 @@ public class MusicListLocalRecyclerAdapter extends RecyclerView.Adapter<MusicLis
         }
     }
 
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
 

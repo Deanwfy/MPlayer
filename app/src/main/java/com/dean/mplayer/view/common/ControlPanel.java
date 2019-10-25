@@ -11,7 +11,6 @@ import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.AttributeSet;
-import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,7 +27,6 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dean.mplayer.ActivityNowPlay_;
 import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.PlayList;
 import com.dean.mplayer.PlayService;
@@ -38,6 +36,7 @@ import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.data.PrefDataSource_;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
+import com.dean.mplayer.view.nowPlay.ActivityNowPlay_;
 
 import org.androidannotations.annotations.Click;
 import org.androidannotations.annotations.EViewGroup;

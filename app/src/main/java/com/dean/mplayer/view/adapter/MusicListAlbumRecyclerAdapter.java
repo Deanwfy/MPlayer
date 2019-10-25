@@ -1,7 +1,5 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.adapter;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +7,19 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.dean.mplayer.LocalAlbm;
+import com.dean.mplayer.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicListAlbumRecyclerAdapter extends RecyclerView.Adapter<MusicListAlbumRecyclerAdapter.MusicListAlbumRecyclerAdapterHolder> implements View.OnClickListener, Filterable {
 
-    class MusicListAlbumRecyclerAdapterHolder extends RecyclerView.ViewHolder{
-        TextView musicInfoName;
+    public class MusicListAlbumRecyclerAdapterHolder extends RecyclerView.ViewHolder{
+        public TextView musicInfoName;
 
         MusicListAlbumRecyclerAdapterHolder(@NonNull View itemView) {
             super(itemView);
@@ -26,7 +30,7 @@ public class MusicListAlbumRecyclerAdapter extends RecyclerView.Adapter<MusicLis
     private List<LocalAlbm> musicListAlbumFilter;
     private List<LocalAlbm> musicListAlbum;
     private OnItemClickListener onItemClickListener = null;
-    MusicListAlbumRecyclerAdapter(List<LocalAlbm> musicListAlbum){
+    public MusicListAlbumRecyclerAdapter(List<LocalAlbm> musicListAlbum){
         this.musicListAlbum = musicListAlbum;
         this.musicListAlbumFilter = this.musicListAlbum;    // 初始化时默认填充全部歌曲
     }
@@ -84,8 +88,12 @@ public class MusicListAlbumRecyclerAdapter extends RecyclerView.Adapter<MusicLis
         };
     }
     // 获取搜索结果
-    List<LocalAlbm> getMusicListAlbumFilter(){
+    public List<LocalAlbm> getMusicListAlbumFilter(){
         return musicListAlbumFilter;
+    }
+
+    public OnItemClickListener getOnItemClickListener() {
+        return onItemClickListener;
     }
 
     @Override
@@ -96,7 +104,7 @@ public class MusicListAlbumRecyclerAdapter extends RecyclerView.Adapter<MusicLis
         }
     }
 
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
 

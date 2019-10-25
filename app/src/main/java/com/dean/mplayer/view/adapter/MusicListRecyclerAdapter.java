@@ -1,4 +1,4 @@
-package com.dean.mplayer.search;
+package com.dean.mplayer.view.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,7 +29,7 @@ public class MusicListRecyclerAdapter extends RecyclerView.Adapter<MusicListRecy
 
     private List<Songs> musicList;
     private OnItemClickListener onItemClickListener = null;
-    MusicListRecyclerAdapter(List<Songs> musicList){
+    public MusicListRecyclerAdapter(List<Songs> musicList){
         this.musicList = musicList;
     }
 
@@ -62,7 +62,7 @@ public class MusicListRecyclerAdapter extends RecyclerView.Adapter<MusicListRecy
             onItemClickListener.onItemClick(v, (int)v.getTag());
         }
     }
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
     //点击事件接口

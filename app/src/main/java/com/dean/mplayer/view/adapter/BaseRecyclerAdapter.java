@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.adapter;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -7,36 +7,39 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.dean.mplayer.R;
+
 import java.util.List;
 
-public class MenuClockRecyclerAdapter extends RecyclerView.Adapter<MenuClockRecyclerAdapter.MenuClockRecyclerAdapterHolder> implements View.OnClickListener{
+public class BaseRecyclerAdapter extends RecyclerView.Adapter<BaseRecyclerAdapter.BaseRecyclerAdapterHolder> implements View.OnClickListener{
 
-    class MenuClockRecyclerAdapterHolder extends RecyclerView.ViewHolder{
-        TextView clockTime;
-        MenuClockRecyclerAdapterHolder(@NonNull View itemView) {
+    class BaseRecyclerAdapterHolder extends RecyclerView.ViewHolder{
+        TextView category;
+        BaseRecyclerAdapterHolder(@NonNull View itemView) {
             super(itemView);
-            clockTime = itemView.findViewById(R.id.clockTime);
+            category = itemView.findViewById(R.id.clockTime);
         }
     }
 
     private List<String> items;
     private OnItemClickListener onItemClickListener = null;
-    MenuClockRecyclerAdapter(List<String> items){
+    public BaseRecyclerAdapter(List<String> items){
         this.items = items;
     }
 
     @NonNull
     @Override
-    public MenuClockRecyclerAdapterHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+    public BaseRecyclerAdapterHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.drawer_menu_clock_item, viewGroup, false);
         view.setOnClickListener(this);
-        return new MenuClockRecyclerAdapterHolder(view);
+        return new BaseRecyclerAdapterHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MenuClockRecyclerAdapterHolder menuClockRecyclerAdapterHolder, int position) {
-        menuClockRecyclerAdapterHolder.clockTime.setText(items.get(position));
-        menuClockRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
+    public void onBindViewHolder(@NonNull BaseRecyclerAdapterHolder baseRecyclerAdapterHolder, int position) {
+        baseRecyclerAdapterHolder.category.setText(items.get(position));
+        baseRecyclerAdapterHolder.itemView.setTag(position);   // setTag - getTag
+//        ViewCompat.setTransitionName(baseRecyclerAdapterHolder.category, "CategoryName");
     }
 
     @Override
@@ -51,7 +54,7 @@ public class MenuClockRecyclerAdapter extends RecyclerView.Adapter<MenuClockRecy
             onItemClickListener.onItemClick(v, (int)v.getTag());
         }
     }
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
     //点击事件接口

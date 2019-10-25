@@ -1,20 +1,25 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.adapter;
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.dean.mplayer.Arts;
+import com.dean.mplayer.R;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<MusicListArtistAlbumRecyclerAdapter.MusicListArtistAlbumRecyclerAdapterHolder> implements View.OnClickListener, Filterable {
 
-    class MusicListArtistAlbumRecyclerAdapterHolder extends RecyclerView.ViewHolder{
-        TextView musicInfoName;
+    public class MusicListArtistAlbumRecyclerAdapterHolder extends RecyclerView.ViewHolder{
+        public TextView musicInfoName;
 
         MusicListArtistAlbumRecyclerAdapterHolder(@NonNull View itemView) {
             super(itemView);
@@ -25,7 +30,7 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
     private List<Arts> musicListArtistAlbumFilter;
     private List<Arts> musicListArtistAlbum;
     private OnItemClickListener onItemClickListener = null;
-    MusicListArtistAlbumRecyclerAdapter(List<Arts> musicListArtistAlbum){
+    public MusicListArtistAlbumRecyclerAdapter(List<Arts> musicListArtistAlbum){
         this.musicListArtistAlbum = musicListArtistAlbum;
         this.musicListArtistAlbumFilter = this.musicListArtistAlbum;    // 初始化时默认填充全部歌曲
     }
@@ -83,7 +88,7 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
         };
     }
     // 获取搜索结果
-    List<Arts> getMusicListArtistAlbumFilter(){
+    public List<Arts> getMusicListArtistAlbumFilter(){
         return musicListArtistAlbumFilter;
     }
 
@@ -95,7 +100,7 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
         }
     }
 
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         this.onItemClickListener = listener;
     }
 

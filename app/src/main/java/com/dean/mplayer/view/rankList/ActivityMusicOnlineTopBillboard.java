@@ -1,6 +1,5 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.rankList;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.ContextMenu;
 import android.view.View;
@@ -12,12 +11,15 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.dean.mplayer.PlayList;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.onlineTopBillboard.Tracks;
+import com.dean.mplayer.view.ActivityMain;
+import com.dean.mplayer.view.adapter.MusicListOnlineTopBillboardRecyclerAdapter;
 import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;
-import com.squareup.picasso.Picasso;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.AfterViews;

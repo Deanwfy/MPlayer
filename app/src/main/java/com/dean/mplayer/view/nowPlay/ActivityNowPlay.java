@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.view.nowPlay;
 
 import android.annotation.SuppressLint;
 import android.content.ComponentName;
@@ -24,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.palette.graphics.Palette;
 
+import com.dean.mplayer.PlayService;
+import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.PrefDataSource_;
 import com.dean.mplayer.util.AppConstant;

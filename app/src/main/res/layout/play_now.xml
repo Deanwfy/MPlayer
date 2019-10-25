@@ -9,7 +9,7 @@
     android:fitsSystemWindows="true"
     android:background="@color/colorBackground"
     tools:ignore="ContentDescription"
-    tools:context="com.dean.mplayer.ActivityNowPlay">
+    tools:context="com.dean.mplayer.view.nowPlay.ActivityNowPlay">
 
     <com.dean.mplayer.view.common.MToolbar_
         android:id="@+id/play_now_toolbar"
