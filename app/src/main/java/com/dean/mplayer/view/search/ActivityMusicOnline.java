@@ -28,11 +28,11 @@ import com.dean.mplayer.view.adapter.MusicListRecyclerAdapter;
 import com.dean.mplayer.view.nowPlay.ActivityNowPlay;
 import com.dean.mplayer.data.DataRepository_;
 import com.dean.mplayer.util.AppConstant;
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
-import com.dean.mplayer.onlineSearch.Songs;
+import com.dean.mplayer.data.model.online.onlineSearch.Songs;
 import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.EActivity;

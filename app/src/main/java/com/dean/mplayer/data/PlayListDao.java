@@ -4,7 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
 
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 
 import java.util.List;
 

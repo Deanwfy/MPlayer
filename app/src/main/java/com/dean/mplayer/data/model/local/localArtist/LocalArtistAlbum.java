@@ -1,13 +1,13 @@
-package com.dean.mplayer;
+package com.dean.mplayer.data.model.local.localArtist;
 
-public class Albm {
+public class LocalArtistAlbum {
 
     private long id;
     private String name;
     private long publishTime;
     private int size;
 
-    public Albm(long id, String name) {
+    public LocalArtistAlbum(long id, String name) {
         super();
         this.id = id;
         this.name = name;

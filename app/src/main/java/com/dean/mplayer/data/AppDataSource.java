@@ -1,6 +1,6 @@
 package com.dean.mplayer.data;
 
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 
 import java.util.List;
 

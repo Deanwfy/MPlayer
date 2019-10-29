@@ -1,8 +1,4 @@
-package com.dean.mplayer;
-
-import android.net.Uri;
-import android.os.Parcel;
-import android.os.Parcelable;
+package com.dean.mplayer.data.model.local;
 
 import java.io.Serializable;
 

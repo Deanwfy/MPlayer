@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.dean.mplayer.LocalAlbm;
-import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.model.local.MusicInfo;
+import com.dean.mplayer.data.model.local.localAlbum.LocalAlbum;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.adapter.MusicListAlbumRecyclerAdapter;
@@ -49,7 +49,7 @@ public class ActivityMusicAlbum extends BaseActivity {
     private LoadingDialog loadingDialog;
     private MusicListAlbumRecyclerAdapter musicListAlbumRecyclerAdapter;
     private List<MusicInfo> musicInfo = new ArrayList<>();
-    private List<LocalAlbm> localAlbm = new ArrayList<>();
+    private List<LocalAlbum> localAlbum = new ArrayList<>();
 
     @AfterViews
     void initViews(){
@@ -122,7 +122,7 @@ public class ActivityMusicAlbum extends BaseActivity {
     private void initPlayList() {
         new Thread(() -> {
             musicInfo = MediaUtil.getMusicLocal(this);
-            localAlbm = MediaUtil.getAlbmLocal();
+            localAlbum = MediaUtil.getAlbmLocal();
             runOnUiThread(() -> {
                 if (musicInfo != null && musicInfo.size() != 0) {
                     setListAdapter();   // 显示歌曲列表
@@ -137,17 +137,17 @@ public class ActivityMusicAlbum extends BaseActivity {
     public void setListAdapter() {
         LinearLayoutManager musicListArtistAlbumRecyclerLayoutManager = new LinearLayoutManager(this);
         musicListArtistAlbumRecyclerView.setLayoutManager(musicListArtistAlbumRecyclerLayoutManager);
-        musicListAlbumRecyclerAdapter = new MusicListAlbumRecyclerAdapter(localAlbm) {
+        musicListAlbumRecyclerAdapter = new MusicListAlbumRecyclerAdapter(localAlbum) {
             @Override
             public void onBindViewHolder(@NonNull MusicListAlbumRecyclerAdapterHolder musicListAlbumRecyclerAdapterHolder, int position) {
                 super.onBindViewHolder(musicListAlbumRecyclerAdapterHolder, position);
-                LocalAlbm localAlbm = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter().get(position);
-                musicListAlbumRecyclerAdapterHolder.musicInfoName.setText(localAlbm.getName());
+                LocalAlbum localAlbum = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter().get(position);
+                musicListAlbumRecyclerAdapterHolder.musicInfoName.setText(localAlbum.getName());
             }
         };
         musicListAlbumRecyclerAdapter.setOnItemClickListener(((view, position) -> {
-            localAlbm = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter();
-            List<MusicInfo> musicAlbumMusicList = localAlbm.get(position).getMusicInfos();
+            localAlbum = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter();
+            List<MusicInfo> musicAlbumMusicList = localAlbum.get(position).getMusicInfos();
             ActivityMusicAlbumMusic_.intent(this)
                     .musicAlbumMusicList(new ArrayList<>(musicAlbumMusicList))
                     .start();

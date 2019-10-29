@@ -15,8 +15,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.dean.mplayer.MusicInfo;
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.local.MusicInfo;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.DataRepository_;

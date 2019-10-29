@@ -41,6 +41,7 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.ActivityMain;

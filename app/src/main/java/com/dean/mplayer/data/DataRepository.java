@@ -2,7 +2,7 @@ package com.dean.mplayer.data;
 
 import android.content.Context;
 
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.util.LogUtils;
 
 import org.androidannotations.annotations.AfterInject;

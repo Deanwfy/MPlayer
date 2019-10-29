@@ -1,20 +1,22 @@
-package com.dean.mplayer;
+package com.dean.mplayer.data.model.local.localAlbum;
+
+import com.dean.mplayer.data.model.local.MusicInfo;
 
 import java.util.List;
 
-public class Arts{
+public class LocalAlbum {
 
     private long id;
     private String name;
+    private long publishTime;
+    private int size;
     private List<MusicInfo> musicInfos;
-    private List<Albm> albums;
 
-    public Arts(long id, String name, List<MusicInfo> musicInfos, List<Albm> albums) {
+    public LocalAlbum(long id, String name, List<MusicInfo> musicInfos) {
         super();
         this.id = id;
         this.name = name;
         this.musicInfos = musicInfos;
-        this.albums = albums;
     }
 
     public boolean contains(CharSequence charSequence){
@@ -36,6 +38,20 @@ public class Arts{
         return name;
     }
 
+    public void setPublishTime(long publishTime) {
+        this.publishTime = publishTime;
+    }
+    public long getPublishTime() {
+        return publishTime;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
+    }
+    public int getSize() {
+        return size;
+    }
+
     public List<MusicInfo> getMusicInfos() {
         return musicInfos;
     }
@@ -43,10 +59,4 @@ public class Arts{
         this.musicInfos = musicInfos;
     }
 
-    public List<Albm> getAlbums() {
-        return albums;
-    }
-    public void setAlbums(List<Albm> albums) {
-        this.albums = albums;
-    }
 }

@@ -8,7 +8,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 
 @Database(entities = {PlayList.class}, version = 1)
 public abstract class AppDatabase extends RoomDatabase {

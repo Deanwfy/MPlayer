@@ -11,11 +11,11 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.DataRepository_;
-import com.dean.mplayer.onlineTopBillboard.Tracks;
+import com.dean.mplayer.data.model.online.onlineRankList.Tracks;
 import com.dean.mplayer.view.ActivityMain;
 import com.dean.mplayer.view.adapter.MusicListOnlineTopBillboardRecyclerAdapter;
 import com.dean.mplayer.view.common.ControlPanel;

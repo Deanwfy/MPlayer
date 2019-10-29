@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dean.mplayer.R;
-import com.dean.mplayer.onlineSearch.Songs;
+import com.dean.mplayer.data.model.online.onlineSearch.Songs;
 import com.dean.mplayer.util.MediaUtil;
 
 import java.util.List;

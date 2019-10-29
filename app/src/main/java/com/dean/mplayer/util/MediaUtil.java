@@ -1,6 +1,5 @@
 package com.dean.mplayer.util;
 
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
@@ -21,11 +20,11 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.dean.mplayer.Albm;
-import com.dean.mplayer.Arts;
-import com.dean.mplayer.LocalAlbm;
-import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.R;
+import com.dean.mplayer.data.model.local.MusicInfo;
+import com.dean.mplayer.data.model.local.localAlbum.LocalAlbum;
+import com.dean.mplayer.data.model.local.localArtist.LocalArtist;
+import com.dean.mplayer.data.model.local.localArtist.LocalArtistAlbum;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -104,31 +103,31 @@ public class MediaUtil {
 	}
 
 	// 本地音乐人获取
-	public static List<Arts> getArtistsLocal() {
-		List<Arts> artistsLocal = new ArrayList<>();
+	public static List<LocalArtist> getArtistsLocal() {
+		List<LocalArtist> artistsLocal = new ArrayList<>();
 		for (int i = 0; i < musicInfoLocal.size(); i++) {
 			boolean repeat = false;
 			List<MusicInfo> musicInfos = new ArrayList<>();
 			MusicInfo musicInfo = musicInfoLocal.get(i);
 			musicInfos.add(musicInfo);
-			List<Albm> artistAlbms = new ArrayList<>();
-			Albm artistAlbm = new Albm(musicInfo.getAlbumId(), musicInfo.getAlbum());
-			artistAlbms.add(artistAlbm);
+			List<LocalArtistAlbum> artistLocalArtistAlbums = new ArrayList<>();
+			LocalArtistAlbum artistLocalArtistAlbum = new LocalArtistAlbum(musicInfo.getAlbumId(), musicInfo.getAlbum());
+			artistLocalArtistAlbums.add(artistLocalArtistAlbum);
 			for (int j = 0; j < artistsLocal.size(); j++) {
-				Arts arts = artistsLocal.get(j);
-				if (arts.getId() == musicInfo.getArtistId()) {
-					arts.getMusicInfos().add(musicInfo);
-					arts.getAlbums().add(artistAlbm);
+				LocalArtist localArtist = artistsLocal.get(j);
+				if (localArtist.getId() == musicInfo.getArtistId()) {
+					localArtist.getMusicInfos().add(musicInfo);
+					localArtist.getAlbums().add(artistLocalArtistAlbum);
 					repeat = true;
 					break;
 				}
 			}
 			if (!repeat){
-				artistsLocal.add(new Arts(
+				artistsLocal.add(new LocalArtist(
 						musicInfo.getArtistId(),
 						musicInfo.getArtist(),
 						musicInfos,
-						artistAlbms
+						artistLocalArtistAlbums
 				));
 			}
 		}
@@ -137,23 +136,23 @@ public class MediaUtil {
 	}
 
 	// 本地专辑获取
-	public static List<LocalAlbm> getAlbmLocal() {
-		List<LocalAlbm> albmLocal = new ArrayList<>();
+	public static List<LocalAlbum> getAlbmLocal() {
+		List<LocalAlbum> albmLocal = new ArrayList<>();
 		for (int i = 0; i < musicInfoLocal.size(); i++) {
 			boolean repeat = false;
             List<MusicInfo> musicInfos = new ArrayList<>();
             MusicInfo musicInfo = musicInfoLocal.get(i);
             musicInfos.add(musicInfo);
 			for (int j = 0; j < albmLocal.size(); j++) {
-				LocalAlbm localAlbm = albmLocal.get(j);
-				if (localAlbm.getName().equals(musicInfo.getTitle())) {
-					localAlbm.getMusicInfos().add(musicInfo);
+				LocalAlbum localAlbum = albmLocal.get(j);
+				if (localAlbum.getName().equals(musicInfo.getTitle())) {
+					localAlbum.getMusicInfos().add(musicInfo);
 					repeat = true;
 					break;
 				}
 			}
 			if (!repeat){
-				albmLocal.add(new LocalAlbm(
+				albmLocal.add(new LocalAlbum(
 						musicInfo.getAlbumId(),
 						musicInfo.getAlbum(),
 						musicInfos

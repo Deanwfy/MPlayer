@@ -12,10 +12,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.dean.mplayer.Arts;
-import com.dean.mplayer.MusicInfo;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
+import com.dean.mplayer.data.model.local.MusicInfo;
+import com.dean.mplayer.data.model.local.localArtist.LocalArtist;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
 import com.dean.mplayer.view.adapter.MusicListArtistAlbumRecyclerAdapter;
@@ -49,7 +49,7 @@ public class ActivityMusicArtist extends BaseActivity {
     private LoadingDialog loadingDialog;
     private MusicListArtistAlbumRecyclerAdapter musicListArtistAlbumRecyclerAdapter;
     private List<MusicInfo> musicInfo = new ArrayList<>();
-    private List<Arts> arts = new ArrayList<>();
+    private List<LocalArtist> arts = new ArrayList<>();
 
     @AfterViews
     void initViews() {
@@ -140,7 +140,7 @@ public class ActivityMusicArtist extends BaseActivity {
             @Override
             public void onBindViewHolder(@NonNull MusicListArtistAlbumRecyclerAdapterHolder musicListArtistAlbumRecyclerAdapterHolder, int position) {
                 super.onBindViewHolder(musicListArtistAlbumRecyclerAdapterHolder, position);
-                Arts art = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter().get(position);
+                LocalArtist art = musicListArtistAlbumRecyclerAdapter.getMusicListArtistAlbumFilter().get(position);
                 musicListArtistAlbumRecyclerAdapterHolder.musicInfoName.setText(art.getName());
             }
         };

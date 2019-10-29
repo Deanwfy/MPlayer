@@ -10,7 +10,7 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.TextView;
 
-import com.dean.mplayer.MusicInfo;
+import com.dean.mplayer.data.model.local.MusicInfo;
 import com.dean.mplayer.R;
 import com.dean.mplayer.util.MediaUtil;
 

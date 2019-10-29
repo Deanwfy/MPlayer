@@ -1,4 +1,4 @@
-package com.dean.mplayer.onlineSearch;
+package com.dean.mplayer.data.model.online.onlineSearch;
 import java.util.List;
 
 public class Songs {

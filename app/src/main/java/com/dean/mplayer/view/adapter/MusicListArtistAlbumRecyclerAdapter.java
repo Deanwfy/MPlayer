@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dean.mplayer.Arts;
+import com.dean.mplayer.data.model.local.localArtist.LocalArtist;
 import com.dean.mplayer.R;
 
 import java.util.ArrayList;
@@ -27,10 +27,10 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
         }
     }
 
-    private List<Arts> musicListArtistAlbumFilter;
-    private List<Arts> musicListArtistAlbum;
+    private List<LocalArtist> musicListArtistAlbumFilter;
+    private List<LocalArtist> musicListArtistAlbum;
     private OnItemClickListener onItemClickListener = null;
-    public MusicListArtistAlbumRecyclerAdapter(List<Arts> musicListArtistAlbum){
+    public MusicListArtistAlbumRecyclerAdapter(List<LocalArtist> musicListArtistAlbum){
         this.musicListArtistAlbum = musicListArtistAlbum;
         this.musicListArtistAlbumFilter = this.musicListArtistAlbum;    // 初始化时默认填充全部歌曲
     }
@@ -64,8 +64,8 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
                 if (searchKey.isEmpty()) {
                     musicListArtistAlbumFilter = musicListArtistAlbum;
                 } else {
-                    List<Arts> filteredList = new ArrayList<>();
-                    for (Arts artist: musicListArtistAlbum) {
+                    List<LocalArtist> filteredList = new ArrayList<>();
+                    for (LocalArtist artist: musicListArtistAlbum) {
                         // 匹配规则
                         if (artist.contains(searchKey)) {
                             filteredList.add(artist);
@@ -81,14 +81,14 @@ public class MusicListArtistAlbumRecyclerAdapter extends RecyclerView.Adapter<Mu
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                musicListArtistAlbumFilter = (List<Arts>) filterResults.values;
+                musicListArtistAlbumFilter = (List<LocalArtist>) filterResults.values;
                 //刷新数据
                 notifyDataSetChanged();
             }
         };
     }
     // 获取搜索结果
-    public List<Arts> getMusicListArtistAlbumFilter(){
+    public List<LocalArtist> getMusicListArtistAlbumFilter(){
         return musicListArtistAlbumFilter;
     }
 

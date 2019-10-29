@@ -27,8 +27,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dean.mplayer.MusicInfo;
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.local.MusicInfo;
+import com.dean.mplayer.data.model.PlayList;
 import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;

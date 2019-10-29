@@ -1,4 +1,4 @@
-package com.dean.mplayer.onlineTopBillboard;
+package com.dean.mplayer.data.model.online.onlineRankList;
 import java.util.List;
 
 public class Ar {

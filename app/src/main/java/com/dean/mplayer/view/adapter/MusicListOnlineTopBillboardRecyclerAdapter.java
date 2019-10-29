@@ -8,7 +8,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.dean.mplayer.R;
-import com.dean.mplayer.onlineTopBillboard.Tracks;
+import com.dean.mplayer.data.model.online.onlineRankList.Tracks;
 import com.dean.mplayer.util.MediaUtil;
 
 import java.util.List;

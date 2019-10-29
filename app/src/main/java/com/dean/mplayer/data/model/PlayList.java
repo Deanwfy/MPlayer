@@ -1,4 +1,4 @@
-package com.dean.mplayer;
+package com.dean.mplayer.data.model;
 
 import android.net.Uri;
 

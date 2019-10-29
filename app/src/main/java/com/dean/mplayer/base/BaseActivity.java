@@ -2,7 +2,7 @@ package com.dean.mplayer.base;
 
 import android.support.v4.media.session.MediaControllerCompat;
 
-import com.dean.mplayer.PlayList;
+import com.dean.mplayer.data.model.PlayList;
 
 import java.util.ArrayList;
 import java.util.List;
