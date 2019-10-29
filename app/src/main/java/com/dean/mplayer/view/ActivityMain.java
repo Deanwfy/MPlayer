@@ -28,15 +28,15 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.dean.mplayer.view.adapter.MenuClockRecyclerAdapter;
 import com.dean.mplayer.PlayService;
 import com.dean.mplayer.R;
 import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.data.PrefDataSource_;
-import com.dean.mplayer.view.search.ActivityMusicOnline_;
 import com.dean.mplayer.util.LogUtils;
+import com.dean.mplayer.view.adapter.MenuClockRecyclerAdapter;
 import com.dean.mplayer.view.common.ControlPanel;
 import com.dean.mplayer.view.common.MToolbar;
+import com.dean.mplayer.view.search.ActivityMusicOnline_;
 import com.google.android.material.navigation.NavigationView;
 
 import org.androidannotations.annotations.AfterViews;
@@ -98,6 +98,8 @@ public class ActivityMain extends BaseActivity implements NavigationView.OnNavig
                 .build();
 
         controlPanel.build(this);
+
+        loadRootFragment(R.id.main_category, FragmentMainCategory_.newInstance());
 
         Intent intentPlayService = new Intent(this, PlayService.class);
         startService(intentPlayService);

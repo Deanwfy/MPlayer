@@ -248,7 +248,7 @@ public class ControlPanel extends ConstraintLayout {
         String album = itemMusicInfo.getAlbum();
         String artist = itemMusicInfo.getArtist();
         long duration = itemMusicInfo.getDuration();
-        Uri uri = itemMusicInfo.getUri();
+        Uri uri = Uri.parse(itemMusicInfo.getUri());
         long albumId = itemMusicInfo.getAlbumId();
         if (playList.size() != 0) {
             int playListPosition;

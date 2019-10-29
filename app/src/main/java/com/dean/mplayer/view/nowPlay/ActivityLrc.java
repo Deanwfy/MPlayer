@@ -30,6 +30,7 @@ public class ActivityLrc extends BaseActivity {
     @AfterViews
     void initViews() {
         initMediaBrowser();
+        loadRootFragment(R.id.fragmentLrc, FragmentLrc_.newInstance());
     }
 
     private void initMediaBrowser() {
@@ -48,7 +49,7 @@ public class ActivityLrc extends BaseActivity {
         }
     }
 
-    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback(){
+    private final MediaBrowserCompat.ConnectionCallback mediaBrowserConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {
         // 连接成功
         @SuppressLint("HandlerLeak")
         @Override

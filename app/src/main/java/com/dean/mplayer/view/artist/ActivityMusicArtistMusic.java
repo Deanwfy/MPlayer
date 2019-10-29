@@ -2,6 +2,7 @@ package com.dean.mplayer.view.artist;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
@@ -49,14 +51,17 @@ public class ActivityMusicArtistMusic extends BaseActivity {
     @ViewById(R.id.activity_music_base_list)
     RecyclerView musicListLocalRecyclerView;
 
+    @Extra
+    ArrayList<MusicInfo> musicArtistMusicList;
+
     // 列表显示
     private LoadingDialog loadingDialog;
     private MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter;
-    private List<MusicInfo> artistMusicInfos = new ArrayList<>();
+    private List<MusicInfo> artistMusicInfos;
 
     @AfterViews
     void initViews() {
-        artistMusicInfos = ActivityMusicArtist.musicArtistMusicList;
+        artistMusicInfos = musicArtistMusicList;
 
         toolbar.setTitle(artistMusicInfos.get(0).getArtist())
                 .setHasBack(true)
@@ -171,7 +176,7 @@ public class ActivityMusicArtistMusic extends BaseActivity {
                         itemMusicInfo.getAlbum(),
                         itemMusicInfo.getArtist(),
                         itemMusicInfo.getDuration(),
-                        itemMusicInfo.getUri(),
+                        Uri.parse(itemMusicInfo.getUri()),
                         "Local",
                         MediaUtil.albumIdToUrl(itemMusicInfo.getAlbumId())
                         )
@@ -192,7 +197,7 @@ public class ActivityMusicArtistMusic extends BaseActivity {
                 controlPanel.addToNext(itemMusicInfo);
                 break;
             case 1:
-                if (MediaUtil.deleteMusicFile(this, itemMusicInfo.getUri())){
+                if (MediaUtil.deleteMusicFile(this, Uri.parse(itemMusicInfo.getUri()))){
                     Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
                     artistMusicInfos.remove(contextMenuPosition);
                     musicListLocalRecyclerAdapter.notifyItemRemoved(contextMenuPosition);

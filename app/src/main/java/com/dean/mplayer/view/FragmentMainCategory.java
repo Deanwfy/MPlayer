@@ -1,5 +1,7 @@
 package com.dean.mplayer.view;
 
+import android.os.Bundle;
+
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -32,6 +34,10 @@ public class FragmentMainCategory extends BaseFragment {
     @Override
     public void onDetach() {
         super.onDetach();
+    }
+
+    public static FragmentMainCategory newInstance() {
+        return FragmentMainCategory_.builder().build();
     }
 
     private void setListAdapter() {

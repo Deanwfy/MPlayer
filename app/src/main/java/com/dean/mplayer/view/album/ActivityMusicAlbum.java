@@ -51,9 +51,6 @@ public class ActivityMusicAlbum extends BaseActivity {
     private List<MusicInfo> musicInfo = new ArrayList<>();
     private List<LocalAlbm> localAlbm = new ArrayList<>();
 
-    // 专辑子页面传值
-    public static List<MusicInfo> musicAlbumMusicList;
-
     @AfterViews
     void initViews(){
 
@@ -150,8 +147,10 @@ public class ActivityMusicAlbum extends BaseActivity {
         };
         musicListAlbumRecyclerAdapter.setOnItemClickListener(((view, position) -> {
             localAlbm = musicListAlbumRecyclerAdapter.getMusicListAlbumFilter();
-            musicAlbumMusicList = localAlbm.get(position).getMusicInfos();
-            ActivityMusicAlbumMusic_.intent(this).start();
+            List<MusicInfo> musicAlbumMusicList = localAlbm.get(position).getMusicInfos();
+            ActivityMusicAlbumMusic_.intent(this)
+                    .musicAlbumMusicList(new ArrayList<>(musicAlbumMusicList))
+                    .start();
         }));
         musicListArtistAlbumRecyclerView.setAdapter(musicListAlbumRecyclerAdapter);
         musicListAlbumRecyclerAdapter.notifyDataSetChanged();

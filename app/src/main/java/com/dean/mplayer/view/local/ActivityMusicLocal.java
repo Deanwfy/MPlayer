@@ -2,6 +2,7 @@ package com.dean.mplayer.view.local;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -177,7 +178,7 @@ public class ActivityMusicLocal extends BaseActivity {
                         itemMusicInfo.getAlbum(),
                         itemMusicInfo.getArtist(),
                         itemMusicInfo.getDuration(),
-                        itemMusicInfo.getUri(),
+                        Uri.parse(itemMusicInfo.getUri()),
                         "Local",
                         MediaUtil.albumIdToUrl(itemMusicInfo.getAlbumId())
                         )
@@ -198,7 +199,7 @@ public class ActivityMusicLocal extends BaseActivity {
                 controlPanel.addToNext(itemMusicInfo);
                 break;
             case 1:
-                if (MediaUtil.deleteMusicFile(this, itemMusicInfo.getUri())){
+                if (MediaUtil.deleteMusicFile(this, Uri.parse(itemMusicInfo.getUri()))){
                     Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
                     musicInfo.remove(contextMenuPosition);
                     musicListLocalRecyclerAdapter.notifyItemRemoved(contextMenuPosition);

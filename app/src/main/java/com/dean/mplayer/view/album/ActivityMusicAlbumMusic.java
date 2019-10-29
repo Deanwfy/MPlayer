@@ -2,6 +2,7 @@ package com.dean.mplayer.view.album;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -29,6 +30,7 @@ import com.xiasuhuei321.loadingdialog.view.LoadingDialog;
 
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EActivity;
+import org.androidannotations.annotations.Extra;
 import org.androidannotations.annotations.ViewById;
 
 import java.util.ArrayList;
@@ -49,14 +51,17 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
     @ViewById(R.id.activity_music_base_list)
     RecyclerView musicListLocalRecyclerView;
 
+    @Extra
+    ArrayList<MusicInfo> musicAlbumMusicList;
+
     // 列表显示
     private LoadingDialog loadingDialog;
     private MusicListLocalRecyclerAdapter musicListLocalRecyclerAdapter;
-    private List<MusicInfo> albumMusicInfos = new ArrayList<>();
+    private List<MusicInfo> albumMusicInfos;
 
     @AfterViews
     void initViews() {
-        albumMusicInfos = ActivityMusicAlbum.musicAlbumMusicList;
+        albumMusicInfos = musicAlbumMusicList;
 
         toolbar.setTitle(albumMusicInfos.get(0).getAlbum())
                 .setHasBack(true)
@@ -171,7 +176,7 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
                         itemMusicInfo.getAlbum(),
                         itemMusicInfo.getArtist(),
                         itemMusicInfo.getDuration(),
-                        itemMusicInfo.getUri(),
+                        Uri.parse(itemMusicInfo.getUri()),
                         "Local",
                         MediaUtil.albumIdToUrl(itemMusicInfo.getAlbumId())
                         )
@@ -194,7 +199,7 @@ public class ActivityMusicAlbumMusic extends BaseActivity {
                 break;
             // 删除歌曲文件
             case 1:
-                if (MediaUtil.deleteMusicFile(this, itemMusicInfo.getUri())){
+                if (MediaUtil.deleteMusicFile(this, Uri.parse(itemMusicInfo.getUri()))){
                     Toast.makeText(this, "删除成功", Toast.LENGTH_SHORT).show();
                     albumMusicInfos.remove(contextMenuPosition);
                     musicListLocalRecyclerAdapter.notifyItemRemoved(contextMenuPosition);

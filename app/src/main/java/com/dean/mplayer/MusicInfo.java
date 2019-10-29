@@ -4,7 +4,9 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class MusicInfo implements Parcelable {
+import java.io.Serializable;
+
+public class MusicInfo implements Serializable {
 
 	private long id;
 	private String title;
@@ -16,7 +18,7 @@ public class MusicInfo implements Parcelable {
 	private long duration;
 	private long size;
 	private String url;
-	private Uri uri;
+	private String uri;
 	private String lrcTitle;
 	private String lrcSize;
 
@@ -26,7 +28,7 @@ public class MusicInfo implements Parcelable {
 
 	public MusicInfo(long id, String title, String album, long albumId,
 					 String displayName, String artist,long artistId, long duration, long size,
-					 String url, Uri uri, String lrcTitle, String lrcSize) {
+					 String url, String uri, String lrcTitle, String lrcSize) {
 		this.id = id;
 		this.title = title;
 		this.album = album;
@@ -40,22 +42,6 @@ public class MusicInfo implements Parcelable {
 		this.uri = uri;
 		this.lrcTitle = lrcTitle;
 		this.lrcSize = lrcSize;
-	}
-
-	protected MusicInfo(Parcel in) {
-		id = in.readLong();
-		title = in.readString();
-		album = in.readString();
-		albumId = in.readLong();
-		displayName = in.readString();
-		artist = in.readString();
-		artistId = in.readLong();
-		duration = in.readLong();
-		size = in.readLong();
-		url = in.readString();
-		uri = in.readParcelable(Uri.class.getClassLoader());
-		lrcTitle = in.readString();
-		lrcSize = in.readString();
 	}
 
 	@Override
@@ -146,10 +132,9 @@ public class MusicInfo implements Parcelable {
 
 	public void setUrl(String url) { this.url = url; }
 
-	public Uri getUri() { return uri; }
+	public String getUri() { return uri; }
 
-	public void setUri(Uri uri) { this.uri = uri; }
-
+	public void setUri(String uri) { this.uri = uri; }
 
 	public String getLrcTitle() {
 		return lrcTitle;
@@ -173,38 +158,5 @@ public class MusicInfo implements Parcelable {
 
 	public void setDisplayName(String displayName) {
 		this.displayName = displayName;
-	}
-
-	// Parcelable
-	public static final Creator<MusicInfo> CREATOR = new Creator<MusicInfo>() {
-		@Override
-		public MusicInfo createFromParcel(Parcel in) {
-			return new MusicInfo(in);
-		}
-
-		@Override
-		public MusicInfo[] newArray(int size) {
-			return new MusicInfo[size];
-		}
-	};
-	@Override
-	public int describeContents() {
-		return 0;
-	}
-	@Override
-	public void writeToParcel(Parcel dest, int flags) {
-		dest.writeLong(id);
-		dest.writeString(title);
-		dest.writeString(album);
-		dest.writeLong(albumId);
-		dest.writeString(displayName);
-		dest.writeString(artist);
-		dest.writeLong(artistId);
-		dest.writeLong(duration);
-		dest.writeLong(size);
-		dest.writeString(url);
-		dest.writeParcelable(uri, flags);
-		dest.writeString(lrcTitle);
-		dest.writeString(lrcSize);
 	}
 }

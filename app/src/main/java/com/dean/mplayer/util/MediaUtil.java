@@ -91,7 +91,7 @@ public class MediaUtil {
 					musicInfo.setDuration(duration);
 					musicInfo.setSize(size);
 					musicInfo.setUrl(url);
-					musicInfo.setUri(uri);
+					musicInfo.setUri(uri.toString());
 					musicInfos.add(musicInfo);
 				}
 			}

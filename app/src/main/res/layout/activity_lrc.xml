@@ -6,9 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".view.nowPlay.ActivityLrc">
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragmentLrc"
-        android:name="com.dean.mplayer.view.nowPlay.FragmentLrc"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
