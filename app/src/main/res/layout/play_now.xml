@@ -7,10 +7,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    android:background="@color/colorControlPanel"
-
+    android:background="@color/colorBackground"
     tools:ignore="ContentDescription"
-    tools:context="com.dean.mplayer.ActivityNowPlay">
+    tools:context="com.dean.mplayer.view.nowPlay.ActivityNowPlay">
+
+    <com.dean.mplayer.view.common.MToolbar_
+        android:id="@+id/play_now_toolbar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/playNowCover"
@@ -20,8 +27,7 @@
         app:layout_constraintBottom_toTopOf="@id/playNowDetail"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.6" />
+        app:layout_constraintTop_toBottomOf="@id/play_now_toolbar" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/playNowDetail"

@@ -6,10 +6,10 @@
     android:descendantFocusability="blocksDescendants"
     android:background="?android:attr/selectableItemBackground"
     android:orientation="horizontal"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
     
     <TextView
         android:id="@+id/play_list_music_info"

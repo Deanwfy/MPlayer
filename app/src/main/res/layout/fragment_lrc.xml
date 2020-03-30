@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="#aa000000"
-    tools:context=".FragmentLrc">
+    tools:context=".view.nowPlay.FragmentLrc">
 
     <me.wcy.lrcview.LrcView
         android:id="@+id/lrcView"

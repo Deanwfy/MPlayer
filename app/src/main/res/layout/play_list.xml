@@ -7,12 +7,12 @@
     android:layout_height="wrap_content"
     android:background="@color/colorControlPanel">
 
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/play_list_title_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/colorControlPanel"
+        android:elevation="0.5dp"
         app:layout_constraintBottom_toTopOf="@id/play_list"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -36,11 +36,9 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/play_list"
-        android:layout_width="0dp"
-        android:layout_height="340dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@color/colorControlPanel"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:background="@color/colorBackground"
         app:layout_constraintBottom_toTopOf="@id/play_list_close"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

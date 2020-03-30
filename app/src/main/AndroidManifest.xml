@@ -3,11 +3,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.dean.mplayer">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
+        android:name=".application.MApplication_"
         android:allowBackup="false"
         tools:replace="android:allowBackup"
         android:icon="@mipmap/ic_launcher"
@@ -18,7 +20,7 @@
         android:theme="@style/AppTheme"
         tools:ignore="UnusedAttribute">
         <activity
-            android:name=".ActivityMain_"
+            android:name=".view.ActivityMain_"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/AppTheme.NoActionBar">
@@ -28,20 +30,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".search.ActivityMusicOnline" />
-        <activity android:name=".ActivityMusicLocal" />
-        <activity android:name=".ActivityMusicArtist" />
-        <activity android:name=".ActivityMusicArtistMusic" />
-        <activity android:name=".ActivityMusicAlbum" />
-        <activity android:name=".ActivityMusicAlbumMusic" />
-        <activity android:name=".ActivityMusicOnlineTopBillboard" />
+        <activity android:name=".view.search.ActivityMusicOnline_" />
+        <activity android:name=".view.local.ActivityMusicLocal_" />
+        <activity android:name=".view.artist.ActivityMusicArtist_" />
+        <activity android:name=".view.artist.ActivityMusicArtistMusic_" />
+        <activity android:name=".view.album.ActivityMusicAlbum_" />
+        <activity android:name=".view.album.ActivityMusicAlbumMusic_" />
+        <activity android:name=".view.rankList.ActivityMusicOnlineTopBillboard_" />
         <activity
-            android:name=".ActivityNowPlay"
+            android:name=".view.nowPlay.ActivityNowPlay_"
             android:launchMode="singleTask"
-            android:parentActivityName=".ActivityMain" />
-        <activity android:name=".TestActivity" />
+            android:parentActivityName=".view.ActivityMain_" />
+        <activity android:name=".view.nowPlay.ActivityLrc_" />
         <!-- 播放服务 -->
-        <service android:name=".PlayService">
+        <service
+            android:name=".PlayService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>

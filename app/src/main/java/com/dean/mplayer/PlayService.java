@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
@@ -32,8 +33,19 @@ import androidx.palette.graphics.Palette;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.GlideException;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
+import com.dean.mplayer.base.BaseActivity;
 import com.dean.mplayer.util.AppConstant;
 import com.dean.mplayer.util.MediaUtil;
+import com.dean.mplayer.view.ActivityMain;
+import com.dean.mplayer.view.nowPlay.ActivityNowPlay_;
+import com.dean.mplayer.view.nowPlay.FragmentLrc;
 
 import java.io.IOException;
 import java.util.List;
@@ -115,8 +127,6 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		}
 	};
 
-
-
 	//extends MediaBrowserServiceCompat
 	@Nullable
 	@Override
@@ -164,7 +174,8 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				}
 			}else mediaControllerCompat.getTransportControls().stop();
 		});
-
+		if (!playLists.isEmpty() && mediaSessionCompat != null)
+			changeMetadata(playLists.get(ActivityMain.listPosition));
 	}
 
     @Override
@@ -231,9 +242,9 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		if (playLists != null && playLists.size() != 0) {
 			//获取歌曲信息
 			playList = playLists.get(ActivityMain.listPosition);
-			String musicTitle = playList.getTitle();
-			String musicArtist = playList.getArtist();
-			Bitmap musicCover = playList.getAlbumBitmap();
+			String musicTitle = playList.title;
+			String musicArtist = playList.artist;
+			Bitmap musicCover = MediaUtil.getArtwork(this, playList.picUrl);
 			//通知内容
 			NotificationCompat.Action playPauseAction = playbackStateCompat.getState() == PlaybackStateCompat.STATE_PLAYING ?
 					createAction(R.drawable.ic_notification_play, "Pause", AppConstant.PlayAction.ACTION_PAUSE) :
@@ -267,7 +278,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 				notificationCompat.setColorized(true);    //通知变色
 			}
 			//通知点击事件
-			Intent resultIntent = new Intent(this, ActivityNowPlay.class);
+			Intent resultIntent = new Intent(this, ActivityNowPlay_.class);
 			PendingIntent resultPendingIntent = PendingIntent.getActivity(this, 0, resultIntent, 0);
 			notificationCompat.setContentIntent(resultPendingIntent);
 			//发布通知
@@ -308,7 +319,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		// 设置播放状态
 		mediaSessionCompat.setPlaybackState(playbackStateCompat);
 		// 加载播放列表
-		playLists = ActivityMain.playList;
+		playLists = BaseActivity.playList;
 
 		// 回调播放控制
 		mediaSessionCompat.setCallback(new MediaSessionCompat.Callback() {
@@ -317,15 +328,12 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 			public void onPlayFromUri(Uri uri, Bundle position) {
 				if (playLists != null && playLists.size() != 0) {
 					playList = playLists.get(ActivityMain.listPosition);
-					MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
-							.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playList.getTitle())
-							.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playList.getArtist())
-							.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, playList.getDuration())
-							.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, playList.getAlbumBitmap());
-					mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
-					switch (playList.getSource()){
+
+					changeMetadata(playList);
+
+					switch (playList.source){
                         case "Netease":
-                            String urlLrc = "http://39.108.4.217:8888/lyric?id=" + playList.getId();
+                            String urlLrc = "http://39.108.4.217:8888/lyric?id=" + playList.id;
                             new Thread(() -> {
                                 try {
                                     OkHttpClient okHttpClient = new OkHttpClient();
@@ -503,7 +511,7 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 	}
 
     private static final String TAG = "PlayService";
-	
+
 	//当音乐准备好的时候开始播放
 	@Override
 	public void onPrepared(MediaPlayer mp) {
@@ -521,7 +529,63 @@ public class PlayService extends MediaBrowserServiceCompat implements OnPrepared
 		}
 	}
 
-	private void updateSeekBar(){
+	private void changeMetadata(PlayList playList) {
+	    switch (playList.source) {
+            case "Local":
+                Uri musicAlbumUri = Uri.parse(playList.picUrl);
+                Glide.with(PlayService.this).asBitmap().load(musicAlbumUri).listener(new RequestListener<Bitmap>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+                    	changeMetadata(playList, MediaUtil.getDefaultArtwork(PlayService.this));
+                        return true;
+                    }
+                    @Override
+                    public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+                        changeMetadata(playList, resource);
+                        return true;
+                    }
+                }).into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {}
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {}
+                });
+                break;
+            case "Netease":
+            	Glide.with(PlayService.this).asBitmap().load(playList.picUrl).listener(new RequestListener<Bitmap>() {
+					@Override
+					public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Bitmap> target, boolean isFirstResource) {
+						changeMetadata(playList, MediaUtil.getDefaultArtwork(PlayService.this));
+						return true;
+					}
+
+					@Override
+					public boolean onResourceReady(Bitmap resource, Object model, Target<Bitmap> target, DataSource dataSource, boolean isFirstResource) {
+						changeMetadata(playList, resource);
+						return true;
+					}
+				}).into(new CustomTarget<Bitmap>() {
+					@Override
+					public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {}
+					@Override
+					public void onLoadCleared(@Nullable Drawable placeholder) {}
+				});
+                break;
+            default:
+                break;
+	    }
+	}
+
+	private void changeMetadata(PlayList playList, Bitmap bitmap) {
+		MediaMetadataCompat.Builder mediaMetaDataCompat = new MediaMetadataCompat.Builder()
+				.putString(MediaMetadataCompat.METADATA_KEY_TITLE, playList.title)
+				.putString(MediaMetadataCompat.METADATA_KEY_ARTIST, playList.artist)
+				.putLong(MediaMetadataCompat.METADATA_KEY_DURATION, playList.duration)
+				.putBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART, bitmap);
+		mediaSessionCompat.setMetadata(mediaMetaDataCompat.build());
+	}
+
+	private void updateSeekBar() {
 		TimerTask timerTask = new TimerTask() {
 			@Override
 			public void run() {

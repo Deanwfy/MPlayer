@@ -1,11 +1,8 @@
 package com.dean.mplayer;
 
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-
-import java.io.Serializable;
 
 public class MusicInfo implements Parcelable {
 
@@ -13,7 +10,6 @@ public class MusicInfo implements Parcelable {
 	private String title;
 	private String album;
 	private long albumId;
-	private Bitmap albumBitmap;
 	private String displayName;
 	private String artist;
 	private long artistId;
@@ -28,14 +24,13 @@ public class MusicInfo implements Parcelable {
 		super();
 	}
 
-	public MusicInfo(long id, String title, String album, long albumId, Bitmap albumBitmap,
+	public MusicInfo(long id, String title, String album, long albumId,
 					 String displayName, String artist,long artistId, long duration, long size,
 					 String url, Uri uri, String lrcTitle, String lrcSize) {
 		this.id = id;
 		this.title = title;
 		this.album = album;
 		this.albumId = albumId;
-		this.albumBitmap = albumBitmap;
 		this.displayName = displayName;
 		this.artist = artist;
 		this.artistId = artistId;
@@ -52,7 +47,6 @@ public class MusicInfo implements Parcelable {
 		title = in.readString();
 		album = in.readString();
 		albumId = in.readLong();
-		albumBitmap = in.readParcelable(Bitmap.class.getClassLoader());
 		displayName = in.readString();
 		artist = in.readString();
 		artistId = in.readLong();
@@ -114,14 +108,6 @@ public class MusicInfo implements Parcelable {
 
 	public void setAlbumId(long albumId) {
 		this.albumId = albumId;
-	}
-
-	public Bitmap getAlbumBitmap() {
-		return albumBitmap;
-	}
-
-	public void setAlbumBitmap(Bitmap albumBitmap) {
-		this.albumBitmap = albumBitmap;
 	}
 
 	public String getArtist() {
@@ -211,7 +197,6 @@ public class MusicInfo implements Parcelable {
 		dest.writeString(title);
 		dest.writeString(album);
 		dest.writeLong(albumId);
-		dest.writeParcelable(albumBitmap, flags);
 		dest.writeString(displayName);
 		dest.writeString(artist);
 		dest.writeLong(artistId);
